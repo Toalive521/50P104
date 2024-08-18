@@ -18,20 +18,60 @@ L_2Hz_Prog:
 	AND		#BIT1
 	BEQ		L_1Hz_Prog
 
-	JSR		L_1Hz_Flash_Prog
+	JSR		L_1Hz_Flash_Prog	;;闪烁
 L_End_2Hz_Prog:
 	RTS
 ;========================================================
 
 L_1Hz_Prog:	
 	JSR		F_Update_Time_Prog
+	JSR		F_Update_STW_Prog	;;更新计时
 	JSR		L_Nokey_Save		;;10S无操作保存退出设置
+	JSR		L_STWKey_Exit		;;计时模式30S无操作退出
 	JSR		L_Display_Mode0Prog
 
 L_1Hz_Prog_End:
 	RTS
 
 ; ;======================================================
+; ;============================================================
+;;设置过程中无操作10S，自动保存当前值，并退出设置模式
+L_Nokey_Save:
+	LDA		R_No_Key
+	CMP		#10
+	BCC		L_Inc_Nokey_Time
+	LDA		#0
+	STA		R_Set_Flag
+	STA		R_No_Key
+	RTS
+L_Inc_Nokey_Time:
+	LDA		R_No_Key
+	INC
+	STA		R_No_Key
+	RTS	
+;===============================================================
+;==============================================================
+;;计时结束后30秒内无操作退出到时间界面
+L_STWKey_Exit:
+	BBR0	Sys_Flag_B,?RTS
+	BBS1	Sys_Flag_B,?RTS
+	LDA		R_STW_Key
+	CMP		#30
+	BCC		L_Inc_STWKey_Time
+	LDA		#0
+	STA		R_Set_Flag
+	STA		R_STW_Key
+	RMB0	Sys_Flag_B
+	RTS
+
+?RTS:
+	RTS
+L_Inc_STWKey_Time:
+	LDA		R_STW_Key
+	INC
+	STA		R_STW_Key
+	RTS
+;===============================================================
 ; L_1Hz_Prog_Num:
 ; 	JSR		F_Update_Time_Prog
 	

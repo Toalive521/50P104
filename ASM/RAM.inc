@@ -72,9 +72,9 @@ Sys_Flag_A	 DS		1
 ;bit7 =	标记PA7按键是否按下
 
 Sys_Flag_B		DS	1
-;bit0 = 
-;bit1 = 
-;bit2 =	
+;bit0 = 时间/计时  0：时间  1：计时
+;bit1 = 计时开始/暂停  0：开始  1：暂停
+;bit2 =	正计时/倒计时  0:正计时 1：倒计时
 ;bit3 = 
 ;bit4 =
 ;bit5 = 12/24HR	0：24Hr  1:12hr
@@ -92,7 +92,7 @@ Sys_Flag_C		DS	1
 ;bit7 =	
 
 Sys_Flag_D		DS	1
-;bit0 = 标记有按键在时间模式下短按
+;bit0 = 
 ;bit1 = 
 ;bit2 =	
 ;bit3 = 
@@ -151,6 +151,7 @@ R_No_Key		DS	1	;
 ;bit5= 
 ;bit6= 
 ;bit7= 
+R_STW_Key		DS	1
 R_Mode_Flag		DS	1
 ;bit0= 0：正计时/1：倒计时
 ;bit1= 
@@ -176,11 +177,11 @@ D_Stw			.EQU  0
 D_Stw2		    .EQU  1
 
 Stw_Sec_Addr	.equ	$
-R_Stw_Sec		DS	2
+R_Stw_Sec		DS	1
 Stw_Min_Addr	.equ	$
-R_Stw_Min	   	DS	2
+R_Stw_Min	   	DS	1
 Stw_Hr_Addr		.equ	$
-R_Stw_Hr		DS	2
+R_Stw_Hr		DS	1
 
 R_Mode			DS	1
 R_Set			DS	1

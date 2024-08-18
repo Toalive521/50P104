@@ -83,6 +83,8 @@ L_Key2_Enter_End:			;;满足3S
 	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
 	LDA		#0					
 	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
+	LDA		#0					
+	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	LDA		R_Set_Flag			
 	BNE		?RTS				;;判断R_Set_Flag不为0 ？ 不为0：跳转	为0 ：R_Set_Flag加1,R_Set_Flag=1
 	INC		R_Set_Flag
@@ -109,6 +111,8 @@ L_Key5_Enter_End:
 	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
 	LDA		#0
 	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
+	LDA		#0					
+	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	LDA		R_Fast_Time
 	CMP		#C_Fast_Time
 	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
@@ -135,6 +139,8 @@ L_Key7_Enter:
 L_Key7_Enter_End:
 	LDA		#0
 	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
+	LDA		#0					
+	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	RMB2	R_Key_Flag
 	LDA		R_Fast_Time
 	CMP		#C_Fast_Time
@@ -193,10 +199,15 @@ L_End_Null_Key_Prog:
 	RTS
 ;============================================================
 L_REALSE_2KEY:
+
 	BBR0	R_Key_Flag, L_REALSE_2KEY_RTS  ;;判断bit0=0?  =0：不是2key，跳转
 	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
+
+	BBS0	Sys_Flag_B,?Start		;;判断是否已经进入计时模式
 	LDA		#0
 	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
+	LDA		#0					
+	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	LDA		R_Set_Flag
 	BEQ		?RTS		;;判断R_Set_Flag=0？ 为0 ：不执行 不为0：R_Set_Flag+1
 	INC		R_Set_Flag
@@ -208,39 +219,61 @@ L_REALSE_2KEY:
 ?ZERO:
 	LDA		#0				;;R_Set_Flag置0
 	STA		R_Set_Flag
-?RTS:
 	RTS
+?RTS:
+	SMB0	Sys_Flag_B			;;set=0，短按标记，进入计时模式
+	JSR		L_Display_Mode0Prog
+	RTS
+
+?Start:
+	LDA		Sys_Flag_B		;;控制计时开始/暂停
+	EOR		#BIT1
+	STA		Sys_Flag_B
+	rts
 
 L_REALSE_2KEY_RTS:
 	RTS
 ;============================================================
 L_REALSE_5KEY:
+	BBR1	R_Key_Flag,L_REALSE_5KEY_RTS	;;判断是否是PA5按下
+	LDA		R_Set_Flag
+	BEQ		?STW
 	LDA		#0
 	STA		R_No_Key
+	LDA		#0					
+	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	JSR		L_Set_Flag_Prog
+	JSR		L_Display_Mode0Prog
+	RTS
+?STW:
+	SMB0	Sys_Flag_B
 	JSR		L_Display_Mode0Prog
 	RTS
 
 L_REALSE_5KEY_RTS:
 	RTS
-
-
-;===============================================================
-;===============================================================
-;===============================================================	
 ;===============================================================
 L_REALSE_7KEY:
+	BBR2	R_Key_Flag,L_REALSE_7KEY_RTS
+	LDA		R_Set_Flag
+	BEQ		?STW
 	LDA		#0
 	STA		R_No_Key
+	LDA		#0					
+	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	JSR		L_Set_Flag_Prog
 	JSR		L_Display_Mode0Prog
 	RTS
-
+?STW:
+	SMB0	Sys_Flag_B
+	JSR		L_Display_Mode0Prog
+	RTS
 L_REALSE_7KEY_RTS:
 	RTS
-
+;===============================================================
 ;===============================================================
 L_Display_Mode0Prog:
+	BBS0	Sys_Flag_B,?STW
 	LDA		R_Set_Flag
 	CLC
 	ROL
@@ -250,6 +283,8 @@ L_Display_Mode0Prog:
 	LDA		T_Display_Table,X
 	PHA
 	RTS
+?STW:
+	JMP		L_STWDisplay_Prog
 
 T_Display_Table:
 	DW		L_Display_Prog-1	;;R_Set_Flag=0
@@ -258,12 +293,14 @@ T_Display_Table:
 	DW		L_Display_Prog-1	;;R_Set_Flag=3
 
 L_Display_Prog:
+	JSR		F_ClrMs
 	JSR		L_Dis_TimeHr
 	JSR		L_Dis_TimeMin
 	JSR		L_DisCol_Prog
 	RTS
 ;========================================================
 L_1Hz_Flash_Prog:
+	BBS1	Sys_Flag_B,L_MS_Flash
 	BBS0	Sys_Flag_C,?RTS			;;判断bit0=1? =1:快加/快减标志,不执行闪烁
 	LDA		R_Set_Flag
 	CLC
@@ -283,7 +320,9 @@ T_Flash_Table:
 	DW		L_Flash_Set3-1		;;R_Set_Flag=3
 
 L_Flash_Set0:
+	BBS0	Sys_Flag_B,?RTS
 	JSR		F_ClrCol
+?RTS:
 	rts
 L_Flash_Set1:
 	JSR		F_Clr12
@@ -295,6 +334,10 @@ L_Flash_Set2:
 L_Flash_Set3:
 	JSR		F_Clr34
 	rts
+
+L_MS_Flash:
+	JSR		F_ClrMs
+	RTS
 ; ;=======================================================	
 L_Set_Flag_Prog:
 	LDA		R_Set_Flag
@@ -429,23 +472,7 @@ L_FastDec_Set3:
 	JSR		L_Dis_TimeMin
 	RTS
 
-; ;============================================================
-;;设置过程中无操作10S，自动保存当前值，并退出设置模式
-L_Nokey_Save:
-	LDA		R_No_Key
-	CMP		#10
-	BCC		L_Inc_Nokey_Time
-	LDA		#0
-	STA		R_Set_Flag
-	CLC
-	; JSR		L_Display_Mode0Prog
-	RTS
-L_Inc_Nokey_Time:
-	LDA		R_No_Key
-	INC
-	STA		R_No_Key
-	RTS	
-;===============================================================
+
 ;============================================================
 Stz_Fast_Hold_Key:
 	LDA		#0

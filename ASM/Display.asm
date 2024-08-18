@@ -39,6 +39,15 @@ L_End_Mode_Prog:
 
 ;========================================
 
+L_STWDisplay_Prog:
+	JSR		F_DisCol
+	JSR		F_DisMs
+	LDA		R_Stw_Min
+	JSR		L_Dis_Digit12
+	LDA		R_Stw_Sec
+	JSR		L_Dis_Digit34
+	RTS
+
 F_DisCol:
 	LDX		#lcd_col
 	JMP		F_DispSymbol	;显示 两点
@@ -80,6 +89,11 @@ F_ClrPm:
 F_DisMs:
 	LDX		#lcd_ms
 	JMP		F_DispSymbol	;显示MS
+
+
+F_ClrMs:
+	LDX		#lcd_ms
+	JMP		F_ClrpSymbol	;显示MS	
 ; F_DisClock:
 ; 	LDX		#lcd_clock
 ; 	JMP		F_DispSymbol	;显示时钟图标

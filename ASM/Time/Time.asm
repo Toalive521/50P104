@@ -11,8 +11,24 @@ F_Update_Time_Prog:
 L_End_Update_Time_Prog:
 	; JMP		L_CMP_Alarm_Prog
 	RTS
+;====================================================
+F_Update_STW_Prog:
+	BBR1	Sys_Flag_B,L_End_Update_STW_Prog
+	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog
 
 
+L_End_Update_STW_Prog:
+	; JMP		L_CMP_Alarm_Prog
+	RTS
+
+
+L_Update_STW_FORW_Prog:
+	JSR		R_CtwInc_Sec
+	BCC		L_Update_STW_FORW_End_Prog
+	JSR		R_CtwInc_Min
+	BCC		L_Update_STW_FORW_End_Prog
+L_Update_STW_FORW_End_Prog:
+	RTS
 ;====================================================
 ;----------------------------------------------------
 F_HrInc:
@@ -113,18 +129,18 @@ L_Dec_Over_Prog:
 ;=====================================================
 R_CtwInc_Sec:		
 	LDX		#(R_Stw_Sec-Time_str_Addr)
-	TXA
-	CLC
-	ADC		P_Temp+4
-	TAX
+	; TXA
+	; CLC
+	; ADC		P_Temp+4
+	; TAX
 	BRA		L_Inc_To_60
 
 R_CtwInc_Min:
 	LDX		#(R_Stw_Min-Time_str_Addr)
-	TXA
-	CLC
-	ADC		P_Temp+4
-	TAX
+	; TXA
+	; CLC
+	; ADC		P_Temp+4
+	; TAX
 	BRA		L_Inc_To_60
 
 ; F_StwHrInc:
