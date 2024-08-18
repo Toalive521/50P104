@@ -1,0 +1,65 @@
+comseg	4	44
+bmp	C0S12.bmp
+bmp	C0S13.bmp
+bmp	C0S14.bmp
+bmp	C0S15.bmp
+bmp	C0S40.bmp
+bmp	C0S41.bmp
+bmp	C0S42.bmp
+bmp	C0S43.bmp
+bmp	C1S12.bmp
+bmp	C1S13.bmp
+bmp	C1S14.bmp
+bmp	C1S15.bmp
+bmp	C1S40.bmp
+bmp	C1S41.bmp
+bmp	C1S42.bmp
+bmp	C1S43.bmp
+bmp	C2S12.bmp
+bmp	C2S13.bmp
+bmp	C2S14.bmp
+bmp	C2S15.bmp
+bmp	C2S40.bmp
+bmp	C2S41.bmp
+bmp	C2S42.bmp
+bmp	C2S43.bmp
+bmp	C3S12.bmp
+bmp	C3S13.bmp
+bmp	C3S14.bmp
+bmp	C3S15.bmp
+bmp	C3S40.bmp
+bmp	C3S41.bmp
+bmp	C3S42.bmp
+bmp	C3S43.bmp
+def	0	12	320	92	0
+def	0	13	288	88	1
+def	0	14	272	92	2
+def	0	15	240	88	3
+def	0	40	200	92	4
+def	0	41	168	88	5
+def	0	42	152	92	6
+def	0	43	120	88	7
+def	1	12	288	124	8
+def	1	13	284	92	9
+def	1	14	240	124	10
+def	1	15	236	92	11
+def	1	40	168	124	12
+def	1	41	164	92	13
+def	1	42	120	124	14
+def	1	43	116	92	15
+def	2	12	320	128	16
+def	2	13	284	128	17
+def	2	14	272	128	18
+def	2	15	236	128	19
+def	2	40	200	128	20
+def	2	41	164	128	21
+def	2	42	152	128	22
+def	2	43	116	128	23
+def	3	12	288	160	24
+def	3	13	172	68	25
+def	3	14	240	160	26
+def	3	15	216	104	27
+def	3	40	168	160	28
+def	3	41	140	104	29
+def	3	42	120	160	30
+def	3	43	124	104	31

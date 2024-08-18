@@ -1,0 +1,3324 @@
+Sun Aug 18 15:07:15 2024
+-------------------------
+CAS V2.15.1-rc1 - (C) Copyright 2000-2012 CHIPMAST TECHNOLOGY CO. LTD.
+Main file   : main.asm
+Current file: main.asm
+
+     1                        ;********************************************************
+     2                        .CHIP           W65C02S
+     3                        ;.INCLIST        ON
+     4                        .MACLIST        ON
+     5                        ;********************************************************
+     6                        ;Project Name:
+     7                        ;CPU
+     8                        ;Start  Date:
+     9                        ;Finish Date:
+    10                        ;********************************************************
+    11                        
+    12                        ;********************************************************
+    13                        CODE_BEG        EQU     0F000H
+    14                        ;********************************************************
+    15                        
+    16                        ;********************************************************
+    17                        PROG    SECTION OFFSET  CODE_BEG
+    18                        ;********************************************************
+    19                        
+    20                        ;********************************************************
+    21                        ; header include
+    22                        ;********************************************************
+    23                        ;.INCLUDE 50X105.H
+    24                        .INCLUDE 50P104.H
+     1                        ;***********************************************************************
+     2                        	.PAGE0
+     3                        	.ORG	00H
+     4                        
+     5                        P_PA		EQU		01H		;Default: 1111 11--B
+     6                        PA			EQU		01H
+     7                        P_PA_WAKE	EQU		02H		;Default: 0000 00--B
+     8                        P_PAWAKE	EQU		02H
+     9                        P_PA_IO		EQU		04H		;Default: 1111 11--B
+    10                        PAIO		EQU		04H
+    11                        P_PADIR		EQU		04H
+    12                        PADIR		EQU		04H
+    13                        P_PA_DIR	EQU		04H
+    14                        
+    15                        P_PB		EQU		05H		;Default: ----00---B
+    16                        P_PB_TYPE	EQU		06H		;Default: ----11---B, CMOS output
+    17                        P_PBTYPE	EQU		06H
+    18                        
+    19                        P_PC		EQU		07H		;Default: 1111 1111B, Pull High
+    20                        PC			EQU		07H
+    21                        P_PC_IO		EQU		08H		;Default: 1111 1111B, Input
+    22                        P_PC_DIR	EQU		P_PC_IO
+    23                        P_PCDIR		EQU		08H
+    24                        PCDIR		EQU		08H
+    25                        
+    26                        P_PCSEG		EQU		09H		;Default: --00 ----B, PC76,PC54
+    27                        
+    28                        P_PD		EQU		0AH
+    29                        P_PDDIR		EQU		0BH
+    30                        
+    31                        P_PADF0		EQU		0CH		;Default: ---- --0-B, PB3S
+    32                        
+    33                        P_PADF1		EQU		0DH
+    34                        
+    35                        P_IER		EQU		0EH		;Default: -0-0 -000B
+    36                        P_IFR		EQU		0FH		;Default: -0-0 -000B
+    37                        bDIVF	    EQU	   0
+    38                        bTMR0F      EQU	   1
+    39                        bTMR1F      EQU	   2
+    40                        bTMR2F      EQU	   3
+    41                        bPAF        EQU	   4
+    42                        bLCDF       EQU	   6
+    43                        
+    44                        P_TMR0		EQU		10H		;Default: xxH
+    45                        P_TMR1H		EQU		12H		;Default: xxH
+    46                        P_TMR1		EQU		P_TMR1H
+    47                        P_TMR2		EQU		14H
+    48                        
+    49                        P_TMRCTRL	EQU		16H		;Default: 0--0 --00B
+    50                        bTMR0ON    	EQU	   0
+    51                        bTMR1ON    	EQU	   1
+    52                        bLCDON	   	EQU	   4
+    53                        bAUDON	   	EQU	   7
+    54                        P_TMRC		EQU		16H
+    55                        
+    56                        P_TMRCLK	EQU		17H		;Default: ---- xx--B
+    57                        P_TMCLK		EQU		17H
+    58                        
+    59                        P_DIVC		EQU		18H		;Default: ---0 xx--B
+    60                        
+    61                        P_LCDCTRL	EQU		19H		;default: 0--- --11B
+    62                        LCDCTRL		EQU		19H
+    63                        
+    64                        P_LCD_COM	EQU		1AH		;Default: 0--- --xxB
+    65                        P_LCDCOM	EQU		1AH
+    66                        
+    67                        P_WDTC		EQU		1CH
+    68                        
+    69                        P_SYSCLK	EQU		1DH		;Default: 0--- -101B, Fcpu=Fsys,Fosc ON,Fext OFF,SubClk strong start
+    70                        
+    71                        P_HALT		EQU		1EH
+    72                        
+    73                        P_AUD		EQU		1FH		;Default: xxxx xxxxB
+    74                        P_AUD0		EQU		1FH
+    75                        
+    76                        P_AUD_CTL	EQU		20H		;Default: ---- -x--B
+    77                        P_AUDCR		EQU		P_AUD_CTL
+    78                        
+    79                        P_MF0		EQU		2FH
+    80                        P_LVC		EQU		3DH
+    81                        P_FUSE0		EQU		3EH
+    82                        P_FUSE1		EQU		4EH
+    83                        P_PDSEG		EQU		5CH
+    84                        P_RFCC0		EQU		5DH
+    85                        P_RFCC1		EQU		5EH
+    86                        P_MF1		EQU		5FH
+    87                        	.ENDS
+    87                        
+    25                        .INCLUDE RAM.inc
+     1                        .Kdata
+     2                        ;***************************************
+     3                        ; RAM Address
+     4                        ;***************************************
+     5                        BIT0			.EQU	001H
+     6                        BIT1			.EQU	002H
+     7                        BIT2			.EQU	004H
+     8                        BIT3			.EQU	008H
+     9                        BIT4			.EQU	010H
+    10                        BIT5			.EQU	020H
+    11                        BIT6			.EQU	040H
+    12                        BIT7			.EQU	080H
+    13                        BIT0_			.EQU	0FEH
+    14                        BIT1_			.EQU	0FDH
+    15                        BIT2_			.EQU	0FBH
+    16                        BIT3_			.EQU	0F7H
+    17                        BIT4_			.EQU	0EFH
+    18                        BIT5_			.EQU	0DFH
+    19                        BIT6_			.EQU	0BFH
+    20                        BIT7_			.EQU	07FH
+    21                        
+    22                        RamStarAddr		EQU		1800H
+    23                        LCD_RamAddr		EQU		RamStarAddr
+    24                        Time_Addr		EQU     RamStarAddr+Time_str_Addr-Page0RamStarAddr
+    25                        
+    26                        StwFlag_Addr	EQU		RamStarAddr+Stw_Flag_Addr-Page0RamStarAddr
+    27                        StwSec_Addr		EQU		RamStarAddr+Stw_Sec_Addr-Page0RamStarAddr
+    28                        StwMin_Addr		EQU		RamStarAddr+Stw_Min_Addr-Page0RamStarAddr
+    29                        StwHr_Addr		EQU		RamStarAddr+Stw_Hr_Addr-Page0RamStarAddr
+    30                        StwSecSpl_Addr	EQU		RamStarAddr+Stw_Sec_Spl_Addr-Page0RamStarAddr
+    31                        StwMinSpl_Addr	EQU		RamStarAddr+Stw_Min_Spl_Addr-Page0RamStarAddr
+    32                        StwHrSpl_Addr	EQU		RamStarAddr+Stw_Hr_Spl_Addr-Page0RamStarAddr
+    33                        
+    34                        DigitStr		EQU		1
+    35                        Digit1			EQU		DigitStr+0
+    36                        Digit2			EQU		DigitStr+1
+    37                        Digit3			EQU		DigitStr+2
+    38                        Digit4			EQU		DigitStr+3
+    39                        Digit5			EQU		DigitStr+4
+    40                        Digit6			EQU		DigitStr+5
+    41                        
+    42                        2Digit1			EQU		DigitStr+0
+    43                        2Digit2			EQU		DigitStr+1
+    44                        2Digit3			EQU		DigitStr+2
+    45                        2Digit4			EQU		DigitStr+3
+    46                        2Digit5			EQU		DigitStr+4
+    47                        2Digit6			EQU		DigitStr+5
+    48                        
+    49                        3Digit1			EQU		DigitStr+12
+    50                        3Digit2			EQU		DigitStr+13
+    51                        3Digit3			EQU		DigitStr+14
+    52                        3Digit4			EQU		DigitStr+15
+    53                        3Digit5			EQU		DigitStr+16
+    54                        3Digit6			EQU		DigitStr+17
+    55                        
+    56                        D_ExitSetTime	EQU		20
+    57                        ;***************************************
+    58                        .PAGE0
+    59                        ;***************************************
+    60                        	ORG	0080H
+    61                        Page0RamStarAddr	EQU		$
+    62 00:0080: xx xx xx xx   LCDRAM			DS		4*6
+    62 00:0080: xx xx xx xx   
+    62 00:0080: xx xx xx xx   
+    63 00:0098: xx            R_Int_Backup	DS		1
+    64 00:0099: xx            Sys_Flag_A	 DS		1
+    65                        ;bit0 = 2HZ
+    66                        ;bit1 =	1HZ
+    67                        ;bit2 = 32HZ
+    68                        ;bit3 =
+    69                        ;bit4 = 标记PA2按键是否按下
+    70                        ;bit5 =
+    71                        ;bit6 =	标记PA5按键是否按下
+    72                        ;bit7 =	标记PA7按键是否按下
+    73                        
+    74 00:009A: xx            Sys_Flag_B		DS	1
+    75                        ;bit0 =
+    76                        ;bit1 =
+    77                        ;bit2 =
+    78                        ;bit3 =
+    79                        ;bit4 =
+    80                        ;bit5 = 12/24HR	0：24Hr  1:12hr
+    81                        ;bit6 =
+    82                        ;bit7 =
+    83                        
+    84 00:009B: xx            Sys_Flag_C		DS	1
+    85                        ;bit0 = 	快加/快减标志
+    86                        ;bit1 =
+    87                        ;bit2 =
+    88                        ;bit3 =
+    89                        ;bit4 =
+    90                        ;bit5 =
+    91                        ;bit6 =
+    92                        ;bit7 =
+    93                        
+    94 00:009C: xx            Sys_Flag_D		DS	1
+    95                        ;bit0 = 标记有按键在时间模式下短按
+    96                        ;bit1 =
+    97                        ;bit2 =
+    98                        ;bit3 =
+    99                        ;bit4 =
+   100                        ;bit5 =
+   101                        ;bit6 =
+   102                        ;bit7 =
+   103                        
+   104 00:009D: xx            R_Key_Flag		DS	1
+   105                        ;bit0=	SATART_KEY HOLD
+   106                        ;bit1=	UP_KEY HOLD
+   107                        ;bit2=	DOWN_KEY HOLD
+   108                        ;bit3=	判断是否有任意键按下过
+   109                        ;bit4=
+   110                        ;bit5=
+   111                        ;bit6=
+   112                        ;bit7=
+   113                        
+   114                        
+   115                        Stw_Flag_Addr 	.EQU  $
+   116 00:009E: xx xx         R_Stw_Flag		DS	2
+   117                        ;bit0=
+   118                        ;bit1=
+   119                        ;bit2=
+   120                        ;bit3=
+   121                        ;bit4=
+   122                        ;bit5=
+   123                        ;bit6=
+   124                        ;bit7=
+   125                        
+   126 00:00A0: xx            R_Day_Flag		DS	1	;
+   127                        ;bit0=
+   128                        ;bit1=
+   129                        ;bit2=
+   130                        ;bit3=
+   131                        ;bit4=
+   132                        ;bit5=
+   133                        ;bit6=
+   134                        ;bit7=
+   135                        
+   136 00:00A1: xx            R_Set_Flag		DS	1	;
+   137                        ;bit0=
+   138                        ;bit1=
+   139                        ;bit2=
+   140                        ;bit3=
+   141                        ;bit4=
+   142                        ;bit5=
+   143                        ;bit6=
+   144                        ;bit7=
+   145 00:00A2: xx            R_No_Key		DS	1	;
+   146                        ;bit0=
+   147                        ;bit1=
+   148                        ;bit2=
+   149                        ;bit3=
+   150                        ;bit4=
+   151                        ;bit5=
+   152                        ;bit6=
+   153                        ;bit7=
+   154 00:00A3: xx            R_Mode_Flag		DS	1
+   155                        ;bit0= 0：正计时/1：倒计时
+   156                        ;bit1=
+   157                        ;bit2=
+   158                        ;bit3=
+   159                        ;bit4=
+   160                        ;bit5=
+   161                        ;bit6=
+   162                        ;bit7=
+   163                        
+   164                        ;;计时
+   165 00:00A4: xx            R_CtwTime_Min	DS	1
+   166 00:00A5: xx            R_CtwTime_Sec	DS	1
+   167                        
+   168                        
+   169                        Time_str_Addr		.EQU  $
+   170 00:00A6: xx            R_Time_Min			DS	1
+   171 00:00A7: xx            R_Time_Sec			DS	1
+   172 00:00A8: xx            R_Time_Hr			DS	1
+   173                        
+   174 00:00A9: xx            R_Stw_Mode		DS  1
+   175                        D_Stw			.EQU  0
+   176                        D_Stw2		    .EQU  1
+   177                        
+   178                        Stw_Sec_Addr	.equ	$
+   179 00:00AA: xx xx         R_Stw_Sec		DS	2
+   180                        Stw_Min_Addr	.equ	$
+   181 00:00AC: xx xx         R_Stw_Min	   	DS	2
+   182                        Stw_Hr_Addr		.equ	$
+   183 00:00AE: xx xx         R_Stw_Hr		DS	2
+   184                        
+   185 00:00B0: xx            R_Mode			DS	1
+   186 00:00B1: xx            R_Set			DS	1
+   187                        D_Time_Mode		.equ	0
+   188                        D_Stw_Mode		.equ	1
+   189                        D_Al_Mode		.equ	2
+   190                        ;D_Al2_Mode		.equ	3
+   191                        ;D_StwDay_Mode	.equ	4
+   192                        D_Max_Mode		.equ	2+1
+   193                        
+   194                        Stw_Sec_Spl_Addr		.equ	$
+   195 00:00B2: xx xx         R_Stw_Sec_Spl   DS	2
+   196                        Stw_Min_Spl_Addr		.equ	$
+   197 00:00B4: xx xx         R_Stw_Min_Spl   DS	2
+   198                        Stw_Hr_Spl_Addr		.equ	$
+   199 00:00B6: xx xx         R_Stw_Hr_Spl    DS	2
+   200                        
+   201 00:00B8: xx            R_Al_Sec_Spl   	DS	1
+   202 00:00B9: xx            R_Al_Min_Spl   	DS	1
+   203                        
+   204 00:00BA: xx            R_Al_Sec		DS	1
+   205 00:00BB: xx            R_Al_Min		DS	1
+   206 00:00BC: xx            R_Al_Hr			DS	1
+   207                        
+   208 00:00BD: xx            R_Alarm_Mode	DS	1
+   209 00:00BE: xx            R_Beep_Time		DS	1
+   210 00:00BF: xx            R_Voice_Unit	DS	1
+   211 00:00C0: xx            R_KeyHold_Time	DS	1
+   212 00:00C1: xx            R_Fast_Time		DS	1
+   213                        C_Fast_Time		.EQU  32/8
+   214                        
+   215 00:00C2: xx            R_Key	DS	1
+   216                        
+   217 00:00C3: xx            R_Num			DS	1
+   218                        ;---------------------------------------
+   219                        ;---------------------------------------
+   220 00:00C4: xx xx xx xx   P_Temp			DS	8
+   220 00:00C4: xx xx xx xx   
+   221                        R_Temp				.equ	P_Temp
+   222 00:00CC: xx            P_Num			DS	1
+   223                        
+   224 00:00CD: xx            PADIR_TEMP		DS	1
+   225 00:00CE: xx            PA_TEMP			DS	1
+   226 00:00CF: xx            PCDIR_TEMP		DS	1
+   227 00:00D0: xx            PC_TEMP			DS	1
+   228                        
+   229 00:00D1: xx            R_KeyValue		DS	1
+   230                        ;***************************************
+   231                        .ENDS
+   232                        ;***************************************
+   233                        ;.Udata
+   234                        ;;---------------------------------------
+   235                        ;	ORG    1800H
+   236                        ;
+   237                        ;;---------------------------------------
+   238                        ;	ORG    1847H
+   239                        ;;---------------------------------------
+   240                        ;.ENDS
+   240                        
+    26                        .INCLUDE MACRO.MAC
+     1                        ;***********************************************************************
+     2                        JMP_IDX MACRO	MEM
+     3                        	if	MEM<$100
+     4                        	JMP	($80+MEM)
+     5                        	else
+     6                        	JMP	(MEM)
+     7                        	endif
+     8                        	ENDM
+     9                        ;*************************************
+    10                        LDLN	MACRO	mem
+    11                        	if	mem<$100
+    12                        	LDA	mem-$40
+    13                        	else
+    14                        	LDA	mem-$60
+    15                        	endif
+    16                        	ENDM
+    17                        
+    18                        LDHN	MACRO	mem
+    19                        	if	mem<$100
+    20                        	LDA	mem-$20
+    21                        	else
+    22                        	LDA	men-$40
+    23                        	endif
+    24                        	ENDM
+    25                        
+    26                        STLN	MACRO	mem
+    27                        	if	mem<$100
+    28                        	STA	mem-$40
+    29                        	else
+    30                        	STA	mem-$60
+    31                        	endif
+    32                        	ENDM
+    33                        
+    34                        STHN	MACRO	mem
+    35                        	if	mem<$100
+    36                        	STA	mem-$20
+    37                        	else
+    38                        	STA	men-$40
+    39                        	endif
+    40                        	ENDM
+    41                        ;************************************
+    42                        
+    43                        LXLN	MACRO	mem
+    44                        	if	mem<$100
+    45                        	LDX	$780+mem
+    46                        	else
+    47                        	LDX	$700+mem
+    48                        	endif
+    49                        	ENDM
+    50                        
+    51                        LXHN	MACRO	mem
+    52                        	if	mem<$100
+    53                        	LDX	$F80+mem
+    54                        	else
+    55                        	LDX	$F00+mem
+    56                        	endif
+    57                        	ENDM
+    58                        
+    59                        SXLN	MACRO	mem
+    60                        	if	mem<$100
+    61                        	STX	$780+mem
+    62                        	else
+    63                        	STX	$700+mem
+    64                        	endif
+    65                        	ENDM
+    66                        
+    67                        SXHN	MACRO	mem
+    68                        	if	mem<$100
+    69                        	STX	$F80+mem
+    70                        	else
+    71                        	STX	$F00+mem
+    72                        	endif
+    73                        	ENDM
+    74                        
+    75                        LDLN_X	MACRO	mem
+    76                        	if	mem<$100
+    77                        	LDA	$780+mem,X
+    78                        	else
+    79                        	LDA	$700+mem,X
+    80                        	endif
+    81                        	ENDM
+    82                        
+    83                        STLN_X	MACRO	mem
+    84                        	if	mem<$100
+    85                        	STA	$780+mem,X
+    86                        	else
+    87                        	STA	$700+mem,X
+    88                        	endif
+    89                        	ENDM
+    90                        
+    91                        LDHN_X	MACRO	mem
+    92                        	if	mem<$100
+    93                        	LDA	$F80+mem,X
+    94                        	else
+    95                        	LDA	$F00+mem,X
+    96                        	endif
+    97                        	ENDM
+    98                        
+    99                        STHN_X	MACRO	mem
+   100                        	if	mem<$100
+   101                        	STA	$F80+mem,X
+   102                        	else
+   103                        	STA	$F00+mem,X
+   104                        	endif
+   105                        	ENDM
+   106                        
+   107                        INCHN_X	MACRO	mem
+   108                        	if	mem<$100
+   109                        	INC	$F80+mem,X
+   110                        	else
+   111                        	INC	$F00+mem,X
+   112                        	endif
+   113                        	ENDM
+   114                        
+   115                        DECHN_X	MACRO	mem
+   116                        	if	mem<$100
+   117                        	DEC	$F80+mem,X
+   118                        	else
+   119                        	DEC	$F00+mem,X
+   120                        	endif
+   121                        	ENDM
+   122                        
+   123                        ADCLN	MACRO	mem
+   124                        	if	mem<$100
+   125                        	ADC	$780+mem
+   126                        	else
+   127                        	ADC	$700+mem
+   128                        	endif
+   129                        	ENDM
+   130                        
+   131                        ADCHN	MACRO	mem
+   132                        	if	mem<$100
+   133                        	ADC	$F80+mem
+   134                        	else
+   135                        	ADC	$F00+mem
+   136                        	endif
+   137                        	ENDM
+   138                        
+   139                        CMPLN	MACRO	mem
+   140                        	if	mem<$100
+   141                        	CMP	$780+mem
+   142                        	else
+   143                        	CMP	$700+mem
+   144                        	endif
+   145                        	ENDM
+   146                        
+   147                        CMPHN	MACRO	mem
+   148                        	if	mem<$100
+   149                        	CMP	$F80+mem
+   150                        	else
+   151                        	CMP	$F00+mem
+   152                        	endif
+   153                        	ENDM
+   154                        
+   155                        
+   156                        ;*************************
+   157                        ;*************************
+   158                        INCLN	MACRO	mem
+   159                        	if	mem<$100
+   160                        	INC	mem-$40
+   161                        	else
+   162                        	INC	mem-$60
+   163                        	endif
+   164                        	ENDM
+   165                        
+   166                        INCHN	MACRO	mem
+   167                        	if	mem<$100
+   168                        	INC	mem-$20
+   169                        	else
+   170                        	INC	mem-$40
+   171                        	endif
+   172                        	ENDM
+   173                        
+   174                        DECLN	MACRO	mem
+   175                        	if	mem<$100
+   176                        	DEC mem-$40
+   177                        	else
+   178                        	DEC mem-$60
+   179                        	endif
+   180                        	ENDM
+   181                        
+   182                        DECHN	MACRO	mem
+   183                        	if	mem<$100
+   184                        	DEC	mem-$20
+   185                        	else
+   186                        	DEC	mem-$40
+   187                        	endif
+   188                        	ENDM
+   189                        ;*************************
+   190                        ;*************************
+   191                        
+   192                        
+   193                        
+   194                        LDA_X	MACRO	mem
+   195                        	if	mem<$100
+   196                        	LDA	$80+mem,X
+   197                        	else
+   198                        	LDA	mem,X
+   199                        	endif
+   200                        	ENDM
+   201                        
+   202                        STA_X	MACRO	mem
+   203                        	if	mem<$100
+   204                        	STA	$80+mem,X
+   205                        	else
+   206                        	STA	mem,X
+   207                        	endif
+   208                        	ENDM
+   209                        
+   210                        STZ_X	MACRO	mem
+   211                        	if	mem<$100
+   212                        	STZ	$80+mem,X
+   213                        	else
+   214                        	STZ	mem,X
+   215                        	endif
+   216                        	ENDM
+   217                        
+   218                        INC_X	MACRO	mem
+   219                        	if	mem<$100
+   220                        	INC	$80+mem,X
+   221                        	else
+   222                        	INC	mem,X
+   223                        	endif
+   224                        	ENDM
+   225                        
+   226                        ADC_X	MACRO	mem
+   227                        	if	mem<$100
+   228                        	ADC	$80+mem,X
+   229                        	else
+   230                        	ADC	mem,X
+   231                        	endif
+   232                        	ENDM
+   233                        
+   234                        SBC_X	MACRO	mem
+   235                        	if	mem<$100
+   236                        	SBC	$80+mem,X
+   237                        	else
+   238                        	SBC	mem,X
+   239                        	endif
+   240                        	ENDM
+   241                        
+   242                        CMP_X	MACRO	mem
+   243                        	if	mem<$100
+   244                        	CMP	$80+mem,X
+   245                        	else
+   246                        	CMP	mem,X
+   247                        	endif
+   248                        	ENDM
+   249                        
+   250                        ASLLN	MACRO	mem
+   251                        	if	mem<$100
+   252                        	ASL	$780+mem
+   253                        	else
+   254                        	ASL	$700+mem
+   255                        	endif
+   256                        	ENDM
+   257                        
+   258                        LSRLN	MACRO	mem
+   259                        	if	mem<$100
+   260                        	LSR	$780+mem
+   261                        	else
+   262                        	LSR	$700+mem
+   263                        	endif
+   264                        	ENDM
+   265                        
+   266                        ROLLN	MACRO	mem
+   267                        	if	mem<$100
+   268                        	ROL	$780+mem
+   269                        	else
+   270                        	ROL	$700+mem
+   271                        	endif
+   272                        	ENDM
+   273                        
+   274                        RORLN	MACRO	mem
+   275                        	if	mem<$100
+   276                        	ROR	$780+mem
+   277                        	else
+   278                        	ROR	$700+mem
+   279                        	endif
+   280                        	ENDM
+   281                        
+   282                        ASLHN	MACRO	mem
+   283                        	if	mem<$100
+   284                        	ASL	$F80+mem
+   285                        	else
+   286                        	ASL	$F00+mem
+   287                        	endif
+   288                        	ENDM
+   289                        
+   290                        LSRHN	MACRO	mem
+   291                        	if	mem<$100
+   292                        	LSR	$F80+mem
+   293                        	else
+   294                        	LSR	$F00+mem
+   295                        	endif
+   296                        	ENDM
+   297                        
+   298                        ROLHN	MACRO	mem
+   299                        	if	mem<$100
+   300                        	ROL	$F80+mem
+   301                        	else
+   302                        	ROL	$F00+mem
+   303                        	endif
+   304                        	ENDM
+   305                        
+   306                        RORHN	MACRO	mem
+   307                        	if	mem<$100
+   308                        	ROR	$F80+mem
+   309                        	else
+   310                        	ROR	$F00+mem
+   311                        	endif
+   312                        	ENDM
+   313                        
+   314                        BR0	MACRO	PARA,VAR,LABLE
+   315                        	BBR@<VAR.mod.8> PARA,LABLE
+   316                        	ENDM
+   317                        
+   318                        BR1	MACRO	PARA,VAR,LABLE
+   319                        	BBS@<VAR.mod.8>	PARA,LABLE
+   320                        	ENDM
+   321                        
+   322                        xSETB	MACRO	flag,bit
+   323                        	SMB@<bit>  flag
+   324                        	ENDM
+   325                        
+   326                        xCLRB	MACRO	flag,bit
+   327                        	RMB@<bit>  flag
+   328                        	ENDM
+   328                        
+    27                        ;.INCLUDE 50X105.MAC
+    28                        .INCLUDE 50P104.MAC
+     1                        ;------------------------------------
+     2                        PB2_PB2_CMOS MACRO
+     3                                RMB0    P_PADF0
+     4                                SMB2    P_PBTYPE ;COMS
+     5                                ENDM
+     6                        PB2_PB2_NMOS MACRO
+     7                                RMB0    P_PADF0
+     8                                RMB2    P_PBTYPE ;NOMS
+     9                                ENDM
+    10                        PB2_PWM MACRO
+    11                                SMB0    P_PADF0
+    12                                SMB2    P_PBTYPE ;COMS
+    13                                ENDM
+    14                        
+    15                        PB3_PB3_CMOS MACRO
+    16                                RMB1    P_PADF0
+    17                                SMB3    P_PBTYPE ;CMOS
+    18                                ENDM
+    19                        PB3_PB3_NMOS MACRO
+    20                                RMB1    P_PADF0
+    21                                RMB3    P_PBTYPE ;CMOS
+    22                                ENDM
+    23                        PB3_PWM MACRO
+    24                                SMB1    P_PADF0
+    25                                SMB3    P_PBTYPE ;CMOS
+    26                                ENDM
+    27                        
+    28                        PC67_PC67       MACRO
+    29                                RMB5    P_PCSEG
+    30                                RMB4    P_DIVC
+    31                                ENDM
+    32                        PC67_EL01       MACRO
+    33                                RMB5    P_PCSEG
+    34                                SMB4    P_DIVC
+    35                                ENDM
+    36                        PC67_SEG	MACRO
+    37                                SMB5    P_PCSEG
+    38                                ENDM
+    39                        
+    40                        PC45_PC45       MACRO
+    41                                RMB4    P_PCSEG
+    42                                ENDM
+    43                        PC45_SEG       MACRO
+    44                                SMB4    P_PCSEG
+    45                                ENDM
+    46                        
+    47                        PC0_PC0       MACRO
+    48                                RMB0    P_PCSEG
+    49                                ENDM
+    50                        PC03_PC03       MACRO
+    51                                RMB0    P_PCSEG
+    52                                RMB1    P_PCSEG
+    53                                RMB2    P_PCSEG
+    54                                RMB3    P_PCSEG
+    55                                ENDM
+    56                        PC0_SEG       MACRO
+    57                                SMB0    P_PCSEG
+    58                                ENDM
+    59                        PC13_SEG       MACRO
+    60                                SMB1    P_PCSEG
+    61                                SMB2    P_PCSEG
+    62                                SMB3    P_PCSEG
+    63                        		RMB3	P_LCDCTRL
+    64                                ENDM
+    65                        
+    66                        PD03_SEG	MACRO
+    67                        		SMB6	P_PCSEG
+    68                                ENDM
+    69                        PD03_RFC	MACRO
+    70                        		RMB6	P_PCSEG
+    71                        		RMB0	P_PDSEG
+    72                        		RMB1	P_PDSEG
+    73                        		RMB2	P_PDSEG
+    74                        		RMB3	P_PDSEG
+    75                        		SMB0	P_RFCC0
+    76                        		SMB1	P_RFCC0
+    77                        		SMB2	P_RFCC0
+    78                        		SMB3	P_RFCC0
+    79                                ENDM
+    80                        PD03_PD03	MACRO
+    81                        		RMB6	P_PCSEG
+    82                        		RMB0	P_PDSEG
+    83                        		RMB1	P_PDSEG
+    84                        		RMB2	P_PDSEG
+    85                        		RMB3	P_PDSEG
+    86                        		RMB0	P_RFCC0
+    87                        		RMB1	P_RFCC0
+    88                        		RMB2	P_RFCC0
+    89                        		RMB3	P_RFCC0
+    90                                ENDM
+    91                        PD0_SEG	MACRO
+    92                        		SMB0	P_PDSEG
+    93                                ENDM
+    94                        PD1_SEG	MACRO
+    95                        		SMB1	P_PDSEG
+    96                                ENDM
+    97                        PD2_SEG	MACRO
+    98                        		SMB2	P_PDSEG
+    99                                ENDM
+   100                        PD3_SEG	MACRO
+   101                        		SMB3	P_PDSEG
+   102                                ENDM
+   103                        
+   104                        PD47_SEG	MACRO
+   105                        		SMB7	P_PCSEG
+   106                                ENDM
+   107                        PD4_RFC	MACRO
+   108                        		RMB7	P_PCSEG
+   109                        		RMB4	P_PDSEG
+   110                        		SMB4	P_RFCC0
+   111                                ENDM
+   112                        PD4_PD4	MACRO
+   113                        		RMB7	P_PCSEG
+   114                        		RMB4	P_PDSEG
+   115                        		RMB4	P_RFCC0
+   116                                ENDM
+   117                        PD47_PD47	MACRO
+   118                        		RMB7	P_PCSEG
+   119                        		RMB4	P_PDSEG
+   120                        		RMB5	P_PDSEG
+   121                        		RMB6	P_PDSEG
+   122                        		RMB7	P_PDSEG
+   123                        		RMB4	P_RFCC0
+   124                                ENDM
+   125                        PD57_PD57	MACRO
+   126                        		RMB7	P_PCSEG
+   127                        		RMB5	P_PDSEG
+   128                        		RMB6	P_PDSEG
+   129                        		RMB7	P_PDSEG
+   130                                ENDM
+   131                        PD4_SEG	MACRO
+   132                        		SMB4	P_PDSEG
+   133                                ENDM
+   134                        PD5_SEG	MACRO
+   135                        		SMB5	P_PDSEG
+   136                                ENDM
+   137                        PD5_PD5	MACRO
+   138                        		RMB7	P_PCSEG
+   139                        		RMB5	P_PDSEG
+   140                                ENDM
+   141                        PD6_SEG	MACRO
+   142                        		SMB6	P_PDSEG
+   143                                ENDM
+   144                        PD6_PD6	MACRO
+   145                        		RMB7	P_PCSEG
+   146                        		RMB6	P_PDSEG
+   147                                ENDM
+   148                        PD7_SEG	MACRO
+   149                        		SMB7	P_PDSEG
+   150                                ENDM
+   151                        PD7_PD7	MACRO
+   152                        		RMB7	P_PCSEG
+   153                        		RMB7	P_PDSEG
+   154                                ENDM
+   155                        
+   156                        PC_PD_SEG	MACRO
+   157                        		LDA		#$FF
+   158                        		STA		P_PCSEG	;S1~S7,S8~S15
+   159                                ENDM
+   160                        
+   161                        LCD_3COM	MACRO
+   162                        		RMB0	P_LCDCOM
+   163                        		RMB1	P_LCDCOM
+   164                                ENDM
+   165                        LCD_4COM	MACRO
+   166                        		SMB0	P_LCDCOM
+   167                        		RMB1	P_LCDCOM
+   168                                ENDM
+   169                        LCD_5COM	MACRO
+   170                        		RMB0	P_LCDCOM
+   171                        		SMB1	P_LCDCOM
+   172                                ENDM
+   173                        LCD_6COM	MACRO
+   174                        		SMB0	P_LCDCOM
+   175                        		SMB1	P_LCDCOM
+   176                                ENDM
+   177                        
+   178                        LCD_ENCH_EN		MACRO
+   179                        		SMB6	P_LCDCOM
+   180                                ENDM
+   181                        LCD_ENCH_DIS	MACRO
+   182                        		RMB6	P_LCDCOM
+   183                                ENDM
+   184                        
+   185                        LCD_DRIVE_2	MACRO
+   186                        		SMB0	P_LCDCTRL
+   187                        		RMB1	P_LCDCTRL
+   188                                ENDM
+   189                        LCD_DRIVE_4	MACRO
+   190                        		RMB0	P_LCDCTRL
+   191                        		SMB1	P_LCDCTRL
+   192                                ENDM
+   193                        LCD_DRIVE_8	MACRO
+   194                        		SMB0	P_LCDCTRL
+   195                        		SMB1	P_LCDCTRL
+   196                                ENDM
+   197                        LCD_DRIVE_FULL	MACRO
+   198                        		RMB0	P_LCDCTRL
+   199                        		RMB1	P_LCDCTRL
+   200                                ENDM
+   201                        
+   202                        LCD_1_2_BAIS_3V	MACRO
+   203                        		RMB2	P_LCDCTRL
+   204                        		RMB3	P_LCDCTRL
+   205                                ENDM
+   206                        LCD_1_3_BAIS_4V	MACRO
+   207                        		SMB2	P_LCDCTRL
+   208                        		RMB3	P_LCDCTRL
+   209                                ENDM
+   210                        LCD_1_3_BAIS_3V	MACRO
+   211                        		SMB3	P_LCDCTRL
+   212                                ENDM
+   213                        LCDS_2	MACRO
+   214                        		RMB5	P_LCDCOM
+   215                                ENDM
+   216                        LCDS_1	MACRO
+   217                        		SMB5	P_LCDCOM
+   218                                ENDM
+   219                        ;------------------------------------
+   220                        Fext_WEAK       MACRO
+   221                                RMB0    P_SYSCLK
+   222                                ENDM
+   223                        Fext_STRONG     MACRO
+   224                                SMB0    P_SYSCLK
+   225                                ENDM
+   226                        
+   227                        Fext_OFF        MACRO
+   228                                RMB1    P_SYSCLK
+   229                                ENDM
+   230                        Fext_ON         MACRO
+   231                                SMB1    P_SYSCLK
+   232                                ENDM
+   233                        
+   234                        Fosc_OFF        MACRO
+   235                                RMB2    P_SYSCLK
+   236                                ENDM
+   237                        Fosc_ON         MACRO
+   238                                SMB2    P_SYSCLK
+   239                                ENDM
+   240                        
+   241                        Fext_Xtal       MACRO
+   242                                RMB3    P_SYSCLK
+   243                                ENDM
+   244                        Fext_RC         MACRO
+   245                                SMB3    P_SYSCLK
+   246                                ENDM
+   247                        
+   248                        Fsys_Fosc_1 MACRO
+   249                                RMB4    P_SYSCLK
+   250                                ENDM
+   251                        Fsys_Fosc_2 MACRO
+   252                                SMB4    P_SYSCLK
+   253                                ENDM
+   254                        
+   255                        Fcpu_Fext  MACRO
+   256                                SMB7    P_SYSCLK
+   257                                ENDM
+   258                        Fcpu_Fsys  MACRO
+   259                                RMB7    P_SYSCLK
+   260                                ENDM
+   261                        ;------------------------------------
+   262                        DIV_8KHZ  MACRO
+   263                                RMB0    P_DIVC
+   264                                RMB1    P_DIVC
+   265                        		RMB5	P_DIVC
+   266                                ENDM
+   267                        DIV_16KHZ  MACRO
+   268                                SMB0    P_DIVC
+   269                                RMB1    P_DIVC
+   270                        		RMB5	P_DIVC
+   271                                ENDM
+   272                        DIV_512HZ  MACRO
+   273                                RMB0    P_DIVC
+   274                                SMB1    P_DIVC
+   275                        		RMB5	P_DIVC
+   276                                ENDM
+   277                        DIV_1KHZ  MACRO
+   278                                SMB0    P_DIVC
+   279                                SMB1    P_DIVC
+   280                        		RMB5	P_DIVC
+   281                                ENDM
+   282                        DIV_256HZ  MACRO
+   283                        		SMB5	P_DIVC
+   284                                ENDM
+   285                        ;------------------------------------
+   286                        WDTC_CLK_256HZ   MACRO
+   287                                RMB0    P_WDTC
+   288                                RMB1    P_WDTC
+   289                                ENDM
+   290                        WDTC_CLK_DIV     MACRO
+   291                                SMB0    P_WDTC
+   292                                RMB1    P_WDTC
+   293                                ENDM
+   294                        WDTC_CLK_TMR1   MACRO
+   295                                RMB0    P_WDTC
+   296                                SMB1    P_WDTC
+   297                                ENDM
+   298                        WDTC_CLK_LCDS    MACRO
+   299                                SMB0    P_WDTC
+   300                                SMB1    P_WDTC
+   301                                ENDM
+   302                        
+   303                        WDTC_CLR MACRO
+   304                                RMB2    P_WDTC
+   305                                ENDM
+   306                        
+   307                        WDTC_ON  MACRO
+   308                                SMB3    P_WDTC
+   309                                ENDM
+   310                        WDTC_OFF MACRO
+   311                                RMB3    P_WDTC
+   312                                ENDM
+   313                        
+   314                        IF_WDTC MACRO   LAB
+   315                                BBS4    P_WDTC,LAB
+   316                                ENDM
+   317                        
+   318                        ;------------------------------------
+   319                        TMR0_ON MACRO
+   320                                SMB0    P_TMRC
+   321                                ENDM
+   322                        TMR0_OFF MACRO
+   323                                RMB0    P_TMRC
+   324                                ENDM
+   325                        TMR0_CLK_FOSC   MACRO
+   326                                SMB0    P_TMCLK
+   327                                RMB1    P_TMCLK
+   328                                ENDM
+   329                        TMR0_CLK_FSUB    MACRO
+   330                                RMB0    P_TMCLK
+   331                                RMB1    P_TMCLK
+   332                                RMB0	P_PADF1
+   333                                ENDM
+   334                        TMR0_CLK_128K	macro
+   335                        		RMB0    P_TMCLK
+   336                                SMB1    P_TMCLK
+   337                                ENDM
+   338                        TMR0_CLK_32K	macro
+   339                        		RMB0    P_TMCLK
+   340                                RMB1    P_TMCLK
+   341                                SMB0	P_PADF1
+   342                                ENDM
+   343                        TMR0_CLK_FOSC_4   MACRO
+   344                                SMB0    P_TMCLK
+   345                                SMB1    P_TMCLK
+   346                                RMB6	P_TMRC
+   347                                ENDM
+   348                        
+   349                        TMR1_ON MACRO
+   350                                SMB1    P_TMRC
+   351                                ENDM
+   352                        TMR1_OFF MACRO
+   353                                RMB1    P_TMRC
+   354                                ENDM
+   355                        TMR1_CLK_TMR0   MACRO
+   356                                RMB2    P_TMCLK
+   357                                RMB3    P_TMCLK
+   358                                ENDM
+   359                        TMR1_CLK_512Hz    MACRO
+   360                                SMB2    P_TMCLK
+   361                                RMB3    P_TMCLK
+   362                                ENDM
+   363                        TMR1_CLK_128K	macro
+   364                        		RMB2    P_TMCLK
+   365                                SMB3    P_TMCLK
+   366                                ENDM
+   367                        TMR1_CLK_FOSC_4		macro
+   368                        		SMB2    P_TMCLK
+   369                                SMB3    P_TMCLK
+   370                                ENDM
+   371                        
+   372                        TMR2_ON MACRO
+   373                                SMB2    P_TMRC
+   374                                ENDM
+   375                        TMR2_OFF MACRO
+   376                                RMB2    P_TMRC
+   377                                ENDM
+   378                        TMR2_CLK_512Hz MACRO
+   379                                RMB2    P_TMRC
+   380                                ENDM
+   381                        
+   382                        
+   383                        TONE_2KHZ_1_2_Duty     MACRO
+   384                                RMB2    P_DIVC
+   385                                RMB3    P_DIVC
+   386                                RMB7    P_DIVC
+   387                                ENDM
+   388                        TONE_TMR0_2_1_2_Duty      MACRO
+   389                                SMB2    P_DIVC
+   390                                RMB3    P_DIVC
+   391                                RMB7    P_DIVC
+   392                                ENDM
+   393                        TONE_L       MACRO
+   394                                RMB2    P_DIVC
+   395                                SMB3    P_DIVC
+   396                                ENDM
+   397                        TONE_H       MACRO
+   398                                SMB2    P_DIVC
+   399                                SMB3    P_DIVC
+   400                                ENDM
+   401                        TONE_2KHZ_3_4_Duty     MACRO
+   402                                RMB2    P_DIVC
+   403                                RMB3    P_DIVC
+   404                                SMB7    P_DIVC
+   405                                ENDM
+   406                        TONE_4KHZ_3_4_Duty      MACRO
+   407                                SMB2    P_DIVC
+   408                                RMB3    P_DIVC
+   409                                SMB7    P_DIVC
+   410                                ENDM
+   411                        ;------------------------------------
+   412                        EN_DIV_IRQ     MACRO
+   413                                SMB0    P_IER
+   414                                ENDM
+   415                        EN_TMR0_IRQ     MACRO
+   416                                SMB1    P_IER
+   417                                ENDM
+   418                        EN_TMR1_IRQ     MACRO
+   419                                SMB2    P_IER
+   420                                ENDM
+   421                        EN_TMR2_IRQ     MACRO
+   422                                SMB3    P_IER
+   423                                ENDM
+   424                        EN_KEY_IRQ      MACRO
+   425                                SMB4    P_IER
+   426                                ENDM
+   427                        EN_PA_IRQ      MACRO
+   428                                SMB4    P_IER
+   429                                ENDM
+   430                        EN_LCD_IRQ      MACRO
+   431                                SMB6    P_IER
+   432                                ENDM
+   433                        
+   434                        DIS_DIV_IRQ     MACRO
+   435                                RMB0    P_IER
+   436                                ENDM
+   437                        DIS_TMR0_IRQ     MACRO
+   438                                RMB1    P_IER
+   439                                ENDM
+   440                        DIS_TMR1_IRQ     MACRO
+   441                                RMB2    P_IER
+   442                                ENDM
+   443                        DIS_TMR2_IRQ     MACRO
+   444                                RMB3    P_IER
+   445                                ENDM
+   446                        DIS_KEY_IRQ      MACRO
+   447                                RMB4    P_IER
+   448                                ENDM
+   449                        DIS_PA_IRQ		 MACRO
+   450                                RMB4    P_IER
+   451                                ENDM
+   452                        DIS_LCD_IRQ      MACRO
+   453                                RMB6    P_IER
+   454                                ENDM
+   455                        
+   456                        CLR_DIV_IRQ_FLAG MACRO
+   457                                RMB0    P_IFR
+   458                                ENDM
+   459                        CLR_TMR0_IRQ_FLAG      MACRO
+   460                                RMB1    P_IFR
+   461                                ENDM
+   462                        CLR_TMR1_IRQ_FLAG      MACRO
+   463                                RMB2    P_IFR
+   464                                ENDM
+   465                        CLR_TMR2_IRQ_FLAG      MACRO
+   466                                RMB3    P_IFR
+   467                                ENDM
+   468                        CLR_KEY_IRQ_FLAG      MACRO
+   469                                RMB4    P_IFR
+   470                                ENDM
+   471                        CLR_PA_IRQ_FLAG      MACRO
+   472                                RMB4    P_IFR
+   473                                ENDM
+   474                        CLR_LCD_IRQ_FLAG       MACRO
+   475                                RMB6    P_IFR
+   476                                ENDM
+   477                        
+   478                        IF_DIV_IRQ_FLAG MACRO   LAB1
+   479                                BBS0    P_IFR,LAB1
+   480                                ENDM
+   481                        IF_TMR0_IRQ_FLAG MACRO   LAB1
+   482                                BBS1    P_IFR,LAB1
+   483                                ENDM
+   484                        IF_TMR1_IRQ_FLAG MACRO   LAB1
+   485                                BBS2    P_IFR,LAB1
+   486                                ENDM
+   487                        IF_TMR2_IRQ_FLAG MACRO   LAB1
+   488                                BBS3    P_IFR,LAB1
+   489                                ENDM
+   490                        IF_KEY_IRQ_FLAG MACRO   LAB1
+   491                                BBS4    P_IFR,LAB1
+   492                                ENDM
+   493                        IF_LCD_IRQ_FLAG MACRO   LAB1
+   494                                BBS6    P_IFR,LAB1
+   495                                ENDM
+   496                        ;------------------------------------
+   497                        LCD_ON           MACRO
+   498                                SMB4    P_TMRC
+   499                                ENDM
+   500                        LCD_OFF          MACRO
+   501                                RMB4    P_TMRC
+   502                                ENDM
+   503                        
+   504                        PWM_ON  MACRO
+   505                        		SMB0	P_SYSCLK	;Strong Mode
+   506                                SMB7    P_TMRC
+   507                                ENDM
+   508                        PWM_OFF MACRO
+   509                                RMB7    P_TMRC
+   510                        ;		LDA		R_Strong_2S
+   511                        ;		BNE		?Skip
+   512                        		RMB0	P_SYSCLK	;WeakMode
+   513                        ?Skip:
+   514                                ENDM
+   515                        
+   516                        IF_PWM_ON       MACRO   LAB
+   517                                BBS7    P_TMRC,LAB
+   518                                ENDM
+   519                        IF_PWM_OFF      MACRO   LAB
+   520                                BBR7    P_TMRC,LAB
+   521                                ENDM
+   522                        
+   523                        SEL_PWM MACRO
+   524                                SMB1    P_AUDCR
+   525                                ENDM
+   526                        SEL_TONE MACRO
+   527                                RMB1    P_AUDCR
+   528                                ENDM
+   529                        ;------------------------------------
+   530                        ClrAllRam MACRO
+   531                            LDA		#$00
+   532                        	LDX		#$FF
+   533                        	STA		$1800
+   534                        ?ClrAllRamLoop:
+   535                        	STA		$1800,X
+   536                        	DEX
+   537                        	BNE		?ClrAllRamLoop
+   538                            ENDM
+   539                        ;------------------------------------
+   539                        
+    29                        ;********************************************************
+    30                        STACK_BOT       EQU     FFH
+    31                        ;********************************************************
+    32                        .PROG
+    33                        V_RESET:
+    34 00:F000: 1A                NOP
+    35 00:F001: 1A                NOP
+    36 00:F002: 1A                NOP
+    37 00:F003: 01                SEI
+    38 00:F004: 5E FF             LDX     #STACK_BOT
+    39 00:F006: 1E                TXS     ; ��ʼ����ջָ��
+    40 00:F007: 53 07             LDA     #$07
+    41 00:F009: 7F 1D             STA     P_SYSCLK    ;Fcpu=560K, Fext=32768,Strong ,Fosc/1
+    42                            ClrAllRam
++   42 00:F00B: 53 00          LDA #$0000
++   42 00:F00D: 5E FF          LDX #$00FF
++   42 00:F00F: 4F 00 18       STA $1800
++   42                        ?ClrAllRamLoop:
++   42 00:F012: 6F 00 18       STA $1800,X
++   42 00:F015: 0F             DEX
++   42 00:F016: 12 FA          BNE ?ClrAllRamLoop
+    43 00:F018: 15 8D F0          JSR     L_InitSPR_Prog
+    44 00:F01B: 15 FA F0          JSR     F_FillScreen
+    45                            LCD_ON
++   45 00:F01E: 2C 16          SMB4 P_TMRC
+    46                            TMR1_ON
++   46 00:F020: 29 16          SMB1 P_TMRC
+    47                            EN_TMR1_IRQ
++   47 00:F022: 2A 0E          SMB2 P_IER
+    48 00:F024: 73 3E             LDA     P_FUSE0
+    49 00:F026: 7F 2F             STA     P_MF0
+    50 00:F028: 7F 1E             STA     P_HALT
+    51 00:F02A: 1A                NOP
+    52 00:F02B: 1A                NOP
+    53 00:F02C: 1A                NOP
+    54 00:F02D: 22 0F             RMB2    P_IFR
+    55 00:F02F: 7F 1E             STA     P_HALT
+    56 00:F031: 1A                NOP
+    57 00:F032: 1A                NOP
+    58 00:F033: 1A                NOP
+    59 00:F034: 22 0F             RMB2    P_IFR
+    60 00:F036: 7F 1E             STA     P_HALT
+    61 00:F038: 1A                NOP
+    62 00:F039: 1A                NOP
+    63 00:F03A: 1A                NOP
+    64 00:F03B: 22 0F             RMB2    P_IFR
+    65                            WDTC_CLR
++   65 00:F03D: 22 1C          RMB2 P_WDTC
+    66                            Fsys_Fosc_1
++   66 00:F03F: 24 1D          RMB4 P_SYSCLK
+    67                            EN_LCD_IRQ
++   67 00:F041: 2E 0E          SMB6 P_IER
+    68                             ; JSR     Change_Key_BIT3
+    69                        
+    70 00:F043: 53 FF             LDA	    #$FF
+    71 00:F045: 7F 05         	STA	    P_PB
+    72                            ; JSR     F_KeyBeep
+    73                            ; JSR     F_KeyLight
+    74                            ; JSR     L_Beep_Control_Prog
+    75                        
+    76 00:F047: 53 A4             LDA     #10100100B
+    77 00:F049: 7F 02             STA     P_PA_WAKE
+    78                        
+    79 00:F04B: 53 00             LDA     #0
+    80 00:F04D: 7F A3             STA     R_Mode_Flag
+    81                        
+    82 00:F04F: 53 00             LDA     #0
+    83 00:F051: 7F A1             STA     R_Set_Flag
+    84                        
+    85 00:F053: 53 00             LDA     #0
+    86 00:F055: 7F CA             STA     P_Temp+6
+    87 00:F057: 7F CB             STA     P_Temp+7
+    88 00:F059: 7F C9             STA     P_Temp+5
+    89 00:F05B: 15 FE F0          JSR     F_ClearScreen
+    90                        ;    JSR     F_KeyUpdateDis
+    91                        
+    92 00:F05E: 05                CLI
+    93                        
+    94                        ;--------------------------------------------------------
+    95                        Mainloop:
+    96                        
+    97 00:F05F: 15 32 F4          JSR     L_2Hz_Prog
+    98 00:F062: 15 D4 F1          JSR     L_32Hz_Prog
+    99                        
+   100                        
+   101                        ;     RMB2    P_WDTC          ;CLR_WDTC
+   102                        ; ;    JSR     L_Mode_Prog
+   103                        ;     ; JSR     L_32Hz_Prog
+   104                        
+   105 00:F065: 3F 16 F7          BBS7    P_TMRC,Mainloop ;������
+   106                            ; LDA     R_Light_Unit
+   107                            ; BNE     Mainloop
+   108                            Fsys_Fosc_2
++  108 00:F068: 2C 1D          SMB4 P_SYSCLK
+   109 00:F06A: 7F 1E             STA     P_HALT
+   110 00:F06C: 15 77 F0          JSR     L_Judge_32hz
+   111 00:F06F: 1A                NOP
+   112 00:F070: 1A                NOP
+   113 00:F071: 1A                NOP
+   114                            Fsys_Fosc_1
++  114 00:F072: 24 1D          RMB4 P_SYSCLK
+   115 00:F074: 16 5F F0          JMP     Mainloop
+   116                        
+   117                        L_Judge_32hz:
+   118 00:F077: 73 01             LDA     PA
+   119 00:F079: 52 A4             EOR     #10100100B
+   120 00:F07B: 51 A4             AND     #10100100B
+   121 00:F07D: 13 02             BEQ     ?OFF
+   122                            EN_LCD_IRQ
++  122 00:F07F: 2E 0E          SMB6 P_IER
+   123                        
+   124                        ?OFF:
+   125 00:F081: 09                RTS
+   126                        ;--------------------------------------------------------
+   127                        .INCLUDE    Init.asm
+     1                        
+     2                        ;------------------------------------------------------
+     3                        ;L_Init_SystemRam_Prog:
+     4                        ;	LDA		#3
+     5                        ;	STA		R_Reset_1S
+     6                        ;	STA		R_Strong_2S
+     7                        
+     8                        ;	LDA		#$06
+     9                        ;	STA		R_Alarm1_Hr
+    10                        ;	LDA		#$12
+    11                        ;	STA		R_Alarm2_Hr
+    12                        ;	RTS
+    13                        ;------------------------------------------------------
+    14                        ;------------------------------------------------------
+    15                        ;-----------------------------------------------------
+    16                        ;-----------------------------------------------------
+    17                        F_Delay30Ms_32KHz:
+    18 00:F082: 53 8C         	LDA		#140		;2
+    19 00:F084: 7F C9         	STA		R_Temp+5
+    20                        ?OOP_DELAY:
+    21 00:F086: 79 C9         	DEC		R_Temp+5	;2*256
+    22 00:F088: 73 C9         	LDA		R_Temp+5	;
+    23 00:F08A: 12 FA         	BNE		?OOP_DELAY	;3*256
+    24 00:F08C: 09            	RTS
+    25                        ;------------------------------------------------------
+    26                        L_InitSPR_Prog:
+    27 00:F08D: 53 0C         	LDA		#00001100B
+    28 00:F08F: 7F 02         	STA		P_PAWAKE
+    29                        
+    30 00:F091: 53 04         	LDA		#00000100B
+    31 00:F093: 7F 04         	STA		P_PADIR
+    32                        
+    33 00:F095: 53 00         	LDA		#0
+    34 00:F097: 7F 01         	STA		P_PA	;PA56���0,������������
+    35                        
+    36                        	PB2_PB2_CMOS
++   36 00:F099: 20 0C          RMB0 P_PADF0
++   36 00:F09B: 2A 06          SMB2 P_PBTYPE
+    37                        	PB3_PB3_CMOS
++   37 00:F09D: 21 0C          RMB1 P_PADF0
++   37 00:F09F: 2B 06          SMB3 P_PBTYPE
+    38                        	WDTC_CLR
++   38 00:F0A1: 22 1C          RMB2 P_WDTC
+    39                        	PC03_PC03
++   39 00:F0A3: 20 09          RMB0 P_PCSEG
++   39 00:F0A5: 21 09          RMB1 P_PCSEG
++   39 00:F0A7: 22 09          RMB2 P_PCSEG
++   39 00:F0A9: 23 09          RMB3 P_PCSEG
+    40                        	PC45_PC45
++   40 00:F0AB: 24 09          RMB4 P_PCSEG
+    41                        	PC67_SEG
++   41 00:F0AD: 2D 09          SMB5 P_PCSEG
+    42                        	PD03_SEG
++   42 00:F0AF: 2E 09          SMB6 P_PCSEG
+    43                        	PD47_SEG
++   43 00:F0B1: 2F 09          SMB7 P_PCSEG
+    44                        ;	LDA		#$FF
+    45                        ;	STA		P_PB
+    46 00:F0B3: 53 00         	LDA		#0
+    47 00:F0B5: 7F 05         	STA		P_PB
+    48 00:F0B7: 7F 08         	STA		P_PC_IO
+    49 00:F0B9: 7F 07         	STA		P_PC
+    50 00:F0BB: 7F 0B         	STA		P_PDDIR
+    51 00:F0BD: 7F 0A         	STA		P_PD
+    52                        	LCD_4COM
++   52 00:F0BF: 28 1A          SMB0 P_LCDCOM
++   52 00:F0C1: 21 1A          RMB1 P_LCDCOM
+    53                        	LCD_DRIVE_4
++   53 00:F0C3: 20 19          RMB0 P_LCDCTRL
++   53 00:F0C5: 29 19          SMB1 P_LCDCTRL
+    54                        	LCD_ENCH_EN
++   54 00:F0C7: 2E 1A          SMB6 P_LCDCOM
+    55                        	LCD_1_2_BAIS_3V
++   55 00:F0C9: 22 19          RMB2 P_LCDCTRL
++   55 00:F0CB: 23 19          RMB3 P_LCDCTRL
+    56                        	LCDS_2
++   56 00:F0CD: 25 1A          RMB5 P_LCDCOM
+    57 00:F0CF: 53 00         	LDA		#0
+    58 00:F0D1: 7F 0D         	STA		P_PADF1
+    59 00:F0D3: 7F 10         	STA		P_TMR0
+    60 00:F0D5: 7F 12         	STA		P_TMR1
+    61 00:F0D7: 7F 14         	STA		P_TMR2
+    62 00:F0D9: 7F 18         	STA		P_DIVC
+    63 00:F0DB: 7F 0E         	STA		P_IER
+    64 00:F0DD: 7F 0F         	STA		P_IFR
+    65 00:F0DF: 7F 1F         	STA		P_AUD0
+    66 00:F0E1: 7F 20         	STA		P_AUDCR
+    67                        ;	LDA		#01111100B
+    68                        ;	STA		P_PA_WAKE
+    69                        	DIV_512HZ
++   69 00:F0E3: 20 18          RMB0 P_DIVC
++   69 00:F0E5: 29 18          SMB1 P_DIVC
++   69 00:F0E7: 25 18          RMB5 P_DIVC
+    70                        	TMR0_CLK_128K
++   70 00:F0E9: 20 17          RMB0 P_TMCLK
++   70 00:F0EB: 29 17          SMB1 P_TMCLK
+    71                        	TMR1_CLK_512Hz
++   71 00:F0ED: 2A 17          SMB2 P_TMCLK
++   71 00:F0EF: 23 17          RMB3 P_TMCLK
+    72                        	TMR2_CLK_512Hz
++   72 00:F0F1: 22 16          RMB2 P_TMRC
+    73                        	WDTC_CLK_TMR1
++   73 00:F0F3: 20 1C          RMB0 P_WDTC
++   73 00:F0F5: 29 1C          SMB1 P_WDTC
+    74                        	WDTC_OFF
++   74 00:F0F7: 23 1C          RMB3 P_WDTC
+    75 00:F0F9: 09            	RTS
+    76                        ;------------------------------------------------------
+    77                        
+    77                        
+   128                        .INCLUDE    Disp.asm
+     1                        
+     2                        
+     3                        ;===========================================================
+     4                        ;LCD_RamAddr		equ		RamStarAddr
+     5                        ;===========================================================
+     6                        F_FillScreen:
+     7 00:F0FA: 53 FF         	LDA		#0FFH
+     8 00:F0FC: 12 02         	BNE		L_FillLcd
+     9                        F_ClearScreen:
+    10 00:F0FE: 53 00         	LDA		#0
+    11                        L_FillLcd:
+    12 00:F100: 5E 00         	LDX		#0
+    13                        L_FillLcd_1:
+    14 00:F102: 6F 00 18         STA		LCD_RamAddr+0*6,X       ;;COM0
+    15 00:F105: 6F 06 18         STA		LCD_RamAddr+1*6,X       ;;COM1
+    16 00:F108: 6F 0C 18         STA		LCD_RamAddr+2*6,X       ;;COM2
+    17 00:F10B: 6F 12 18         STA		LCD_RamAddr+3*6,X       ;;COM3
+    18                        ;   STA		Lcd_RamAddr+4*6,x       ;;COM4
+    19                        ;   STA		Lcd_RamAddr+5*6,x       ;;COM5
+    20 00:F10E: 0B               INX
+    21 00:F10F: 57 06            CPX    	#6
+    22 00:F111: 10 EF            BCC    	L_FillLcd_1
+    23                        	; STA		0200H
+    24                        	; STA		0201H
+    25                        	; STA		0208H
+    26                        	; STA		0209H
+    27                        	; STA		0210H
+    28                        	; STA		0211H
+    29                        	; STA		0218H
+    30                        	; STA		0219H
+    31 00:F113: 09            	RTS
+    32                        
+    33                        
+    34                        ;===========================================================
+    35                        ;程序功能：	显示8BIT字段
+    36                        ;程序入口：	A =  显示内容
+    37                        ;			X =  ofc
+    38                        ;影响资源：P_Temp，P_Temp+1，P_Temp+2，P_Temp+3,X，A
+    39                        ;===========================================================
+    40                        L_Dis_8Bit_DigitDot_Prog:
+    41                        ;	STA		P_Temp
+    42                        ;	LDA		Table_Digit_Add   r_Offset,X
+    43 00:F114: 7C C5         	STX		P_Temp+1
+    44 00:F116: 1B            	TAX
+    45 00:F117: 63 7E F1      	LDA		Table_Digit_DataDot,X
+    46 00:F11A: 7E C5         	LDX		P_Temp+1
+    47                        F_DispPro:
+    48 00:F11C: 7F C4         	STA		P_Temp
+    49 00:F11E: 7C C5         	STX		P_Temp+1	;
+    50 00:F120: 53 07         	LDA		#7
+    51 00:F122: 7F C7         	STA		P_Temp+3	;显示段数
+    52                        L_Judge_Dis_8Bit_DigitDot:
+    53 00:F124: 7E C5         	LDX		P_Temp+1
+    54 00:F126: 63 B4 F1      	LDA		lcd_bit,X
+    55 00:F129: 7F C6         	STA		P_Temp+2
+    56 00:F12B: 63 94 F1      	LDA		lcd_byte,X
+    57 00:F12E: 1B            	TAX
+    58 00:F12F: 7B C4         	ROR		P_Temp
+    59 00:F131: 10 0A         	BCC		L_CLR
+    60 00:F133: 63 00 18      	LDA		LCD_RamAddr,X
+    61 00:F136: 70 C6         	ORA		P_Temp+2
+    62 00:F138: 6F 00 18      	STA		LCD_RamAddr,X
+    63 00:F13B: 17 0A         	BRA		L_Inc_Dis_Index_Prog
+    64                        L_CLR:
+    65 00:F13D: 63 00 18      	LDA		LCD_RamAddr,X
+    66 00:F140: 70 C6         	ORA		P_Temp+2
+    67 00:F142: 72 C6         	EOR		P_Temp+2
+    68 00:F144: 6F 00 18      	STA		LCD_RamAddr,X
+    69                        L_Inc_Dis_Index_Prog:
+    70 00:F147: 78 C5         	INC		P_Temp+1
+    71 00:F149: 79 C7         	DEC		P_Temp+3
+    72 00:F14B: 12 D7         	BNE		L_Judge_Dis_8Bit_DigitDot
+    73 00:F14D: 09            	RTS
+    74                        
+    75                        F_DispPro_8bit:
+    76 00:F14E: 7F C4         	STA		P_Temp
+    77 00:F150: 7C C5         	STX		P_Temp+1
+    78 00:F152: 53 08         	LDA		#8
+    79 00:F154: 7F C7         	STA		P_Temp+3	;显示段数
+    80 00:F156: 17 CC         	BRA		L_Judge_Dis_8Bit_DigitDot
+    81                        ;-----------------------------------------
+    82                        F_DispSymbol:		;input Xcc -> ofs
+    83                        ;	LDA		Lcd_bit,X
+    84                        ;	STA		P_Temp+2
+    85                        ;	LDA		Lcd_byte,X
+    86                        ;	TAX
+    87                        ;	LDA		LCD_RamAddr,X
+    88                        ;	ORA		P_Temp+2
+    89 00:F158: 15 68 F1      	JSR		F_DispSymbol_Com
+    90 00:F15B: 6F 00 18      	STA		LCD_RamAddr,X
+    91 00:F15E: 09            	RTS
+    92                        ;-----------------------------------------
+    93                        F_ClrpSymbol:		;input Xcc -> ofs
+    94                        ;	LDA		Lcd_bit,X
+    95                        ;	STA		P_Temp+2
+    96                        ;	LDA		Lcd_byte,X
+    97                        ;	TAX
+    98                        ;	LDA		LCD_RamAddr,X
+    99                        ;	ORA		P_Temp+2
+   100 00:F15F: 15 68 F1      	JSR		F_DispSymbol_Com
+   101 00:F162: 72 C6         	EOR		P_Temp+2
+   102 00:F164: 6F 00 18      	STA		LCD_RamAddr,X
+   103 00:F167: 09            	RTS
+   104                        
+   105                        F_DispSymbol_Com:
+   106 00:F168: 63 B4 F1      	LDA		lcd_bit,X
+   107 00:F16B: 7F C6         	STA		P_Temp+2
+   108 00:F16D: 63 94 F1      	LDA		lcd_byte,X
+   109 00:F170: 1B            	TAX
+   110 00:F171: 63 00 18      	LDA		LCD_RamAddr,X
+   111 00:F174: 70 C6         	ORA		P_Temp+2
+   112 00:F176: 09            	RTS
+   113                        ;============================================================
+   114                        ;==================================== ===========
+   115                        L_ROR_4Bit_Prog:
+   116                        L_ROR4Bit_Prog:
+   117                        L_LSR4Bit_Prog:
+   118                        F_MSBToLSB:
+   119 00:F177: 19            	ROR
+   120 00:F178: 19            	ROR
+   121 00:F179: 19            	ROR
+   122 00:F17A: 19            	ROR
+   123 00:F17B: 51 0F         	AND		#$0F
+   124 00:F17D: 09            	RTS
+   125                        ;================================================
+   126                        ;********************************************
+   127                        Table_Digit_DataDot:	;显示内容对应显示的段码
+   128 00:F17E: 3F            	.BYTE 	3fh	;0
+   129 00:F17F: 06            	.BYTE	06h	;1
+   130 00:F180: 5B            	.BYTE	5bh	;2
+   131 00:F181: 4F            	.BYTE	4fh	;3
+   132 00:F182: 66            	.BYTE	66h	;4
+   133                        Tab_S:
+   134                        Char_S  .EQU	Tab_S-Table_Digit_DataDot
+   135 00:F183: 6D            	.BYTE	6dh	;5
+   136 00:F184: 7D            	.BYTE	7dh	;6
+   137 00:F185: 07            	.BYTE	07h	;7			;带钩	27h	;7
+   138 00:F186: 7F            	.BYTE	7fh	;8
+   139 00:F187: 6F            	.BYTE	6fh	;9
+   140 00:F188: 00            	.BYTE	00h	; 		;A
+   141 00:F189: 40            	.BYTE	40h	;负号	;B
+   142 00:F18A: 77            	.BYTE	77h	;A		;C
+   143 00:F18B: 38            	.BYTE	38h	;L		;D
+   144 00:F18C: 76            	.BYTE	76h	;H		;E
+   145 00:F18D: 50            	.BYTE	50H	;r		;F
+   146                        	;.BYTE	01H	;test
+   147                        Tab_C:
+   148                        Char_C  .EQU	Tab_C-Table_Digit_DataDot
+   149 00:F18E: 39            	.BYTE	39h	;C		;10
+   150 00:F18F: 71            	.BYTE	71h	;F		;11
+   151                        Tab_A:
+   152                        Char_A	.EQU	Tab_A-Table_Digit_DataDot
+   153 00:F190: 77            	.BYTE	77h	;A		;12
+   154                        Tab_P:
+   155                        Char_P  .EQU	Tab_P-Table_Digit_DataDot
+   156 00:F191: 73            	.BYTE	73h	;P		;13
+   157                        Tab_o:
+   158                        Char_o  .EQU	Tab_o-Table_Digit_DataDot
+   159 00:F192: 5C            	.BYTE	5Ch	;o		;14
+   160                        Tab_n:
+   161                        Char_n  .EQU	Tab_n-Table_Digit_DataDot
+   162 00:F193: 54            	.BYTE	54h	;n		;15
+   163                        ;-----------------------------------------------------------
+   163                        
+   129                        .INCLUDE    Lcdtab.asm
+     1                        ;4 COM*8 SEG
+     2                        
+     3                        ;--------COM------------
+     4                        C1  .equ    0
+     5                        C2  .equ    1
+     6                        C3  .equ    2
+     7                        C4  .equ    3
+     8                        ;;--------SEG------------
+     9                        S3      .EQU    43
+    10                        S4      .EQU    42
+    11                        S5      .EQU    41
+    12                        S6      .EQU    40
+    13                        S7      .EQU    15
+    14                        S8      .EQU    14
+    15                        S9      .EQU    13
+    16                        S10     .EQU    12
+    17                        
+    18                        db_c_s:      .macro  com,seg
+    19                                    db com*6+seg/8
+    20                                      .endm
+    21                        
+    22                        db_c_y:       .macro  com,seg
+    23                                    db 1.shl.(seg-seg/8*8)
+    24                                    .endm
+    25                        
+    26                        lcd_byte:
+    27                        lcd_table1:
+    28                        lcd_d1 .equ $-lcd_table1
+    29                            db_c_s  C1,S3   ;;1A
++   29 00:F194: 05             .DB C1*$0006+S3/$0008
+    30                            db_c_s  C1,S4   ;;1B
++   30 00:F195: 05             .DB C1*$0006+S4/$0008
+    31                            db_c_s  C3,S4   ;;1C
++   31 00:F196: 11             .DB C3*$0006+S4/$0008
+    32                            db_c_s  C4,S4   ;;1D
++   32 00:F197: 17             .DB C4*$0006+S4/$0008
+    33                            db_c_s  C3,S3   ;;1E
++   33 00:F198: 11             .DB C3*$0006+S3/$0008
+    34                            db_c_s  C2,S3   ;;1F
++   34 00:F199: 0B             .DB C2*$0006+S3/$0008
+    35                            db_c_s  C2,S4   ;;1G
++   35 00:F19A: 0B             .DB C2*$0006+S4/$0008
+    36                        
+    37                        lcd_d2 .equ $-lcd_table1
+    38                            db_c_s  C1,S5   ;;2A
++   38 00:F19B: 05             .DB C1*$0006+S5/$0008
+    39                            db_c_s  C1,S6   ;;2B
++   39 00:F19C: 05             .DB C1*$0006+S6/$0008
+    40                            db_c_s  C3,S6   ;;2C
++   40 00:F19D: 11             .DB C3*$0006+S6/$0008
+    41                            db_c_s  C4,S6   ;;2D
++   41 00:F19E: 17             .DB C4*$0006+S6/$0008
+    42                            db_c_s  C3,S5   ;;2E
++   42 00:F19F: 11             .DB C3*$0006+S5/$0008
+    43                            db_c_s  C2,S5   ;;2F
++   43 00:F1A0: 0B             .DB C2*$0006+S5/$0008
+    44                            db_c_s  C2,S6   ;;2G
++   44 00:F1A1: 0B             .DB C2*$0006+S6/$0008
+    45                        
+    46                        lcd_d3 equ $-lcd_table1
+    47                            db_c_s  C1,S7   ;;3A
++   47 00:F1A2: 01             .DB C1*$0006+S7/$0008
+    48                            db_c_s  C1,S8   ;;3B
++   48 00:F1A3: 01             .DB C1*$0006+S8/$0008
+    49                            db_c_s  C3,S8   ;;3C
++   49 00:F1A4: 0D             .DB C3*$0006+S8/$0008
+    50                            db_c_s  C4,S8   ;;3D
++   50 00:F1A5: 13             .DB C4*$0006+S8/$0008
+    51                            db_c_s  C3,S7   ;;3E
++   51 00:F1A6: 0D             .DB C3*$0006+S7/$0008
+    52                            db_c_s  C2,S7   ;;3F
++   52 00:F1A7: 07             .DB C2*$0006+S7/$0008
+    53                            db_c_s  C2,S8   ;;3G
++   53 00:F1A8: 07             .DB C2*$0006+S8/$0008
+    54                        
+    55                        lcd_d4 equ $-lcd_table1
+    56                            db_c_s  C1,S9   ;;4A
++   56 00:F1A9: 01             .DB C1*$0006+S9/$0008
+    57                            db_c_s  C1,S10  ;;4B
++   57 00:F1AA: 01             .DB C1*$0006+S10/$0008
+    58                            db_c_s  C3,S10  ;;4C
++   58 00:F1AB: 0D             .DB C3*$0006+S10/$0008
+    59                            db_c_s  C4,S10  ;;4D
++   59 00:F1AC: 13             .DB C4*$0006+S10/$0008
+    60                            db_c_s  C3,S9   ;;4E
++   60 00:F1AD: 0D             .DB C3*$0006+S9/$0008
+    61                            db_c_s  C2,S9   ;;4F
++   61 00:F1AE: 07             .DB C2*$0006+S9/$0008
+    62                            db_c_s  C2,S10  ;;4G
++   62 00:F1AF: 07             .DB C2*$0006+S10/$0008
+    63                        
+    64                        lcd_dot:
+    65                        lcd_col equ $-lcd_table1
+    66                            db_c_s  C4,S7  ;;COL
++   66 00:F1B0: 13             .DB C4*$0006+S7/$0008
+    67                        lcd_am equ $-lcd_table1
+    68                            db_c_s  C4,S3  ;;AM
++   68 00:F1B1: 17             .DB C4*$0006+S3/$0008
+    69                        lcd_pm equ $-lcd_table1
+    70                            db_c_s  C4,S5  ;;PM
++   70 00:F1B2: 17             .DB C4*$0006+S5/$0008
+    71                        lcd_ms equ $-lcd_table1
+    72                            db_c_s  C4,S9  ;;M,S
++   72 00:F1B3: 13             .DB C4*$0006+S9/$0008
+    73                        
+    74                        ;=========================================
+    75                        lcd_bit:
+    76                            db_c_y  C1,S3   ;;1A
++   76 00:F1B4: 08             .DB $0001<<(S3-S3/$0008*$0008)
+    77                            db_c_y  C1,S4   ;;1B
++   77 00:F1B5: 04             .DB $0001<<(S4-S4/$0008*$0008)
+    78                            db_c_y  C3,S4   ;;1C
++   78 00:F1B6: 04             .DB $0001<<(S4-S4/$0008*$0008)
+    79                            db_c_y  C4,S4   ;;1D
++   79 00:F1B7: 04             .DB $0001<<(S4-S4/$0008*$0008)
+    80                            db_c_y  C3,S3   ;;1E
++   80 00:F1B8: 08             .DB $0001<<(S3-S3/$0008*$0008)
+    81                            db_c_y  C2,S3   ;;1F
++   81 00:F1B9: 08             .DB $0001<<(S3-S3/$0008*$0008)
+    82                            db_c_y  C2,S4   ;;1G
++   82 00:F1BA: 04             .DB $0001<<(S4-S4/$0008*$0008)
+    83                        
+    84                            db_c_y  C1,S5   ;;2A
++   84 00:F1BB: 02             .DB $0001<<(S5-S5/$0008*$0008)
+    85                            db_c_y  C1,S6   ;;2B
++   85 00:F1BC: 01             .DB $0001<<(S6-S6/$0008*$0008)
+    86                            db_c_y  C3,S6   ;;2C
++   86 00:F1BD: 01             .DB $0001<<(S6-S6/$0008*$0008)
+    87                            db_c_y  C4,S6   ;;2D
++   87 00:F1BE: 01             .DB $0001<<(S6-S6/$0008*$0008)
+    88                            db_c_y  C3,S5   ;;2E
++   88 00:F1BF: 02             .DB $0001<<(S5-S5/$0008*$0008)
+    89                            db_c_y  C2,S5   ;;2F
++   89 00:F1C0: 02             .DB $0001<<(S5-S5/$0008*$0008)
+    90                            db_c_y  C2,S6   ;;2G
++   90 00:F1C1: 01             .DB $0001<<(S6-S6/$0008*$0008)
+    91                        
+    92                            db_c_y  C1,S7   ;;3A
++   92 00:F1C2: 80             .DB $0001<<(S7-S7/$0008*$0008)
+    93                            db_c_y  C1,S8   ;;3B
++   93 00:F1C3: 40             .DB $0001<<(S8-S8/$0008*$0008)
+    94                            db_c_y  C3,S8   ;;3C
++   94 00:F1C4: 40             .DB $0001<<(S8-S8/$0008*$0008)
+    95                            db_c_y  C4,S8   ;;3D
++   95 00:F1C5: 40             .DB $0001<<(S8-S8/$0008*$0008)
+    96                            db_c_y  C3,S7   ;;3E
++   96 00:F1C6: 80             .DB $0001<<(S7-S7/$0008*$0008)
+    97                            db_c_y  C2,S7   ;;3F
++   97 00:F1C7: 80             .DB $0001<<(S7-S7/$0008*$0008)
+    98                            db_c_y  C2,S8   ;;3G
++   98 00:F1C8: 40             .DB $0001<<(S8-S8/$0008*$0008)
+    99                        
+   100                            db_c_y  C1,S9   ;;4A
++  100 00:F1C9: 20             .DB $0001<<(S9-S9/$0008*$0008)
+   101                            db_c_y  C1,S10  ;;4B
++  101 00:F1CA: 10             .DB $0001<<(S10-S10/$0008*$0008)
+   102                            db_c_y  C3,S10  ;;4C
++  102 00:F1CB: 10             .DB $0001<<(S10-S10/$0008*$0008)
+   103                            db_c_y  C4,S10  ;;4D
++  103 00:F1CC: 10             .DB $0001<<(S10-S10/$0008*$0008)
+   104                            db_c_y  C3,S9   ;;4E
++  104 00:F1CD: 20             .DB $0001<<(S9-S9/$0008*$0008)
+   105                            db_c_y  C2,S9   ;;4F
++  105 00:F1CE: 20             .DB $0001<<(S9-S9/$0008*$0008)
+   106                            db_c_y  C2,S10  ;;4G
++  106 00:F1CF: 10             .DB $0001<<(S10-S10/$0008*$0008)
+   107                        
+   108                            db_c_y  C4,S7  ;;COL
++  108 00:F1D0: 80             .DB $0001<<(S7-S7/$0008*$0008)
+   109                            db_c_y  C4,S3  ;;AM
++  109 00:F1D1: 08             .DB $0001<<(S3-S3/$0008*$0008)
+   110                            db_c_y  C4,S5  ;;PM
++  110 00:F1D2: 02             .DB $0001<<(S5-S5/$0008*$0008)
+   111                            db_c_y  C4,S9  ;;M,S
++  111 00:F1D3: 20             .DB $0001<<(S9-S9/$0008*$0008)
+   112                        ;=========================================
+   112                        
+   130                        ; .include    Key\KeyBeep.asm
+   131                        .include    Key\KeyScan.asm
+     1                        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     2                        D_Key1S		.EQU  32*1
+     3                        D_Key2S		.EQU  25*2
+     4                        D_Key3S		.EQU  30*3
+     5                        
+     6                        D_Key2		.EQU  %00000100
+     7                        D_Key5		.EQU  %00100000
+     8                        D_Key7		.EQU  %10000000
+     9                        
+    10                        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    11                        L_32Hz_Prog:
+    12 00:F1D4: 73 99         	LDA		Sys_Flag_A
+    13 00:F1D6: 51 04         	AND		#BIT2
+    14 00:F1D8: 13 0B         	BEQ		L_End_32Hz_Prog
+    15                        
+    16 00:F1DA: 01            	SEI
+    17 00:F1DB: 73 99         	LDA		Sys_Flag_A
+    18 00:F1DD: 51 FB         	AND		#BIT2_
+    19 00:F1DF: 7F 99         	STA		Sys_Flag_A
+    20 00:F1E1: 05            	CLI
+    21                        	; JSR		L_Beep_Control_Prog
+    22 00:F1E2: 15 E6 F1      	JSR		L_Scankey_Prog
+    23                        L_End_32Hz_Prog:
+    24 00:F1E5: 09            	RTS
+    25                        ;---------------------------------------------------------
+    26                        L_Scankey_Prog:
+    27 00:F1E6: 15 18 F4      	JSR		F_KeyIoPAInputHigh
+    28                        
+    29 00:F1E9: 15 29 F4      	JSR		L_ScanKey_Delay_Prog		;	等待功能，跑循环
+    30 00:F1EC: 73 01         	LDA     P_PA
+    31 00:F1EE: 52 A4             EOR     #10100100B			;;取反，区分按下和未按下的键
+    32 00:F1F0: 51 A4             AND     #10100100B			;;去除其余干扰位，确定按键
+    33 00:F1F2: 7F C5             STA     P_Temp+1
+    34 00:F1F4: 12 03         	BNE		L_Havekey
+    35 00:F1F6: 16 9D F2      	JMP		L_Null_Key_Prog
+    36                        L_Havekey:
+    37 00:F1F9: 73 C5         	LDA		P_Temp+1
+    38 00:F1FB: 76 D1         	CMP		R_KeyValue
+    39 00:F1FD: 13 03         	BEQ		L_KeyLine1
+    40 00:F1FF: 7F D1         	STA		R_KeyValue
+    41 00:F201: 09            	RTS
+    42                        
+    43                        L_KeyLine1:
+    44 00:F202: 73 9D         	LDA		R_Key_Flag
+    45 00:F204: 51 80         	AND		#BIT7
+    46 00:F206: 13 01         	BEQ		L_KeyLine1_
+    47 00:F208: 09            	RTS
+    48                        
+    49                        L_KeyLine1_:
+    50                        ;	JSR		Stop_Alarm_Beep		;有键按下即关闭闹钟
+    51                        
+    52 00:F209: 73 C5         	LDA		P_Temp+1
+    53 00:F20B: 56 04         	CMP		#D_Key2
+    54 00:F20D: 13 0B         	BEQ		L_Key2_Enter
+    55                        
+    56 00:F20F: 56 20         	CMP		#D_Key5
+    57 00:F211: 13 2D         	BEQ		L_Key5_Enter
+    58                        
+    59 00:F213: 56 80         	CMP		#D_Key7
+    60 00:F215: 13 50         	BEQ		L_Key7_Enter
+    61                        
+    62 00:F217: 16 96 F2      	JMP		L_ManyKey
+    63                        
+    64                        ;============================================================
+    65                        L_Key2_Enter:
+    66 00:F21A: 3C 99 04      	BBS4	Sys_Flag_A,?RTS		;;判断Sys_Flag_A的bit4=1？ 不为1，则往下执行；为1 说明按键已经按下，直接跳转
+    67 00:F21D: 2C 99         	SMB4	Sys_Flag_A		;;标记Sys_Flag_A的bit4=1
+    68 00:F21F: 28 9D         	SMB0	R_Key_Flag		;;R_Key_Flag的bit0=1
+    69                        
+    70                        
+    71                        ?RTS:
+    72 00:F221: 73 C0         	LDA		R_KeyHold_Time
+    73 00:F223: 56 5A         	CMP		#D_Key3S
+    74 00:F225: 13 06         	BEQ		L_Key2_Enter_End		;;判断是否按下满足3S
+    75 00:F227: 73 C0         	LDA		R_KeyHold_Time
+    76 00:F229: 03            	INC
+    77 00:F22A: 7F C0         	STA		R_KeyHold_Time
+    78 00:F22C: 09            	RTS
+    79                        
+    80                        L_Key2_Enter_End:			;;满足3S
+    81                        
+    82 00:F22D: 30 9D 0F      	BBR0	R_Key_Flag, ?RTS  ;;判断bit2=0?  =0：不是2key，跳转
+    83 00:F230: 20 9D         	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
+    84 00:F232: 53 00         	LDA		#0
+    85 00:F234: 7F A2         	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
+    86 00:F236: 73 A1         	LDA		R_Set_Flag
+    87 00:F238: 12 05         	BNE		?RTS				;;判断R_Set_Flag不为0 ？ 不为0：跳转	为0 ：R_Set_Flag加1,R_Set_Flag=1
+    88 00:F23A: 78 A1         	INC		R_Set_Flag
+    89 00:F23C: 15 00 F3      	JSR		L_Display_Mode0Prog	;;R_Set_Flag=1
+    90                        ?RTS:
+    91 00:F23F: 09            	RTS
+    92                        
+    93                        ;=================================================
+    94                        L_Key5_Enter:
+    95 00:F240: 3E 99 04      	BBS6	Sys_Flag_A,?RTS
+    96 00:F243: 2E 99         	SMB6	Sys_Flag_A
+    97 00:F245: 29 9D         	SMB1	R_Key_Flag		;;bit1=1
+    98                        
+    99                        ?RTS:
+   100 00:F247: 73 C0         	LDA		R_KeyHold_Time
+   101 00:F249: 56 5A         	CMP		#D_Key3S
+   102 00:F24B: 13 06         	BEQ		L_Key5_Enter_End
+   103 00:F24D: 73 C0         	LDA		R_KeyHold_Time
+   104 00:F24F: 03            	INC
+   105 00:F250: 7F C0         	STA		R_KeyHold_Time
+   106 00:F252: 09            	RTS
+   107                        
+   108                        L_Key5_Enter_End:
+   109 00:F253: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   110 00:F255: 53 00         	LDA		#0
+   111 00:F257: 7F A2         	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
+   112 00:F259: 73 C1         	LDA		R_Fast_Time
+   113 00:F25B: 56 04         	CMP		#C_Fast_Time
+   114 00:F25D: 10 2F         	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
+   115 00:F25F: 53 00         	LDA		#0
+   116 00:F261: 7F C1         	STA		R_Fast_Time			;;达到按键时长,R_Fast_Time>=C_Fast_Time,C=1不跳转,R_Fast_Time重置为0,一次快加结束
+   117 00:F263: 15 AF F3      	JSR		L_FastAdd_Prog
+   118 00:F266: 09            	RTS
+   119                        
+   120                        ;==================================================
+   121                        L_Key7_Enter:
+   122 00:F267: 3F 99 04      	BBS7	Sys_Flag_A,?RTS
+   123 00:F26A: 2F 99         	SMB7	Sys_Flag_A
+   124 00:F26C: 2A 9D         	SMB2	R_Key_Flag		;;bit2=1
+   125                        
+   126                        ?RTS:
+   127 00:F26E: 73 C0         	LDA		R_KeyHold_Time
+   128 00:F270: 56 5A         	CMP		#D_Key3S
+   129 00:F272: 13 06         	BEQ		L_Key7_Enter_End
+   130 00:F274: 73 C0         	LDA		R_KeyHold_Time
+   131 00:F276: 03            	INC
+   132 00:F277: 7F C0         	STA		R_KeyHold_Time
+   133 00:F279: 09            	RTS
+   134                        
+   135                        L_Key7_Enter_End:
+   136 00:F27A: 53 00         	LDA		#0
+   137 00:F27C: 7F A2         	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
+   138 00:F27E: 22 9D         	RMB2	R_Key_Flag
+   139 00:F280: 73 C1         	LDA		R_Fast_Time
+   140 00:F282: 56 04         	CMP		#C_Fast_Time
+   141 00:F284: 10 08         	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
+   142 00:F286: 53 00         	LDA		#0
+   143 00:F288: 7F C1         	STA		R_Fast_Time
+   144 00:F28A: 15 D7 F3      	JSR		L_FastDec_Prog
+   145 00:F28D: 09            	RTS
+   146                        ;============================================================
+   147                        L_Inc_Fast_Time:
+   148 00:F28E: 04            	CLC
+   149 00:F28F: 73 C1         	LDA		R_Fast_Time
+   150 00:F291: 54 01         	ADC		#1
+   151 00:F293: 7F C1         	STA		R_Fast_Time
+   152 00:F295: 09            	RTS
+   153                        ;============================================================
+   154                        L_ManyKey:
+   155 00:F296: 73 9D         	LDA		R_Key_Flag
+   156 00:F298: 50 80         	ORA		#BIT7
+   157 00:F29A: 7F 9D         	STA		R_Key_Flag
+   158                        L_End_KeyScan_Prog:
+   159 00:F29C: 09            	RTS
+   160                        
+   161                        ;============================================================
+   162                        ;============================================================
+   163                        L_Null_Key_Prog:
+   164 00:F29D: 15 18 F4      	JSR		F_KeyIoPAInputHigh
+   165 00:F2A0: 53 00         	LDA		#$0
+   166 00:F2A2: 7F C0         	STA		R_KeyHold_Time
+   167                        
+   168 00:F2A4: 15 C9 F2      	JSR		L_REALSE_2KEY
+   169 00:F2A7: 15 E8 F2      	JSR		L_REALSE_5KEY
+   170 00:F2AA: 15 F4 F2      	JSR		L_REALSE_7KEY
+   171                        
+   172 00:F2AD: 24 99         	RMB4 	Sys_Flag_A
+   173 00:F2AF: 26 99         	RMB6 	Sys_Flag_A
+   174 00:F2B1: 27 99         	RMB7 	Sys_Flag_A
+   175                        
+   176 00:F2B3: 20 9B         	RMB0	Sys_Flag_C		;;清除快加/快减标志位
+   177                        
+   178 00:F2B5: 73 9D         	LDA		R_Key_Flag
+   179 00:F2B7: 51 7F         	AND		#%01111111
+   180 00:F2B9: 7F 9D         	STA		R_Key_Flag
+   181                        
+   182 00:F2BB: 15 11 F4      	JSR		Stz_Fast_Hold_Key
+   183 00:F2BE: 73 BF         	LDA		R_Voice_Unit
+   184 00:F2C0: 12 06         	BNE		L_End_Null_Key_Prog
+   185                        
+   186                        ;	JSR		L_Mode_Prog
+   187                        ;;L_Exit_Null_Key_Prog:
+   188                        ;	ST_DIS
+   189                        	DIS_LCD_IRQ
++  189 00:F2C2: 26 0E          RMB6 P_IER
+   190 00:F2C4: 24 0F         	RMB4	P_IFR
+   191                        	EN_PA_IRQ
++  191 00:F2C6: 2C 0E          SMB4 P_IER
+   192                        L_End_Null_Key_Prog:
+   193 00:F2C8: 09            	RTS
+   194                        ;============================================================
+   195                        L_REALSE_2KEY:
+   196 00:F2C9: 30 9D 1B      	BBR0	R_Key_Flag, L_REALSE_2KEY_RTS  ;;判断bit0=0?  =0：不是2key，跳转
+   197 00:F2CC: 20 9D         	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
+   198 00:F2CE: 53 00         	LDA		#0
+   199 00:F2D0: 7F A2         	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
+   200 00:F2D2: 73 A1         	LDA		R_Set_Flag
+   201 00:F2D4: 13 10         	BEQ		?RTS		;;判断R_Set_Flag=0？ 为0 ：不执行 不为0：R_Set_Flag+1
+   202 00:F2D6: 78 A1         	INC		R_Set_Flag
+   203 00:F2D8: 73 A1         	LDA		R_Set_Flag
+   204 00:F2DA: 56 04         	CMP		#4			;;判断R_Set_Flag
+   205 00:F2DC: 13 04         	BEQ		?ZERO
+   206 00:F2DE: 15 00 F3      	JSR		L_Display_Mode0Prog
+   207 00:F2E1: 09            	RTS
+   208                        ?ZERO:
+   209 00:F2E2: 53 00         	LDA		#0				;;R_Set_Flag置0
+   210 00:F2E4: 7F A1         	STA		R_Set_Flag
+   211                        ?RTS:
+   212 00:F2E6: 09            	RTS
+   213                        
+   214                        L_REALSE_2KEY_RTS:
+   215 00:F2E7: 09            	RTS
+   216                        ;============================================================
+   217                        L_REALSE_5KEY:
+   218 00:F2E8: 53 00         	LDA		#0
+   219 00:F2EA: 7F A2         	STA		R_No_Key
+   220 00:F2EC: 15 4C F3      	JSR		L_Set_Flag_Prog
+   221 00:F2EF: 15 00 F3      	JSR		L_Display_Mode0Prog
+   222 00:F2F2: 09            	RTS
+   223                        
+   224                        L_REALSE_5KEY_RTS:
+   225 00:F2F3: 09            	RTS
+   226                        
+   227                        
+   228                        ;===============================================================
+   229                        ;===============================================================
+   230                        ;===============================================================
+   231                        ;===============================================================
+   232                        L_REALSE_7KEY:
+   233 00:F2F4: 53 00         	LDA		#0
+   234 00:F2F6: 7F A2         	STA		R_No_Key
+   235 00:F2F8: 15 4C F3      	JSR		L_Set_Flag_Prog
+   236 00:F2FB: 15 00 F3      	JSR		L_Display_Mode0Prog
+   237 00:F2FE: 09            	RTS
+   238                        
+   239                        L_REALSE_7KEY_RTS:
+   240 00:F2FF: 09            	RTS
+   241                        
+   242                        ;===============================================================
+   243                        L_Display_Mode0Prog:
+   244 00:F300: 73 A1         	LDA		R_Set_Flag
+   245 00:F302: 04            	CLC
+   246 00:F303: 18            	ROL
+   247 00:F304: 1B            	TAX
+   248 00:F305: 63 0F F3      	LDA		T_Display_Table+1,X
+   249 00:F308: 0A            	PHA
+   250 00:F309: 63 0E F3      	LDA		T_Display_Table,X
+   251 00:F30C: 0A            	PHA
+   252 00:F30D: 09            	RTS
+   253                        
+   254                        T_Display_Table:
+   255 00:F30E: 15 F3         	DW		L_Display_Prog-1	;;R_Set_Flag=0
+   256 00:F310: 00 F5         	DW		L_Key5_DisHR-1		;;R_Set_Flag=1
+   257 00:F312: 15 F3         	DW		L_Display_Prog-1	;;R_Set_Flag=2
+   258 00:F314: 15 F3         	DW		L_Display_Prog-1	;;R_Set_Flag=3
+   259                        
+   260                        L_Display_Prog:
+   261 00:F316: 15 DC F5      	JSR		L_Dis_TimeHr
+   262 00:F319: 15 FB F4      	JSR		L_Dis_TimeMin
+   263 00:F31C: 15 F7 F4      	JSR		L_DisCol_Prog
+   264 00:F31F: 09            	RTS
+   265                        ;========================================================
+   266                        L_1Hz_Flash_Prog:
+   267 00:F320: 38 9B 0D      	BBS0	Sys_Flag_C,?RTS			;;判断bit0=1? =1:快加/快减标志,不执行闪烁
+   268 00:F323: 73 A1         	LDA		R_Set_Flag
+   269 00:F325: 04            	CLC
+   270 00:F326: 18            	ROL
+   271 00:F327: 1B            	TAX
+   272 00:F328: 63 32 F3      	LDA		T_Flash_Table+1,X
+   273 00:F32B: 0A            	PHA
+   274 00:F32C: 63 31 F3      	LDA		T_Flash_Table,X
+   275 00:F32F: 0A            	PHA
+   276                        ?RTS:
+   277 00:F330: 09            	RTS
+   278                        
+   279                        T_Flash_Table:
+   280 00:F331: 38 F3         	DW		L_Flash_Set0-1		;;R_Set_Flag=0
+   281 00:F333: 3C F3         	DW		L_Flash_Set1-1		;;R_Set_Flag=1
+   282 00:F335: 43 F3         	DW		L_Flash_Set2-1		;;R_Set_Flag=2
+   283 00:F337: 47 F3         	DW		L_Flash_Set3-1		;;R_Set_Flag=3
+   284                        
+   285                        L_Flash_Set0:
+   286 00:F339: 15 5A F4      	JSR		F_ClrCol
+   287 00:F33C: 09            	rts
+   288                        L_Flash_Set1:
+   289 00:F33D: 15 5F F4      	JSR		F_Clr12
+   290 00:F340: 15 6D F4      	JSR		F_Clr34
+   291 00:F343: 09            	rts
+   292                        L_Flash_Set2:
+   293 00:F344: 15 5F F4      	JSR		F_Clr12
+   294 00:F347: 09            	rts
+   295                        L_Flash_Set3:
+   296 00:F348: 15 6D F4      	JSR		F_Clr34
+   297 00:F34B: 09            	rts
+   298                        ; ;=======================================================
+   299                        L_Set_Flag_Prog:
+   300 00:F34C: 73 A1         	LDA		R_Set_Flag
+   301 00:F34E: 04            	CLC
+   302 00:F34F: 18            	ROL
+   303 00:F350: 1B            	TAX
+   304 00:F351: 63 5B F3      	LDA		T_Set_Table+1,X
+   305 00:F354: 0A            	PHA
+   306 00:F355: 63 5A F3      	LDA		T_Set_Table,X
+   307 00:F358: 0A            	PHA
+   308 00:F359: 09            	RTS
+   309                        
+   310                        T_Set_Table:
+   311 00:F35A: 61 F3         	DW		L_Flag_Set0-1		;;R_Set_Flag=0
+   312 00:F35C: 62 F3         	DW		L_Flag_Set1-1		;;R_Set_Flag=1
+   313 00:F35E: 7C F3         	DW		L_Flag_Set2-1		;;R_Set_Flag=2
+   314 00:F360: 95 F3         	DW		L_Flag_Set3-1		;;R_Set_Flag=3
+   315                        
+   316                        L_Flag_Set0:
+   317 00:F362: 09            	RTS
+   318                        L_Flag_Set1:					;;12/24HR
+   319 00:F363: 31 9D 06      	BBR1	R_Key_Flag, L_REALSE_7KEY_12or24Flag  ;;判断bit1=0?  =0：不是5key，跳转
+   320 00:F366: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   321 00:F368: 15 76 F3      	JSR		L_REALSE_12or24Flag
+   322 00:F36B: 09            	RTS
+   323                        L_REALSE_7KEY_12or24Flag:
+   324 00:F36C: 32 9D 06      	BBR2	R_Key_Flag,?RTS  	;;判断bit2=0?  =0：不是7key，跳转
+   325 00:F36F: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
+   326 00:F371: 15 76 F3      	JSR		L_REALSE_12or24Flag
+   327 00:F374: 09            	RTS
+   328                        ?RTS:
+   329 00:F375: 09            	rts
+   330                        
+   331                        L_REALSE_12or24Flag:
+   332 00:F376: 73 9A         	LDA		Sys_Flag_B
+   333 00:F378: 52 20         	EOR		#BIT5
+   334 00:F37A: 7F 9A         	STA		Sys_Flag_B			;;改变bit5位
+   335 00:F37C: 09            	RTS
+   336                        
+   337                        
+   338                        L_Flag_Set2:
+   339 00:F37D: 31 9D 09      	BBR1	R_Key_Flag, L_REALSE_7KEY_HrFlag  ;;判断bit1=0?  =0：不是5key，跳转
+   340 00:F380: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   341 00:F382: 15 59 F5      	JSR		F_HrInc				;;"时"加
+   342 00:F385: 15 DC F5      	JSR		L_Dis_TimeHr
+   343 00:F388: 09            	RTS
+   344                        L_REALSE_7KEY_HrFlag:
+   345 00:F389: 32 9D 09      	BBR2	R_Key_Flag,?RTS  ;;判断bit2=0?  =0：不是7key，跳转
+   346 00:F38C: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
+   347 00:F38E: 15 5F F5      	JSR		F_HrDec				;;"时"减
+   348 00:F391: 15 DC F5      	JSR		L_Dis_TimeHr
+   349 00:F394: 09            	RTS
+   350                        ?RTS:
+   351 00:F395: 09            	rts
+   352                        
+   353                        L_Flag_Set3:
+   354 00:F396: 31 9D 09      	BBR1	R_Key_Flag, L_REALSE_7KEY_MinFlag  ;;判断bit1=0?  =0：不是5key，跳转
+   355 00:F399: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   356 00:F39B: 15 65 F5      	JSR		F_MinInc				;;"分"加
+   357 00:F39E: 15 DC F5      	JSR		L_Dis_TimeHr
+   358 00:F3A1: 09            	RTS
+   359                        L_REALSE_7KEY_MinFlag:
+   360 00:F3A2: 32 9D 09      	BBR2	R_Key_Flag,?RTS	 ;;判断bit2=0?  =0：不是7key，跳转
+   361 00:F3A5: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
+   362 00:F3A7: 15 69 F5      	JSR		F_MinDec				;;"分"减
+   363 00:F3AA: 15 DC F5      	JSR		L_Dis_TimeHr
+   364 00:F3AD: 09            	RTS
+   365                        ?RTS:
+   366 00:F3AE: 09            	rts
+   367                        ; ;=======================================================
+   368                        L_FastAdd_Prog:
+   369 00:F3AF: 28 9B         	SMB0	Sys_Flag_C			;;标记快加
+   370 00:F3B1: 73 A1         	LDA		R_Set_Flag
+   371 00:F3B3: 04            	CLC
+   372 00:F3B4: 18            	ROL
+   373 00:F3B5: 1B            	TAX
+   374 00:F3B6: 63 C0 F3      	LDA		T_FastAdd_Table+1,X
+   375 00:F3B9: 0A            	PHA
+   376 00:F3BA: 63 BF F3      	LDA		T_FastAdd_Table,X
+   377 00:F3BD: 0A            	PHA
+   378 00:F3BE: 09            	RTS
+   379                        
+   380                        T_FastAdd_Table:
+   381 00:F3BF: C6 F3         	DW		L_FastAdd_Set0-1		;;R_Set_Flag=0
+   382 00:F3C1: C7 F3         	DW		L_FastAdd_Set1-1		;;R_Set_Flag=1
+   383 00:F3C3: C8 F3         	DW		L_FastAdd_Set2-1		;;R_Set_Flag=2
+   384 00:F3C5: CF F3         	DW		L_FastAdd_Set3-1		;;R_Set_Flag=3
+   385                        
+   386                        L_FastAdd_Set0:
+   387 00:F3C7: 09            	rts
+   388                        L_FastAdd_Set1:
+   389 00:F3C8: 09            	rts
+   390                        L_FastAdd_Set2:
+   391 00:F3C9: 15 59 F5      	JSR		F_HrInc				;;"时"加
+   392 00:F3CC: 15 DC F5      	JSR		L_Dis_TimeHr
+   393 00:F3CF: 09            	RTS
+   394                        
+   395                        L_FastAdd_Set3:
+   396 00:F3D0: 15 65 F5      	JSR		F_MinInc				;;"分"加
+   397 00:F3D3: 15 FB F4      	JSR		L_Dis_TimeMin
+   398 00:F3D6: 09            	RTS
+   399                        ; ;=======================================================
+   400                        L_FastDec_Prog:
+   401 00:F3D7: 28 9B         	SMB0	Sys_Flag_C		;;标记快减
+   402 00:F3D9: 73 A1         	LDA		R_Set_Flag
+   403 00:F3DB: 04            	CLC
+   404 00:F3DC: 18            	ROL
+   405 00:F3DD: 1B            	TAX
+   406 00:F3DE: 63 E8 F3      	LDA		T_FastDec_Table+1,X
+   407 00:F3E1: 0A            	PHA
+   408 00:F3E2: 63 E7 F3      	LDA		T_FastDec_Table,X
+   409 00:F3E5: 0A            	PHA
+   410 00:F3E6: 09            	RTS
+   411                        
+   412                        T_FastDec_Table:
+   413 00:F3E7: EE F3         	DW		L_FastDec_Set0-1		;;R_Set_Flag=0
+   414 00:F3E9: EF F3         	DW		L_FastDec_Set1-1		;;R_Set_Flag=1
+   415 00:F3EB: F0 F3         	DW		L_FastDec_Set2-1		;;R_Set_Flag=2
+   416 00:F3ED: F7 F3         	DW		L_FastDec_Set3-1		;;R_Set_Flag=3
+   417                        
+   418                        L_FastDec_Set0:
+   419 00:F3EF: 09            	rts
+   420                        L_FastDec_Set1:
+   421 00:F3F0: 09            	rts
+   422                        L_FastDec_Set2:
+   423 00:F3F1: 15 5F F5      	JSR		F_HrDec				;;"时"减
+   424 00:F3F4: 15 DC F5      	JSR		L_Dis_TimeHr
+   425 00:F3F7: 09            	RTS
+   426                        
+   427                        L_FastDec_Set3:
+   428 00:F3F8: 15 69 F5      	JSR		F_MinDec				;;"分"减
+   429 00:F3FB: 15 FB F4      	JSR		L_Dis_TimeMin
+   430 00:F3FE: 09            	RTS
+   431                        
+   432                        ; ;============================================================
+   433                        ;;设置过程中无操作10S，自动保存当前值，并退出设置模式
+   434                        L_Nokey_Save:
+   435 00:F3FF: 73 A2         	LDA		R_No_Key
+   436 00:F401: 56 0A         	CMP		#10
+   437 00:F403: 10 06         	BCC		L_Inc_Nokey_Time
+   438 00:F405: 53 00         	LDA		#0
+   439 00:F407: 7F A1         	STA		R_Set_Flag
+   440 00:F409: 04            	CLC
+   441                        	; JSR		L_Display_Mode0Prog
+   442 00:F40A: 09            	RTS
+   443                        L_Inc_Nokey_Time:
+   444 00:F40B: 73 A2         	LDA		R_No_Key
+   445 00:F40D: 03            	INC
+   446 00:F40E: 7F A2         	STA		R_No_Key
+   447 00:F410: 09            	RTS
+   448                        ;===============================================================
+   449                        ;============================================================
+   450                        Stz_Fast_Hold_Key:
+   451 00:F411: 53 00         	LDA		#0
+   452 00:F413: 7F C1         	STA		R_Fast_Time
+   453 00:F415: 7F C0         	STA		R_KeyHold_Time
+   454 00:F417: 09            	RTS
+   455                        ;============================================================
+   456                        ;===============================================================
+   457                        ; F_KeyUpdateDis:
+   458                        ; 	JSR		F_ClearScreen
+   459                        ; 	; JMP		L_Display_Prog
+   460                        
+   461                        
+   462                        ; L_Beep_Control_Prog:			;控制声音频率
+   463                        ; 	LDA		Sys_Flag_B
+   464                        ; 	AND		#BIT2				;静音状态不发出声音
+   465                        ; 	BNE		L_StzVoice
+   466                        
+   467                        ; 	LDA     Sys_Flag_B
+   468                        ;     AND     #BIT3
+   469                        ;     BEQ     L_Set16HzBIT
+   470                        
+   471                        ; 	LDA		Sys_Flag_B
+   472                        ; 	AND		#BIT3_
+   473                        ; 	STA		Sys_Flag_B
+   474                        
+   475                        
+   476                        
+   477                        ; 	LDA		R_Voice_Unit
+   478                        ; 	BEQ		L_End_OpenBeep
+   479                        ; 	DEC		R_Voice_Unit
+   480                        ; 	BNE		L_ContinueJudge
+   481                        ; 	;JSR		L_LightOff
+   482                        ; 	BRA		L_CloseBeep
+   483                        ; L_ContinueJudge:
+   484                        ; 	LDA		R_Voice_Unit
+   485                        ; 	AND		#BIT0
+   486                        ; 	BEQ		L_JudgeOpenBeep	;L_OpenBeep
+   487                        ; 	BRA		L_CloseBeep
+   488                        ; ;	JSR		L_LightOn
+   489                        ; L_StzVoice:
+   490                        ; 	LDA		#0
+   491                        ; 	STA		R_Voice_Unit
+   492                        ; L_CloseBeep:
+   493                        ; 	PB2_PB2_NMOS
+   494                        ; 	PB3_PB3_NMOS
+   495                        ; 	LDA	 #$FF
+   496                        ; 	STA	 P_PB
+   497                        ; 	PWM_OFF
+   498                        ; 	RTS
+   499                        
+   500                        ; L_JudgeOpenBeep:
+   501                        ; ;	JSR		L_LightOff
+   502                        ; L_OpenBeep:
+   503                        ; 	PB2_PWM
+   504                        ;     LDA	 #$FF
+   505                        ; 	STA	 P_PB
+   506                        ; 	PB3_PWM
+   507                        ; 	PWM_ON
+   508                        
+   509                        ; ?3Key:
+   510                        ;     TONE_4KHZ_3_4_Duty
+   511                        ; 	;TONE_2KHZ_3_4_Duty
+   512                        ; 	;PWM_ON
+   513                        ; 	RTS
+   514                        ; L_End_OpenBeep:
+   515                        ; 	RTS
+   516                        
+   517                        ; L_Set16HzBIT:
+   518                        ; 	LDA		Sys_Flag_B
+   519                        ; 	ORA		#BIT3
+   520                        ; 	STA		Sys_Flag_B
+   521                        ; 	RTS
+   522                        ;;--------------------------------------------------------------
+   523                        ;;==============================================================
+   524                        ;;==============================================================
+   525                        ; F_KeyIoPCInputLow:
+   526                        ; 	LDA		PCDIR_TEMP
+   527                        ; 	AND		#00000000B
+   528                        ; 	STA		PCDIR_TEMP
+   529                        ; 	STA		PCDIR
+   530                        ; 	LDA		PC_TEMP
+   531                        ; 	AND		#00000000B
+   532                        ; 	STA		PC_TEMP
+   533                        ; 	STA		PC
+   534                        ; 	NOP
+   535                        ; 	LDA		PCDIR_TEMP
+   536                        ; 	ORA		#00111111B
+   537                        ; 	STA		PCDIR_TEMP
+   538                        ; 	STA		PCDIR
+   539                        ; 	LDA		PC_TEMP
+   540                        ; 	ORA		#00111111B
+   541                        ; 	STA		PC_TEMP
+   542                        ; 	STA		PC
+   543                        ; 	RTS
+   544                        
+   545                        ; F_KeyIoPCOutputLow:
+   546                        ; 	LDA		PCDIR_TEMP
+   547                        ; 	AND		#00000000B
+   548                        ; 	STA		PCDIR_TEMP
+   549                        ; 	STA		PCDIR
+   550                        ; 	LDA		PC_TEMP
+   551                        ; 	AND		#00000000B
+   552                        ; 	STA		PC_TEMP
+   553                        ; 	STA		PC
+   554                        ; 	RTS
+   555                        
+   556                        
+   557                        ; F_KeyIoPAOutputLow:
+   558                        ; 	LDA		PADIR_TEMP
+   559                        ; 	AND		#11111011B
+   560                        ; 	STA		PADIR_TEMP
+   561                        ; 	STA		PADIR
+   562                        ; 	LDA		PA_TEMP
+   563                        ; 	ORA		#00000100B
+   564                        ; 	STA		PA_TEMP
+   565                        ; 	STA		PA
+   566                        ; 	RTS
+   567                        
+   568                        F_KeyIoPAInputHigh:
+   569 00:F418: 73 CD         	LDA		PADIR_TEMP
+   570 00:F41A: 50 A4         	ORA		#10100100B
+   571 00:F41C: 7F CD         	STA		PADIR_TEMP
+   572 00:F41E: 7F 04         	STA		PADIR
+   573 00:F420: 73 CE         	LDA		PA_TEMP
+   574 00:F422: 51 5B         	AND		#01011011B
+   575 00:F424: 7F CE         	STA		PA_TEMP
+   576 00:F426: 7F 01         	STA		PA
+   577 00:F428: 09            	RTS
+   578                        
+   579                        
+   580                        ;;===========================
+   581                        L_ScanKey_Delay_Prog:		;等待功能，循环
+   582 00:F429: 53 F0         	LDA		#$F0
+   583 00:F42B: 7F C4         	STA		P_Temp
+   584                        L_Loop_ScanKey_Delay:
+   585 00:F42D: 78 C4         	INC		P_Temp
+   586 00:F42F: 12 FC         	BNE		L_Loop_ScanKey_Delay
+   587 00:F431: 09            	RTS
+   588                        ;;===========================
+   589                        
+   590                        ;;==========================
+   591                        
+   592                        ;===========================
+   593                        
+   594                        ;=================================================
+   595                        ; Judge_Stw_Ending_Voice:
+   596                        ;     LDA     Sys_Flag_B
+   597                        ;     AND     #BIT4
+   598                        ;     BNE     Judge_Stw_Ending_Voice_AlRun
+   599                        
+   600                        ; 	LDA		R_Key_Flag
+   601                        ; 	AND		#BIT7
+   602                        ; 	BNE		Skip_Then
+   603                        
+   604                        ; 	BRA		Judge_Stw_Ending_Voice_End
+   605                        
+   606                        ; Judge_Stw_Ending_Voice_AlRun:
+   607                        ; 	LDA     Sys_Flag_B
+   608                        ;     AND     #BIT4_
+   609                        ; 	STA		Sys_Flag_B
+   610                        
+   611                        ; 	LDA		#0
+   612                        ; 	STA		R_Beep_Time
+   613                        ; ;	JSR		Judge_F_AlarmBeepControl
+   614                        ; 	LDA		R_KeyValue
+   615                        ; 	CMP		#D_Key4
+   616                        ; 	BNE		Skip_Then
+   617                        
+   618                        ; 	LDA		Sys_Flag_B
+   619                        ; 	ORA		#BIT1
+   620                        ; 	STA		Sys_Flag_B
+   621                        
+   622                        
+   623                        ; ;	JSR		Judge_Alarm_Spl
+   624                        
+   625                        ; 	JSR		F_DisZZ
+   626                        
+   627                        ;     BRA     Skip_Then
+   628                        ; Skip_Then:
+   629                        ; 	LDA     R_Key_Flag
+   630                        ;     ORA     #BIT7
+   631                        ;     STA     R_Key_Flag
+   632                        
+   633                        ;     SEC
+   634                        ;     RTS
+   635                        ; Judge_Stw_Ending_Voice_End:
+   636                        ;     CLC
+   637                        ;     RTS
+   638                        ; ;===============
+   639                        ; Judge_NoVoice:
+   640                        ; 	LDA		Sys_Flag_B
+   641                        ; 	AND		#BIT2
+   642                        ; 	BEQ		Judge_NoVoice_End
+   643                        ; 	JSR		F_DisMute
+   644                        ; 	RTS
+   645                        ; Judge_NoVoice_End:
+   646                        ; 	JSR		F_ClrMute
+   647                        ; 	RTS
+   647                        
+   132                        ; .include    Key\KeyNumb.asm
+   133                        ; .include    Key\KeyLock.asm
+   134                        ; .include    Key\KeyShort.asm
+   135                        ; .include    Key\KeyLong.asm
+   136                        
+   137                        .include    Half_S.asm
+     1                        ;=======================================================
+     2                        L_2Hz_Prog:
+     3 00:F432: 73 99         	LDA		Sys_Flag_A
+     4 00:F434: 51 01         	AND		#BIT0
+     5 00:F436: 13 11         	BEQ		L_End_2Hz_Prog
+     6                        
+     7                        
+     8 00:F438: 73 99         	LDA		Sys_Flag_A
+     9 00:F43A: 51 FE         	AND		#~BIT0		;清半秒标志
+    10 00:F43C: 52 02         	EOR		#BIT1
+    11 00:F43E: 7F 99         	STA		Sys_Flag_A
+    12                        
+    13                        	;JSR		Judge_Alarm_T1_Flash
+    14                        	;JSR		Judge_Stw_TimeKeeping
+    15                        	;JSR		Judge_Stw_Forward
+    16                        
+    17 00:F440: 73 99         	LDA		Sys_Flag_A
+    18 00:F442: 51 02         	AND		#BIT1
+    19 00:F444: 13 04         	BEQ		L_1Hz_Prog
+    20                        
+    21 00:F446: 15 20 F3      	JSR		L_1Hz_Flash_Prog
+    22                        L_End_2Hz_Prog:
+    23 00:F449: 09            	RTS
+    24                        ;========================================================
+    25                        
+    26                        L_1Hz_Prog:
+    27 00:F44A: 15 49 F5      	JSR		F_Update_Time_Prog
+    28 00:F44D: 15 FF F3      	JSR		L_Nokey_Save		;;10S无操作保存退出设置
+    29 00:F450: 15 00 F3      	JSR		L_Display_Mode0Prog
+    30                        
+    31                        L_1Hz_Prog_End:
+    32 00:F453: 09            	RTS
+    33                        
+    34                        ; ;======================================================
+    35                        ; L_1Hz_Prog_Num:
+    36                        ; 	JSR		F_Update_Time_Prog
+    37                        
+    38                        ; 	JSR		Judge_F_AlarmBeepControl	;闹钟声音
+    39                        ; 	JSR		F_StwBeepControl
+    40                        
+    41                        ; 	JSR		L_Mode_Prog
+    42                        ; L_Skip_Update_Time_Prog:
+    43                        ; 	RTS
+    44                        ; ;========================================================
+    45                        
+    46                        ; Judge_Lock_Num:
+    47                        ; 	LDA		R_Mode
+    48                        ; 	CMP		#D_Time_Mode
+    49                        ; 	BNE		Judge_Lock_Num_End
+    50                        
+    51                        ; 	LDA		Sys_Flag_A
+    52                        ; 	AND		#BIT6
+    53                        ; 	BNE		Judge_Lock_Num_End
+    54                        
+    55                        ; 	LDA		R_Num
+    56                        ; 	DEC
+    57                        ; 	STA		R_Num
+    58                        ; 	BNE		Judge_Lock_Num_End
+    59                        
+    60                        ; 	LDA		Sys_Flag_A
+    61                        ; 	ORA		#BIT6
+    62                        ; 	STA		Sys_Flag_A
+    63                        ; Judge_Lock_Num_End:
+    64                        ; 	RTS
+    65                        
+    65                        
+   138                        .include    Display.asm
+     1                        ;===========================================================
+     2                         ;;;;;;;;;;;;;;;;;;;;Display Program;;;;;;;;;;;;;;;;;;;;;;;;
+     3                        ;===========================================================
+     4                        ; To_Timer:
+     5                        ; 	JSR		L_Dis_Time
+     6                        ; 	BRA		L_End_Mode_Prog
+     7                        ; To_Stw:
+     8                        ; 	JSR		L_Dis_Stw_Mode
+     9                        ; 	BRA		L_End_Mode_Prog
+    10                        ; To_AL:
+    11                        ; 	JSR		L_Dis_Al_Mode
+    12                        ; 	BRA		L_End_Mode_Prog
+    13                        
+    14                        
+    15                        
+    16                        ;lcd_alarm
+    17                        ; L_Mode_Prog:
+    18                        ; 	LDA		R_Mode
+    19                        ; 	JSR		Judge_Alarm_Start
+    20                        ; 	JSR		Judge_NoVoice
+    21                        
+    22                        ; 	JSR		Judge_Alarm_T1_Flash
+    23                        
+    24                        ; 	LDA		R_Mode
+    25                        ; 	CMP		#D_Time_Mode
+    26                        ; 	BEQ		To_Timer
+    27                        ; 	CMP		#D_Stw_Mode
+    28                        ; 	BEQ		To_Stw
+    29                        ; 	CMP		#D_Al_Mode
+    30                        ; 	BEQ		To_AL
+    31                        
+    32                        
+    33                        L_End_Mode_Prog:
+    34 00:F454: 09            	RTS
+    35                        
+    36                        
+    37                        ; L_Display_Prog:
+    38                        ; 	JMP		L_Mode_Prog
+    39                        
+    40                        ;========================================
+    41                        
+    42                        F_DisCol:
+    43 00:F455: 5E 1C         	LDX		#lcd_col
+    44 00:F457: 16 58 F1      	JMP		F_DispSymbol	;显示 两点
+    45                        F_ClrCol:
+    46 00:F45A: 5E 1C         	LDX		#lcd_col
+    47 00:F45C: 16 5F F1      	JMP		F_ClrpSymbol
+    48                        
+    49                        F_Clr12:
+    50 00:F45F: 53 0A         	LDA		#0AH
+    51 00:F461: 5E 00         	LDX		#lcd_d1
+    52 00:F463: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    53 00:F466: 53 0A         	LDA		#0AH
+    54 00:F468: 5E 07         	LDX		#lcd_d2
+    55 00:F46A: 16 14 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+    56                        
+    57                        F_Clr34:
+    58 00:F46D: 53 0A         	LDA		#0AH
+    59 00:F46F: 5E 0E         	LDX		#lcd_d3
+    60 00:F471: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    61 00:F474: 53 0A         	LDA		#0AH
+    62 00:F476: 5E 15         	LDX		#lcd_d4
+    63 00:F478: 16 14 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+    64                        
+    65                        F_DisAm:
+    66 00:F47B: 5E 1D         	LDX		#lcd_am
+    67 00:F47D: 16 58 F1      	JMP		F_DispSymbol	;显示AM
+    68                        F_ClrAm:
+    69 00:F480: 5E 1D         	LDX		#lcd_am
+    70 00:F482: 16 5F F1      	JMP		F_ClrpSymbol
+    71                        
+    72                        
+    73                        F_DisPM:
+    74 00:F485: 5E 1E         	LDX		#lcd_pm
+    75 00:F487: 16 58 F1      	JMP		F_DispSymbol	;显示PM
+    76                        F_ClrPm:
+    77 00:F48A: 5E 1E         	LDX		#lcd_pm
+    78 00:F48C: 16 5F F1      	JMP		F_ClrpSymbol
+    79                        
+    80                        F_DisMs:
+    81 00:F48F: 5E 1F         	LDX		#lcd_ms
+    82 00:F491: 16 58 F1      	JMP		F_DispSymbol	;显示MS
+    83                        ; F_DisClock:
+    84                        ; 	LDX		#lcd_clock
+    85                        ; 	JMP		F_DispSymbol	;显示时钟图标
+    86                        
+    87                        ; F_DisMute:
+    88                        ; 	LDX		#lcd_mute
+    89                        ; 	JMP		F_DispSymbol	;显示 静音 图标
+    90                        
+    91                        ; F_DisTime_end:
+    92                        ; 	LDX		#lcd_time_end
+    93                        ; 	JMP		F_DispSymbol	;显示时间到图标
+    94                        
+    95                        ; F_DisTimekeeping:
+    96                        ; 	LDX		#lcd_timekeeping
+    97                        ; 	JMP		F_DispSymbol	;显示计时图标
+    98                        
+    99                        ; F_DisStwOne:
+   100                        ; 	LDX		#lcd_StwOne
+   101                        ; 	JMP		F_DispSymbol
+   102                        
+   103                        ; F_DisStwTwo:
+   104                        ; 	LDX		#lcd_StwTwo
+   105                        ; 	JMP		F_DispSymbol
+   106                        
+   107                        ; F_DisZZ:
+   108                        ; 	LDX		#lcd_ZZ
+   109                        ; 	JMP		F_DispSymbol
+   110                        
+   111                        ; F_DisForward:
+   112                        ; 	LDX		#lcd_forward
+   113                        ; 	JMP		F_DispSymbol	;显示 正 图标
+   114                        
+   115                        ; F_DisT1:
+   116                        ; 	LDX		#lcd_T1
+   117                        ; 	JMP		F_DispSymbol	;显示时间到图标
+   118                        ; ;=========================================
+   119                        ; F_ClrClock:
+   120                        ; 	LDX		#lcd_clock
+   121                        ; 	JMP		F_ClrpSymbol	;清除时钟图标
+   122                        
+   123                        ; F_ClrMute:
+   124                        ; 	LDX		#lcd_mute
+   125                        ; 	JMP		F_ClrpSymbol	;清除 静音 图标
+   126                        
+   127                        ; F_ClrTime_end:
+   128                        ; 	LDX		#lcd_time_end
+   129                        ; 	JMP		F_ClrpSymbol	;清除时间到图标
+   130                        
+   131                        ; F_ClrTimekeeping:
+   132                        ; 	LDX		#lcd_timekeeping
+   133                        ; 	JMP		F_ClrpSymbol	;清除计时图标
+   134                        
+   135                        ; F_ClrStwOne:
+   136                        ; 	LDX		#lcd_StwOne
+   137                        ; 	JMP		F_ClrpSymbol
+   138                        
+   139                        ; F_ClrStwTwo:
+   140                        ; 	LDX		#lcd_StwTwo
+   141                        ; 	JMP		F_ClrpSymbol
+   142                        
+   143                        ; F_ClrZZ:
+   144                        ; 	LDX		#lcd_ZZ
+   145                        ; 	JMP		F_ClrpSymbol
+   146                        
+   147                        ; F_ClrForward:
+   148                        ; 	LDX		#lcd_forward
+   149                        ; 	JMP		F_ClrpSymbol	;清除 正 图标
+   150                        
+   151                        ; F_ClrT1:
+   152                        ; 	LDX		#lcd_T1
+   153                        ; 	JMP		F_ClrpSymbol	;显示时间到图标
+   154                        ;==========================================
+   155                        ;L_Judge_ClrAllDis:
+   156                        ;	LDA		R_Bop
+   157                        ;	BEQ		L_5Alarm_ClrAllDis
+   158                        ;	CMP		#D_Num
+   159                        ;	BEQ		L_Numtimer_ClrAllDis
+   160                        ;	CMP		#D_Timer5
+   161                        ;	BCC		L_4Timer_ClrAllDis
+   162                        ;	LDX		#lcd_alarm
+   163                        ;	JSR		F_ClrpSymbol
+   164                        
+   165                        ;	LDX		#lcd_motor
+   166                        ;	JSR		F_ClrpSymbol
+   167                        ;	RTS
+   168                        
+   169                        ;L_5Alarm_ClrAllDis:
+   170                        ;	LDX		#lcd_t1_t
+   171                        ;	JSR		F_ClrpSymbol
+   172                        ;	LDX		#lcd_t2_t
+   173                        ;	JSR		F_ClrpSymbol
+   174                        ;	LDX		#lcd_t3_t
+   175                        ;	JSR		F_ClrpSymbol
+   176                        ;	LDX		#lcd_t4_t
+   177                        ;	JSR		F_ClrpSymbol
+   178                        ;	LDX		#lcd_t5_t
+   179                        ;	JSR		F_ClrpSymbol
+   180                        ;	LDX		#lcd_timer
+   181                        ;	JSR		F_ClrpSymbol
+   182                        ;	LDX		#lcd_up
+   183                        ;	JSR		F_ClrpSymbol
+   184                        ;	LDX		#lcd_down
+   185                        ;	JMP		F_ClrpSymbol
+   186                        
+   187                        ;L_4Timer_ClrAllDis:
+   188                        ;	LDX		#lcd_motor
+   189                        ;	JSR		F_ClrpSymbol
+   190                        
+   191                        ;	LDX		#lcd_alarm
+   192                        ;	JSR		F_ClrpSymbol
+   193                        ;	LDX		#lcd_t5_t
+   194                        ;	JSR		F_ClrpSymbol
+   195                        ;	LDX		#lcd_t5_5
+   196                        ;	JSR		F_ClrpSymbol
+   197                        ;	LDX		#lcd_al5
+   198                        ;	JMP		F_ClrpSymbol
+   199                        
+   200                        L_Numtimer_ClrAllDis:
+   201 00:F494: 53 00         	LDA		#0
+   202 00:F496: 4F 01 02      	STA		0201H
+   203 00:F499: 4F 02 02      	STA		0202H
+   204 00:F49C: 4F 09 02      	STA		0209H
+   205 00:F49F: 53 80         	LDA		#$80
+   206 00:F4A1: 4F 03 02      	STA		0203H
+   207 00:F4A4: 53 FE         	LDA		#$FE
+   208 00:F4A6: 4F 0A 02      	STA		020AH
+   209 00:F4A9: 4F 12 02      	STA		0212H
+   210 00:F4AC: 09            	RTS
+   211                        ;==========================================
+   212                        L_Dis_Digit_AlHr:
+   213                        L_Dis_Digit_TimeHr:
+   214                        L_Dis_Digit_TimeMonth:
+   215                        L_Dis_Digit_TimerHr:
+   216                        L_Dis_Digit12:
+   217 00:F4AD: 5E 00         	LDX		#lcd_d1
+   218 00:F4AF: 0A            	PHA
+   219 00:F4B0: 15 77 F1      	JSR		L_ROR_4Bit_Prog
+   220                        	; TAX
+   221                        	; LDA		Lcd_1_table,X
+   222 00:F4B3: 5E 00         	LDX		#lcd_d1
+   223 00:F4B5: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+   224 00:F4B8: 5E 07         	LDX		#lcd_d2
+   225 00:F4BA: 0C            	PLA
+   226                        
+   227 00:F4BB: 51 0F         	AND		#$0F
+   228 00:F4BD: 16 14 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+   229                        	;BRA		F_Dis_2Digit
+   230                        ;=====================================================
+   231                        ;=====================================================
+   232                        L_Dis_Digit_AlMin:
+   233                        L_Dis_Digit_TimeMin:
+   234                        L_Dis_Digit_TimeDay:
+   235                        L_Dis_Digit_TimerMin:
+   236                        L_Dis_Digit34:
+   237 00:F4C0: 5E 0E         	LDX		#lcd_d3
+   238 00:F4C2: 17 00         	BRA		F_Dis_2Digit
+   239                        ;===============================================
+   240                        L_Dis_Digit_AlSec:
+   241                        L_Dis_Digit_TimeSec:
+   242                        L_Dis_Digit_TimerSec:
+   243                        L_Dis_Digit56:
+   244                        ; 	LDX		#lcd_d5
+   245                        ; ;	BRA		F_Dis_2Digit
+   246                        F_Dis_2Digit:
+   247 00:F4C4: 0A            	PHA
+   248 00:F4C5: 15 77 F1      	JSR		L_ROR_4Bit_Prog
+   249 00:F4C8: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+   250 00:F4CB: 7E C5         	LDX		P_Temp+1
+   251 00:F4CD: 0C            	PLA
+   252 00:F4CE: 51 0F         	AND		#$0F
+   253 00:F4D0: 16 14 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+   254                        ;===========================================================
+   255                         ;;;;;;;;;;;;;;;;;;;;Flash Program;;;;;;;;;;;;;;;;;;;;;;;;
+   256                        ;===========================================================
+   257                        ;F_1Hz_Flash_Prog:
+   258                        ;	LDA		R_Bop
+   259                        ;	BEQ		L_1Hz_Flash_5Alarm
+   260                        ;	CMP		#D_Num
+   261                        ;	BEQ		L_1Hz_Flash_Num
+   262                        ;L_1Hz_Flash_45Timer:
+   263                        ;	JMP		L_Flash_Prog_5Timer
+   264                        ;L_1Hz_Flash_5Alarm:
+   265                        ;	JMP		L_Flash_Prog_5Alarm
+   266                        ;L_1Hz_Flash_Num:
+   267                        ;	JMP		L_Flash_Prog_Number
+   268                        
+   269                        L_Flash_Digit3:
+   270 00:F4D3: 5E 0E         	LDX		#lcd_d3
+   271                        L_Flash_Digit:
+   272 00:F4D5: 53 0A         	LDA		#$0A
+   273 00:F4D7: 16 14 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+   274                        L_Flash_Digit4:
+   275 00:F4DA: 5E 15         	LDX		#lcd_d4
+   276 00:F4DC: 17 F7         	BRA		L_Flash_Digit
+   277                        ; L_Flash_Digit5:
+   278                        ; 	LDX		#lcd_d5
+   279                        ; 	BRA		L_Flash_Digit
+   280                        ; L_Flash_Digit6:
+   281                        ; 	LDX		#lcd_d6
+   282                        ; 	BRA		L_Flash_Digit
+   283                        
+   284                        L_Flash_Digit12:
+   285 00:F4DE: 53 AA         	LDA		#$AA
+   286 00:F4E0: 16 AD F4      	JMP		L_Dis_Digit12
+   287                        L_Flash_Digit34:
+   288 00:F4E3: 53 AA         	LDA		#$AA
+   289 00:F4E5: 16 C0 F4      	JMP		L_Dis_Digit34
+   290                        L_Flash_Digit56:
+   291 00:F4E8: 53 AA         	LDA		#$AA
+   292 00:F4EA: 16 C4 F4      	JMP		L_Dis_Digit56
+   293                        
+   294                        L_Flash_Digit23:
+   295 00:F4ED: 53 AA         	LDA		#$AA
+   296 00:F4EF: 5E 07         	LDX		#lcd_d2
+   297 00:F4F1: 16 C4 F4      	JMP		F_Dis_2Digit
+   298                        ;============================================================
+   299                        ;============================================================
+   300                        Lcd_1_table:
+   301 00:F4F4: 00            	.BYTE 	00h	;0
+   302 00:F4F5: 06            	.BYTE	06h	;1
+   303 00:F4F6: 03            	.BYTE	03h	;2
+   304                        
+   305                        
+   306                        
+   307                        
+   308                        ;============================================================
+   308                        
+   139                        .include    Time\Dis_number.asm
+     1                        L_DisCol_Prog:
+     2 00:F4F7: 15 55 F4      	JSR		F_DisCol
+     3 00:F4FA: 09            	RTS
+     4                        
+     5                        L_Dis_TimeMin:
+     6 00:F4FB: 73 A6         	LDA		R_Time_Min
+     7 00:F4FD: 15 C0 F4      	JSR		L_Dis_Digit34
+     8 00:F500: 09            	RTS
+     9                        
+    10                        
+    11                        L_Key5_DisHR:
+    12 00:F501: 15 5A F4      	JSR		F_ClrCol
+    13 00:F504: 15 80 F4      	JSR		F_ClrAm
+    14 00:F507: 15 8A F4      	JSR		F_ClrPm
+    15 00:F50A: 3D 9A 1F      	BBS5	Sys_Flag_B,L_Key5_Dis12HR
+    16 00:F50D: 17 00         	BRA		L_Key5_Dis24HR
+    17                        
+    18                        
+    19                        
+    20                        L_Key5_Dis24HR:
+    21 00:F50F: 53 02         	LDA		#2
+    22 00:F511: 5E 00         	LDX		#lcd_d1
+    23 00:F513: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    24 00:F516: 53 04         	LDA		#4
+    25 00:F518: 5E 07         	LDX		#lcd_d2
+    26 00:F51A: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    27 00:F51D: 53 76         	LDA		#76H
+    28 00:F51F: 5E 0E         	LDX		#lcd_d3
+    29 00:F521: 15 1C F1      	JSR		F_DispPro
+    30 00:F524: 53 50         	LDA		#50H
+    31 00:F526: 5E 15         	LDX		#lcd_d4
+    32 00:F528: 15 1C F1      	JSR		F_DispPro
+    33 00:F52B: 09            	RTS
+    34                        
+    35                        L_Key5_Dis12HR:
+    36 00:F52C: 53 01         	LDA		#1
+    37 00:F52E: 5E 00         	LDX		#lcd_d1
+    38 00:F530: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    39 00:F533: 53 02         	LDA		#2
+    40 00:F535: 5E 07         	LDX		#lcd_d2
+    41 00:F537: 15 14 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    42 00:F53A: 53 76         	LDA		#76H
+    43 00:F53C: 5E 0E         	LDX		#lcd_d3
+    44 00:F53E: 15 1C F1      	JSR		F_DispPro
+    45 00:F541: 53 50         	LDA		#50H
+    46 00:F543: 5E 15         	LDX		#lcd_d4
+    47 00:F545: 15 1C F1      	JSR		F_DispPro
+    48 00:F548: 09            	RTS
+    49                        
+    50                        
+    50                        
+   140                        .include    Time\Time.asm
+     1                        ;=====================================================
+     2                        ; ;=====================================================
+     3                        F_Update_Time_Prog:
+     4 00:F549: 15 6F F5      	JSR		F_SecInc
+     5 00:F54C: 10 0A         	BCC		L_End_Update_Time_Prog
+     6 00:F54E: 15 65 F5      	JSR		F_MinInc
+     7 00:F551: 10 05         	BCC		L_End_Update_Time_Prog
+     8 00:F553: 15 59 F5      	JSR		F_HrInc
+     9 00:F556: 10 00         	BCC		L_End_Update_Time_Prog
+    10                        
+    11                        L_End_Update_Time_Prog:
+    12                        	; JMP		L_CMP_Alarm_Prog
+    13 00:F558: 09            	RTS
+    14                        
+    15                        
+    16                        ;====================================================
+    17                        ;----------------------------------------------------
+    18                        F_HrInc:
+    19 00:F559: 5E 02         	LDX		#(R_Time_Hr-Time_str_Addr)
+    20                        L_Inc_0_To_23_Prog:
+    21                        L_Inc_To_24:
+    22 00:F55B: 53 23         	LDA		#$23
+    23 00:F55D: 17 14         	BRA		L_Inc_0_To_Any_Count_Prog
+    24                        
+    25                        F_HrDec:
+    26 00:F55F: 5E 02         	LDX		#(R_Time_Hr-Time_str_Addr)
+    27 00:F561: 53 23         	LDA		#$23
+    28 00:F563: 17 30         	BRA		L_Dec_To_0_Prog
+    29                        
+    30                        ; F_AlHrInc:	;注意范围
+    31                        ; 	LDX		#(R_Al_Hr-Time_str_Addr)
+    32                        ; 	LDA		#$23
+    33                        ; 	; JMP		L_Inc_0_To_Any_Count_Prog
+    34                        ; 	BRA		L_Inc_0_To_23_Prog
+    35                        
+    36                        ;----------------------------------------------------
+    37                        F_MinInc:
+    38 00:F565: 5E 00         	LDX		#(R_Time_Min-Time_str_Addr)
+    39 00:F567: 17 08         	BRA		L_Inc_0_To_59_Prog
+    40                        
+    41                        F_MinDec:
+    42 00:F569: 5E 00         	LDX		#(R_Time_Min-Time_str_Addr)
+    43 00:F56B: 53 59         	LDA		#$59
+    44 00:F56D: 17 26         	BRA		L_Dec_To_0_Prog
+    45                        
+    46                        ; F_MinSplDec:
+    47                        ; 	LDX		#(R_Al_Min_Spl-Time_str_Addr)
+    48                        ; 	LDA		#10
+    49                        ; 	BRA		L_Dec_To_0_Prog
+    50                        
+    51                        ; F_SecSplDec:
+    52                        ; 	LDX		#(R_Al_Sec_Spl-Time_str_Addr)
+    53                        ; 	BRA		L_Dec_To_60_Prog
+    54                        
+    55                        
+    56                        ; F_AlMinInc:
+    57                        ; 	LDX		#(R_Al_Min-Time_str_Addr)
+    58                        ; 	BRA		L_Inc_0_To_59_Prog
+    59                        ; F_AlInc:
+    60                        ; 	LDX		#(R_Al_Sec-Time_str_Addr)
+    61                        ; 	BRA		L_Inc_0_To_59_Prog
+    62                        
+    63                        F_SecInc:
+    64 00:F56F: 5E 01         	LDX 	#(R_Time_Sec-Time_str_Addr)
+    65                        L_Inc_0_To_59_Prog:
+    66                        L_Inc_To_60:
+    67 00:F571: 53 59         	LDA		#$59
+    68                        L_Inc_0_To_Any_Count_Prog:
+    69 00:F573: 7F C5         	STA		P_Temp+1	;最大值
+    70 00:F575: 53 00         	LDA		#$00
+    71                        L_Inc_Any_To_Any_Count_Prog:
+    72 00:F577: 7F C4         	STA		P_Temp		;最小值
+    73 00:F579: 63 26 18      	LDA		Time_Addr,X	;P_Temp+1
+    74 00:F57C: 76 C5         	CMP		P_Temp+1	;Time_Addr,X
+    75 00:F57E: 11 0C         	BCS		L_Inc_Over
+    76 00:F580: 04            	CLC
+    77 00:F581: 02            	SED
+    78 00:F582: 63 26 18      	LDA		Time_Addr,X
+    79 00:F585: 54 01         	ADC		#1
+    80 00:F587: 6F 26 18      	STA		Time_Addr,X
+    81 00:F58A: 06            	CLD
+    82 00:F58B: 09            	RTS
+    83                        L_Inc_Over:
+    84 00:F58C: 73 C4         	LDA		P_Temp
+    85 00:F58E: 6F 26 18      	STA		Time_Addr,X
+    86 00:F591: 00            	SEC
+    87 00:F592: 09            	RTS
+    88                        ;=====================================================
+    89                        L_Dec_To_60_Prog:
+    90 00:F593: 53 59         	LDA		#$59
+    91                        L_Dec_To_0_Prog:
+    92 00:F595: 7F C4         	STA		P_Temp
+    93 00:F597: 53 00         	LDA		#0
+    94                        L_Dec_To_Anycount_Prog:
+    95 00:F599: 00            	SEC
+    96 00:F59A: 65 26 18          SBC     Time_Addr,X
+    97 00:F59D: 13 0F         	BEQ		L_Dec_Over_Prog
+    98 00:F59F: 11 0D         	BCS		L_Dec_Over_Prog
+    99                        
+   100 00:F5A1: 00            	SEC
+   101 00:F5A2: 02            	SED
+   102 00:F5A3: 63 26 18      	LDA		Time_Addr,X
+   103 00:F5A6: 55 01         	SBC		#1
+   104 00:F5A8: 6F 26 18      	STA		Time_Addr,X
+   105 00:F5AB: 06            	CLD
+   106 00:F5AC: 00            	SEC
+   107 00:F5AD: 09            	RTS
+   108                        L_Dec_Over_Prog:
+   109 00:F5AE: 73 C4         	LDA		P_Temp
+   110 00:F5B0: 6F 26 18      	STA		Time_Addr,X
+   111 00:F5B3: 04            	CLC
+   112 00:F5B4: 09            	RTS
+   113                        ;=====================================================
+   114                        R_CtwInc_Sec:
+   115 00:F5B5: 5E 04         	LDX		#(R_Stw_Sec-Time_str_Addr)
+   116 00:F5B7: 1C            	TXA
+   117 00:F5B8: 04            	CLC
+   118 00:F5B9: 74 C8         	ADC		P_Temp+4
+   119 00:F5BB: 1B            	TAX
+   120 00:F5BC: 17 B3         	BRA		L_Inc_To_60
+   121                        
+   122                        R_CtwInc_Min:
+   123 00:F5BE: 5E 06         	LDX		#(R_Stw_Min-Time_str_Addr)
+   124 00:F5C0: 1C            	TXA
+   125 00:F5C1: 04            	CLC
+   126 00:F5C2: 74 C8         	ADC		P_Temp+4
+   127 00:F5C4: 1B            	TAX
+   128 00:F5C5: 17 AA         	BRA		L_Inc_To_60
+   129                        
+   130                        ; F_StwHrInc:
+   131                        ; 	LDX		#(R_Stw_Hr-Time_str_Addr)
+   132                        ; 	TXA
+   133                        ; 	CLC
+   134                        ; 	ADC		P_Temp+4
+   135                        ; 	TAX
+   136                        ; 	LDA		#$23
+   137                        ; 	BRA		L_Inc_0_To_Any_Count_Prog
+   138                        ;-------------------------------------------------
+   139                        
+   140                        R_CtwDec_Sec:
+   141 00:F5C7: 5E 04         	LDX		#(R_Stw_Sec-Time_str_Addr)
+   142 00:F5C9: 1C            	TXA
+   143 00:F5CA: 04            	CLC
+   144 00:F5CB: 74 C8         	ADC		P_Temp+4
+   145 00:F5CD: 1B            	TAX
+   146 00:F5CE: 17 C3         	BRA		L_Dec_To_60_Prog
+   147                        
+   148                        R_CtwDec_Min:
+   149 00:F5D0: 5E 06         	LDX		#(R_Stw_Min-Time_str_Addr)
+   150 00:F5D2: 1C            	TXA
+   151 00:F5D3: 04            	CLC
+   152 00:F5D4: 74 C8         	ADC		P_Temp+4
+   153 00:F5D6: 1B            	TAX
+   154 00:F5D7: 17 BA         	BRA		L_Dec_To_60_Prog
+   155                        
+   156                        ; F_StwHrDec:
+   157                        ; 	LDX		#(R_Stw_Hr-Time_str_Addr)
+   158                        ; 	TXA
+   159                        ; 	CLC
+   160                        ; 	ADC		P_Temp+4
+   161                        ; 	TAX
+   162                        ; 	LDA		#$99
+   163                        ; 	BRA		L_Dec_To_0_Prog
+   164                        
+   165                        ;-------------------------------------------------
+   166                        
+   167                        ; F_KeyIncSec:
+   168                        ; 	JSR		F_SecInc
+   169                        ; 	JSR		L_Dis_Time ;L_Dis_TimeSec
+   170                        ; 	RTS
+   171                        
+   172                        ; F_KeyIncMin:
+   173                        ; 	JSR		F_MinInc
+   174                        ; 	JMP		L_Dis_Time ;L_Dis_TimeMin
+   175                        ; F_KeyIncHr:
+   176                        ; 	JSR		F_HrInc
+   177                        ; 	LDA		R_Time_Hr
+   178                        ; 	BNE		L_Exit_KeyIncHr
+   179                        ; 	LDA		Sys_Flag_B
+   180                        ; 	EOR		#BIT5
+   181                        ; 	STA		Sys_Flag_B	;12hr/24hr
+   182                        ; L_Exit_KeyIncHr:
+   183                        ; 	JMP		L_Dis_Time ;L_Dis_TimeHr
+   183                        
+   141                        .include    Time\Dis_time.asm
+     1                        ;==========================================
+     2                        L_Dis_Time_Mode:
+     3                        ;T_DisTimeSetTable:
+     4                        ;	.word	L_Dis_TimeOrDate-1
+     5                        ;	.word	L_Dis_Time-1
+     6                        ;	.word	L_Dis_Time-1
+     7                        ;	.word	L_Dis_Time-1
+     8                        ;	.word	L_Dis_Date-1
+     9                        ;	.word	L_Dis_Date-1
+    10                        ;	.word	L_Dis_Date-1
+    11                        
+    12                        
+    13                        L_Dis_Time:
+    14 00:F5D9: 15 55 F4      	JSR		F_DisCol
+    15                        L_Dis_TimeHr:
+    16 00:F5DC: 73 A8         	LDA		R_Time_Hr
+    17 00:F5DE: 16 E1 F5      	JMP		L_Dis_Hr_Common
+    18                        
+    19                        L_Dis_Hr_Common:
+    20 00:F5E1: 7F C8         	STA		P_Temp+4
+    21 00:F5E3: 73 9A         	LDA		Sys_Flag_B
+    22 00:F5E5: 51 20         	AND		#BIT5
+    23 00:F5E7: 13 2B         	BEQ		L_Dis_TimeHr_24
+    24 00:F5E9: 00            	SEC
+    25 00:F5EA: 02            	SED
+    26 00:F5EB: 73 C8         	LDA		P_Temp+4
+    27 00:F5ED: 55 12         	SBC		#$12
+    28 00:F5EF: 06            	CLD
+    29 00:F5F0: 10 0E         	BCC		L_Dis_Hour_12AM
+    30 00:F5F2: 7F C8         	STA		P_Temp+4
+    31 00:F5F4: 5E 1D         	LDX		#lcd_am
+    32 00:F5F6: 15 5F F1      	JSR		F_ClrpSymbol
+    33 00:F5F9: 5E 1E         	LDX		#lcd_pm
+    34 00:F5FB: 15 58 F1      	JSR		F_DispSymbol
+    35 00:F5FE: 17 0A         	BRA		L_TimeHr_0To12
+    36                        L_Dis_Hour_12AM:
+    37 00:F600: 5E 1D         	LDX		#lcd_am
+    38 00:F602: 15 58 F1      	JSR		F_DispSymbol
+    39 00:F605: 5E 1E         	LDX		#lcd_pm
+    40 00:F607: 15 5F F1      	JSR		F_ClrpSymbol
+    41                        L_TimeHr_0To12:
+    42 00:F60A: 73 C8         	LDA		P_Temp+4
+    43 00:F60C: 12 10         	BNE		L_Dis_HourDate_Prog
+    44 00:F60E: 53 12         	LDA		#$12
+    45 00:F610: 7F C8         	STA		P_Temp+4
+    46 00:F612: 17 0A         	BRA		L_Dis_HourDate_Prog
+    47                        L_Dis_TimeHr_24:
+    48 00:F614: 5E 1D         	LDX		#lcd_am
+    49 00:F616: 15 5F F1      	JSR		F_ClrpSymbol
+    50 00:F619: 5E 1E         	LDX		#lcd_pm
+    51 00:F61B: 15 5F F1      	JSR		F_ClrpSymbol
+    52                        L_Dis_HourDate_Prog:
+    53 00:F61E: 15 28 F6      	JSR		L_HighBitDealWith
+    54 00:F621: 5E 00         	LDX		#lcd_d1
+    55 00:F623: 73 C8         	LDA		P_Temp+4
+    56 00:F625: 16 AD F4      	JMP		L_Dis_Digit12
+    57                        
+    58                        L_HighBitDealWith:
+    59 00:F628: 73 C8         	LDA		P_Temp+4
+    60 00:F62A: 51 F0         	AND		#$F0
+    61 00:F62C: 12 06         	BNE		L_Exit_HighBitDealWith
+    62                        
+    63 00:F62E: 73 C8         	LDA		P_Temp+4
+    64 00:F630: 50 A0         	ORA		#$A0
+    65 00:F632: 7F C8         	STA		P_Temp+4
+    66                        L_Exit_HighBitDealWith:
+    67 00:F634: 09            	RTS
+    68                        ; ;=====================================================
+    69                        ;L_TimeHrDealwith:
+    70                        ;	lda		R_Time_Hr
+    71                        ;	beq		Load12
+    72                        ;	cmp		#$12
+    73                        ;	beq		L_End_TimeHrDealwith
+    74                        ;	bcc		L_End_TimeHrDealwith
+    75                        ;	sec
+    76                        ;	sed
+    77                        ;	sbc		#$12
+    78                        ;	CLD
+    79                        ;	rts
+    80                        ;Load12:
+    81                        ;	lda		#$12
+    82                        ;L_End_TimeHrDealwith:
+    83                        ;	rts
+    84                        ; ;=====================================================
+    85                        ; ;L_Dis_TimeOrDate:
+    86                        ; ;	LDA		Sys_Flag_B
+    87                        ; ;	AND		#BIT1
+    88                        ; ;	BEQ		L_Dis_Time
+    89                        ; ;;=====================================================
+    90                        ; ;L_Dis_Date:
+    91                        ; ;	LDX		#lcd_date
+    92                        ; ;	JSR		F_DispSymbol
+    93                        ; ;
+    94                        ; ;	JSR		L_Dis_TimeDay
+    95                        ; ;	JMP		L_Dis_TimeMonth
+    96                        ; ;=====================================================
+    97                        ; L_Dis_TimeSec:
+    98                        ; 	LDA		R_Time_Sec
+    99                        ; 	JMP		L_Dis_Digit_TimeSec
+   100                        
+   101                        ; L_Dis_TimeMin:
+   102                        ; 	LDA		R_Time_Min
+   103                        ; 	JMP		L_Dis_Digit_TimeMin
+   104                        ;
+   105                        ;L_Dis_TimeDay:
+   106                        ;	LDA		R_Day
+   107                        ;	PHA
+   108                        ;	AND		#$F0
+   109                        ;	BNE		L_Skip_Dis_TimeDay
+   110                        ;;	LDA		R_Day
+   111                        ;	PLA
+   112                        ;	ORA		#$A0
+   113                        ;	JMP		L_Dis_Digit_TimeDay
+   114                        ;L_Skip_Dis_TimeDay:
+   115                        ;;	LDA		R_Day
+   116                        ;	PLA
+   117                        ;	JMP		L_Dis_Digit_TimeDay
+   118                        ;
+   119                        ;L_Dis_TimeMonth:
+   120                        ;	LDA		R_Month
+   121                        ;	JMP		L_Dis_Digit_TimeMonth
+   122                        
+   123                        ;L_Dis_TimeYear:
+   124                        ;	LDA		R_Year
+   125                        ;	JMP		L_Dis_Digit_TimeYear
+   126                        ;===============================================
+   127                        ;F_JudgeDisWeek:
+   128                        ;;	LDA		R_Mode
+   129                        ;;	BNE		F_DisAllWeek
+   130                        ;;	LDA		R_Set
+   131                        ;;	BEQ		F_DisWeek
+   132                        ;;	CMP		#4
+   133                        ;;	BCC		F_DisAllWeek
+   134                        ;F_DisWeek:
+   135                        ;	LDX		R_Week
+   136                        ;	LDA		TabWeek,X
+   137                        ;L_DisWeek_Com:
+   138                        ;	LDX		#lcd_Week
+   139                        ;	JMP		F_DispPro
+   140                        ;TabWeek:
+   141                        ;	.BYTE	$01,$02,$04,$08,$10,$20,$40,$01
+   142                        ;
+   143                        ;;F_DisAllWeek:
+   144                        ;;	LDA		#$7F
+   145                        ;;	LDX		#lcd_Week
+   146                        ;;	JMP		F_DispPro
+   147                        ;
+   148                        ;L_FlashWeek:
+   149                        ;	LDA		#$00
+   150                        ;	BRA		L_DisWeek_Com
+   151                        ;===============================================
+   151                        
+   142                        ; .include    stw\Stw.asm
+   143                        ; .include    stw\Dis_stw.asm
+   144                        ; .include    Day_Ctw\Dayctw.asm
+   145                        ; .include    Day_Ctw\Dis_Day.asm
+   146                        ; .include    Alarm\Al.asm
+   147                        ; .include    Alarm\Dis_al.asm
+   148                        ; .include    Test\Test.asm
+   149                        ;.include    Time\Tool.asm
+   150                        
+   151                        
+   152                        ;--------------------------------------------------------
+   153                        ; ISR
+   154                        ;--------------------------------------------------------
+   155                        V_IRQ:
+   156 00:F635: 0A                PHA
+   157 00:F636: 1C                TXA
+   158 00:F637: 0A                PHA
+   159 00:F638: 73 0E             LDA     P_IER
+   160 00:F63A: 71 0F             AND     P_IFR
+   161 00:F63C: 7F 98             STA     R_Int_Backup
+   162                        ;   AND     #$01
+   163                        ;   BNE     L_Div_IRQ_Prog
+   164                        ;   LDA     R_Int_Backup
+   165                        ;   AND     #$02
+   166                        ;   BNE     L_Timer0_IRQ_Prog
+   167                        ;   LDA     R_Int_Backup
+   168 00:F63E: 51 04             AND     #$04
+   169 00:F640: 12 19             BNE     L_Timer1_IRQ_Prog
+   170 00:F642: 73 98             LDA     R_Int_Backup
+   171 00:F644: 51 10             AND     #$10
+   172 00:F646: 12 1E             BNE     L_PA_IRQ_Prog
+   173 00:F648: 73 98             LDA     R_Int_Backup
+   174 00:F64A: 51 40             AND     #$40
+   175 00:F64C: 12 21             BNE     L_LCD_IRQ_Prog
+   176 00:F64E: 16 77 F6          JMP     L_End_IRQ_Prog
+   177                        L_Div_IRQ_Prog:
+   178 00:F651: 20 0F             RMB0    P_IFR
+   179 00:F653: 16 77 F6          JMP     L_End_IRQ_Prog
+   180                        
+   181                        L_Timer0_IRQ_Prog:
+   182 00:F656: 21 0F             RMB1    P_IFR
+   183 00:F658: 16 77 F6          JMP     L_End_IRQ_Prog
+   184                        
+   185                        L_Timer1_IRQ_Prog:
+   186 00:F65B: 22 0F             RMB2    P_IFR
+   187                        ;   SMB0    Sys_Flag_A      ;Half Second Flag
+   188                        
+   189 00:F65D: 73 99             LDA     Sys_Flag_A
+   190 00:F65F: 50 01             ORA     #BIT0               ;2hz
+   191 00:F661: 7F 99             STA     Sys_Flag_A
+   192 00:F663: 16 77 F6          JMP     L_End_IRQ_Prog
+   193                        
+   194                        L_PA_IRQ_Prog:
+   195 00:F666: 24 0F             RMB4    P_IFR           ;���PA�жϱ�־
+   196                            DIS_PA_IRQ              ;��PA�ж�ʹ��
++  196 00:F668: 24 0E          RMB4 P_IER
+   197                            EN_LCD_IRQ              ;��32HZ�ж�ʹ��
++  197 00:F66A: 2E 0E          SMB6 P_IER
+   198 00:F66C: 16 77 F6          JMP     L_End_IRQ_Prog
+   199                        
+   200                        L_LCD_IRQ_Prog:
+   201 00:F66F: 26 0F             RMB6    P_IFR           ;���LCD�жϱ�־
+   202                        ;   SMB2    Sys_Flag_A      ;����LCD init flag
+   203 00:F671: 73 99             LDA     Sys_Flag_A
+   204 00:F673: 50 04             ORA     #BIT2
+   205 00:F675: 7F 99             STA     Sys_Flag_A      ;32HZ
+   206                        L_End_IRQ_Prog:
+   207 00:F677: 3A 0F E1          BBS2    P_IFR,L_Timer1_IRQ_Prog
+   208 00:F67A: 0C                PLA
+   209 00:F67B: 1B                TAX
+   210 00:F67C: 0C                PLA
+   211 00:F67D: 08                RTI
+   212                        ;--------------------------------------------------------
+   213                        ; Interrupt vector
+   214                        ;--------------------------------------------------------
+   215 00:F67E: 1A 1A 1A 1A       .BLKB   $FFD5-$,$1A
+   215 00:F67E: 1A 1A 1A 1A   
+   215 00:F67E: 1A 1A 1A 1A   
+   216                            .ORG    0FFD5H
+   217 00:FFD5: 16 00 F0          JMP     V_RESET
+   218 00:FFD8: FF FF FF FF       .BLKB   $FFFF-$,$FF
+   218 00:FFD8: FF FF FF FF   
+   218 00:FFD8: FF FF FF FF   
+   219                            .ORG    0FFF8H
+   220 00:FFF8: B7                DB      10110111B      ;;bit7=1 bit6=0  bit3=0
+   221                            ; DB      10111111B   ;bit6=1:PB23 CMOS L;BIT0=1 Unprotected
+   222                        
+   223                        
+   224                            .ORG    0FFFCH
+   225 00:FFFC: 00 F0             DW      V_RESET
+   226 00:FFFE: 35 F6             DW      V_IRQ
+   227                            .ENDS
+   228                             END
+
+ --------------------
+      Warnings:0
+      Errors  :0

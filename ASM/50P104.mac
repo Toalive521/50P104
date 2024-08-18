@@ -1,0 +1,539 @@
+;------------------------------------
+PB2_PB2_CMOS MACRO
+        RMB0    P_PADF0
+        SMB2    P_PBTYPE ;COMS		
+        ENDM
+PB2_PB2_NMOS MACRO
+        RMB0    P_PADF0
+        RMB2    P_PBTYPE ;NOMS
+        ENDM	
+PB2_PWM MACRO
+        SMB0    P_PADF0
+        SMB2    P_PBTYPE ;COMS
+        ENDM
+			
+PB3_PB3_CMOS MACRO
+        RMB1    P_PADF0
+        SMB3    P_PBTYPE ;CMOS
+        ENDM
+PB3_PB3_NMOS MACRO
+        RMB1    P_PADF0
+        RMB3    P_PBTYPE ;CMOS
+        ENDM		
+PB3_PWM MACRO
+        SMB1    P_PADF0
+        SMB3    P_PBTYPE ;CMOS
+        ENDM
+
+PC67_PC67       MACRO
+        RMB5    P_PCSEG
+        RMB4    P_DIVC
+        ENDM
+PC67_EL01       MACRO
+        RMB5    P_PCSEG
+        SMB4    P_DIVC
+        ENDM
+PC67_SEG	MACRO
+        SMB5    P_PCSEG
+        ENDM
+
+PC45_PC45       MACRO
+        RMB4    P_PCSEG
+        ENDM		
+PC45_SEG       MACRO
+        SMB4    P_PCSEG
+        ENDM
+		
+PC0_PC0       MACRO
+        RMB0    P_PCSEG	
+        ENDM
+PC03_PC03       MACRO
+        RMB0    P_PCSEG
+        RMB1    P_PCSEG
+        RMB2    P_PCSEG		
+        RMB3    P_PCSEG		
+        ENDM		
+PC0_SEG       MACRO
+        SMB0    P_PCSEG		
+        ENDM	
+PC13_SEG       MACRO
+        SMB1    P_PCSEG
+        SMB2    P_PCSEG		
+        SMB3    P_PCSEG
+		RMB3	P_LCDCTRL
+        ENDM	
+			
+PD03_SEG	MACRO		
+		SMB6	P_PCSEG
+        ENDM
+PD03_RFC	MACRO		
+		RMB6	P_PCSEG	
+		RMB0	P_PDSEG		
+		RMB1	P_PDSEG		
+		RMB2	P_PDSEG		
+		RMB3	P_PDSEG
+		SMB0	P_RFCC0		
+		SMB1	P_RFCC0		
+		SMB2	P_RFCC0		
+		SMB3	P_RFCC0		
+        ENDM
+PD03_PD03	MACRO		
+		RMB6	P_PCSEG
+		RMB0	P_PDSEG		
+		RMB1	P_PDSEG		
+		RMB2	P_PDSEG		
+		RMB3	P_PDSEG		
+		RMB0	P_RFCC0		
+		RMB1	P_RFCC0		
+		RMB2	P_RFCC0		
+		RMB3	P_RFCC0		
+        ENDM
+PD0_SEG	MACRO		
+		SMB0	P_PDSEG			
+        ENDM		
+PD1_SEG	MACRO		
+		SMB1	P_PDSEG			
+        ENDM
+PD2_SEG	MACRO			
+		SMB2	P_PDSEG			
+        ENDM
+PD3_SEG	MACRO			
+		SMB3	P_PDSEG			
+        ENDM		
+		
+PD47_SEG	MACRO
+		SMB7	P_PCSEG
+        ENDM	
+PD4_RFC	MACRO		
+		RMB7	P_PCSEG	
+		RMB4	P_PDSEG		
+		SMB4	P_RFCC0				
+        ENDM
+PD4_PD4	MACRO		
+		RMB7	P_PCSEG	
+		RMB4	P_PDSEG		
+		RMB4	P_RFCC0			
+        ENDM		
+PD47_PD47	MACRO		
+		RMB7	P_PCSEG	
+		RMB4	P_PDSEG		
+		RMB5	P_PDSEG		
+		RMB6	P_PDSEG		
+		RMB7	P_PDSEG
+		RMB4	P_RFCC0				
+        ENDM
+PD57_PD57	MACRO		
+		RMB7	P_PCSEG	
+		RMB5	P_PDSEG		
+		RMB6	P_PDSEG		
+		RMB7	P_PDSEG		
+        ENDM			
+PD4_SEG	MACRO			
+		SMB4	P_PDSEG			
+        ENDM		
+PD5_SEG	MACRO			
+		SMB5	P_PDSEG			
+        ENDM
+PD5_PD5	MACRO			
+		RMB7	P_PCSEG
+		RMB5	P_PDSEG		
+        ENDM		
+PD6_SEG	MACRO		
+		SMB6	P_PDSEG			
+        ENDM
+PD6_PD6	MACRO			
+		RMB7	P_PCSEG
+		RMB6	P_PDSEG		
+        ENDM		
+PD7_SEG	MACRO		
+		SMB7	P_PDSEG			
+        ENDM
+PD7_PD7	MACRO			
+		RMB7	P_PCSEG
+		RMB7	P_PDSEG
+        ENDM		
+		
+PC_PD_SEG	MACRO		
+		LDA		#$FF
+		STA		P_PCSEG	;S1~S7,S8~S15			
+        ENDM
+				
+LCD_3COM	MACRO		
+		RMB0	P_LCDCOM
+		RMB1	P_LCDCOM				
+        ENDM		
+LCD_4COM	MACRO		
+		SMB0	P_LCDCOM
+		RMB1	P_LCDCOM				
+        ENDM		
+LCD_5COM	MACRO		
+		RMB0	P_LCDCOM
+		SMB1	P_LCDCOM				
+        ENDM		
+LCD_6COM	MACRO		
+		SMB0	P_LCDCOM
+		SMB1	P_LCDCOM			
+        ENDM
+		
+LCD_ENCH_EN		MACRO		
+		SMB6	P_LCDCOM			
+        ENDM
+LCD_ENCH_DIS	MACRO		
+		RMB6	P_LCDCOM			
+        ENDM
+		
+LCD_DRIVE_2	MACRO		
+		SMB0	P_LCDCTRL
+		RMB1	P_LCDCTRL	
+        ENDM
+LCD_DRIVE_4	MACRO		
+		RMB0	P_LCDCTRL
+		SMB1	P_LCDCTRL	
+        ENDM
+LCD_DRIVE_8	MACRO		
+		SMB0	P_LCDCTRL
+		SMB1	P_LCDCTRL	
+        ENDM
+LCD_DRIVE_FULL	MACRO		
+		RMB0	P_LCDCTRL
+		RMB1	P_LCDCTRL	
+        ENDM
+		
+LCD_1_2_BAIS_3V	MACRO	
+		RMB2	P_LCDCTRL
+		RMB3	P_LCDCTRL	
+        ENDM
+LCD_1_3_BAIS_4V	MACRO	
+		SMB2	P_LCDCTRL
+		RMB3	P_LCDCTRL
+        ENDM		
+LCD_1_3_BAIS_3V	MACRO	
+		SMB3	P_LCDCTRL
+        ENDM
+LCDS_2	MACRO	
+		RMB5	P_LCDCOM
+        ENDM
+LCDS_1	MACRO	
+		SMB5	P_LCDCOM
+        ENDM		
+;------------------------------------
+Fext_WEAK       MACRO
+        RMB0    P_SYSCLK
+        ENDM
+Fext_STRONG     MACRO
+        SMB0    P_SYSCLK
+        ENDM
+
+Fext_OFF        MACRO
+        RMB1    P_SYSCLK
+        ENDM
+Fext_ON         MACRO
+        SMB1    P_SYSCLK
+        ENDM
+
+Fosc_OFF        MACRO
+        RMB2    P_SYSCLK
+        ENDM
+Fosc_ON         MACRO
+        SMB2    P_SYSCLK
+        ENDM
+
+Fext_Xtal       MACRO
+        RMB3    P_SYSCLK
+        ENDM
+Fext_RC         MACRO
+        SMB3    P_SYSCLK
+        ENDM
+
+Fsys_Fosc_1 MACRO
+        RMB4    P_SYSCLK
+        ENDM
+Fsys_Fosc_2 MACRO
+        SMB4    P_SYSCLK
+        ENDM
+
+Fcpu_Fext  MACRO
+        SMB7    P_SYSCLK
+        ENDM
+Fcpu_Fsys  MACRO
+        RMB7    P_SYSCLK
+        ENDM
+;------------------------------------
+DIV_8KHZ  MACRO
+        RMB0    P_DIVC
+        RMB1    P_DIVC
+		RMB5	P_DIVC		
+        ENDM
+DIV_16KHZ  MACRO
+        SMB0    P_DIVC
+        RMB1    P_DIVC
+		RMB5	P_DIVC		
+        ENDM
+DIV_512HZ  MACRO
+        RMB0    P_DIVC
+        SMB1    P_DIVC
+		RMB5	P_DIVC		
+        ENDM
+DIV_1KHZ  MACRO
+        SMB0    P_DIVC
+        SMB1    P_DIVC
+		RMB5	P_DIVC		
+        ENDM
+DIV_256HZ  MACRO
+		SMB5	P_DIVC		
+        ENDM		
+;------------------------------------
+WDTC_CLK_256HZ   MACRO
+        RMB0    P_WDTC
+        RMB1    P_WDTC
+        ENDM
+WDTC_CLK_DIV     MACRO
+        SMB0    P_WDTC
+        RMB1    P_WDTC
+        ENDM
+WDTC_CLK_TMR1   MACRO
+        RMB0    P_WDTC
+        SMB1    P_WDTC
+        ENDM
+WDTC_CLK_LCDS    MACRO
+        SMB0    P_WDTC
+        SMB1    P_WDTC
+        ENDM
+
+WDTC_CLR MACRO
+        RMB2    P_WDTC
+        ENDM
+
+WDTC_ON  MACRO
+        SMB3    P_WDTC
+        ENDM
+WDTC_OFF MACRO
+        RMB3    P_WDTC
+        ENDM
+
+IF_WDTC MACRO   LAB
+        BBS4    P_WDTC,LAB
+        ENDM
+
+;------------------------------------
+TMR0_ON MACRO
+        SMB0    P_TMRC
+        ENDM
+TMR0_OFF MACRO
+        RMB0    P_TMRC
+        ENDM
+TMR0_CLK_FOSC   MACRO
+        SMB0    P_TMCLK
+        RMB1    P_TMCLK
+        ENDM
+TMR0_CLK_FSUB    MACRO
+        RMB0    P_TMCLK
+        RMB1    P_TMCLK
+        RMB0	P_PADF1
+        ENDM
+TMR0_CLK_128K	macro
+		RMB0    P_TMCLK
+        SMB1    P_TMCLK
+        ENDM
+TMR0_CLK_32K	macro
+		RMB0    P_TMCLK
+        RMB1    P_TMCLK
+        SMB0	P_PADF1
+        ENDM    
+TMR0_CLK_FOSC_4   MACRO
+        SMB0    P_TMCLK
+        SMB1    P_TMCLK
+        RMB6	P_TMRC       
+        ENDM
+
+TMR1_ON MACRO
+        SMB1    P_TMRC
+        ENDM
+TMR1_OFF MACRO
+        RMB1    P_TMRC
+        ENDM			
+TMR1_CLK_TMR0   MACRO
+        RMB2    P_TMCLK
+        RMB3    P_TMCLK
+        ENDM
+TMR1_CLK_512Hz    MACRO
+        SMB2    P_TMCLK
+        RMB3    P_TMCLK
+        ENDM
+TMR1_CLK_128K	macro
+		RMB2    P_TMCLK
+        SMB3    P_TMCLK
+        ENDM
+TMR1_CLK_FOSC_4		macro
+		SMB2    P_TMCLK
+        SMB3    P_TMCLK
+        ENDM			
+		
+TMR2_ON MACRO
+        SMB2    P_TMRC
+        ENDM
+TMR2_OFF MACRO
+        RMB2    P_TMRC
+        ENDM
+TMR2_CLK_512Hz MACRO
+        RMB2    P_TMRC
+        ENDM
+		
+
+TONE_2KHZ_1_2_Duty     MACRO
+        RMB2    P_DIVC
+        RMB3    P_DIVC
+        RMB7    P_DIVC		
+        ENDM
+TONE_TMR0_2_1_2_Duty      MACRO
+        SMB2    P_DIVC
+        RMB3    P_DIVC
+        RMB7    P_DIVC	
+        ENDM
+TONE_L       MACRO
+        RMB2    P_DIVC
+        SMB3    P_DIVC
+        ENDM
+TONE_H       MACRO
+        SMB2    P_DIVC
+        SMB3    P_DIVC
+        ENDM
+TONE_2KHZ_3_4_Duty     MACRO
+        RMB2    P_DIVC
+        RMB3    P_DIVC
+        SMB7    P_DIVC		
+        ENDM
+TONE_4KHZ_3_4_Duty      MACRO
+        SMB2    P_DIVC
+        RMB3    P_DIVC
+        SMB7    P_DIVC
+        ENDM		
+;------------------------------------
+EN_DIV_IRQ     MACRO
+        SMB0    P_IER
+        ENDM
+EN_TMR0_IRQ     MACRO
+        SMB1    P_IER
+        ENDM
+EN_TMR1_IRQ     MACRO
+        SMB2    P_IER
+        ENDM		
+EN_TMR2_IRQ     MACRO
+        SMB3    P_IER
+        ENDM
+EN_KEY_IRQ      MACRO
+        SMB4    P_IER
+        ENDM
+EN_PA_IRQ      MACRO
+        SMB4    P_IER
+        ENDM		
+EN_LCD_IRQ      MACRO
+        SMB6    P_IER
+        ENDM
+
+DIS_DIV_IRQ     MACRO
+        RMB0    P_IER
+        ENDM
+DIS_TMR0_IRQ     MACRO
+        RMB1    P_IER
+        ENDM
+DIS_TMR1_IRQ     MACRO
+        RMB2    P_IER
+        ENDM		
+DIS_TMR2_IRQ     MACRO
+        RMB3    P_IER
+        ENDM
+DIS_KEY_IRQ      MACRO
+        RMB4    P_IER
+        ENDM
+DIS_PA_IRQ		 MACRO
+        RMB4    P_IER
+        ENDM		
+DIS_LCD_IRQ      MACRO
+        RMB6    P_IER
+        ENDM
+
+CLR_DIV_IRQ_FLAG MACRO
+        RMB0    P_IFR
+        ENDM
+CLR_TMR0_IRQ_FLAG      MACRO
+        RMB1    P_IFR
+        ENDM
+CLR_TMR1_IRQ_FLAG      MACRO
+        RMB2    P_IFR
+        ENDM		
+CLR_TMR2_IRQ_FLAG      MACRO
+        RMB3    P_IFR
+        ENDM
+CLR_KEY_IRQ_FLAG      MACRO
+        RMB4    P_IFR
+        ENDM
+CLR_PA_IRQ_FLAG      MACRO
+        RMB4    P_IFR
+        ENDM		
+CLR_LCD_IRQ_FLAG       MACRO
+        RMB6    P_IFR
+        ENDM
+
+IF_DIV_IRQ_FLAG MACRO   LAB1
+        BBS0    P_IFR,LAB1
+        ENDM
+IF_TMR0_IRQ_FLAG MACRO   LAB1
+        BBS1    P_IFR,LAB1
+        ENDM
+IF_TMR1_IRQ_FLAG MACRO   LAB1
+        BBS2    P_IFR,LAB1
+        ENDM		
+IF_TMR2_IRQ_FLAG MACRO   LAB1
+        BBS3    P_IFR,LAB1
+        ENDM
+IF_KEY_IRQ_FLAG MACRO   LAB1
+        BBS4    P_IFR,LAB1
+        ENDM
+IF_LCD_IRQ_FLAG MACRO   LAB1
+        BBS6    P_IFR,LAB1
+        ENDM
+;------------------------------------
+LCD_ON           MACRO
+        SMB4    P_TMRC
+        ENDM
+LCD_OFF          MACRO
+        RMB4    P_TMRC
+        ENDM
+
+PWM_ON  MACRO
+		SMB0	P_SYSCLK	;Strong Mode	
+        SMB7    P_TMRC
+        ENDM
+PWM_OFF MACRO
+        RMB7    P_TMRC
+;		LDA		R_Strong_2S
+;		BNE		?Skip
+		RMB0	P_SYSCLK	;WeakMode
+?Skip:		
+        ENDM	
+		
+IF_PWM_ON       MACRO   LAB
+        BBS7    P_TMRC,LAB
+        ENDM
+IF_PWM_OFF      MACRO   LAB
+        BBR7    P_TMRC,LAB
+        ENDM
+
+SEL_PWM MACRO
+        SMB1    P_AUDCR
+        ENDM
+SEL_TONE MACRO
+        RMB1    P_AUDCR	
+        ENDM	
+;------------------------------------
+ClrAllRam MACRO
+    LDA		#$00
+	LDX		#$FF
+	STA		$1800	
+?ClrAllRamLoop:
+	STA		$1800,X
+	DEX
+	BNE		?ClrAllRamLoop
+    ENDM
+;------------------------------------

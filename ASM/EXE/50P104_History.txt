@@ -1,0 +1,36 @@
+50P104 history
+
+/// 1.00 第一版						    2020/12/11
+/// 2.00 add S40 S41					2022/10/31
+///      modify IO report 
+/// 2.01 Xtal speed fix at 32768        2022/11/04
+/// 2.02 fix Fcpu select Xtal 時間計算錯誤問題  2022/11/10
+/// 2.03 fix pa7 無產生中斷問題               2022/11/11
+/// 2.04 a.加入 WDT reset 模擬, 加入 WDT overflow 會跳出警告窗, 並停止執行		    2022/12/01
+///      b. POR random seed 設定 
+/// 2.05 a.fix PB can't work														2022/12/02
+///      b. 鬼鍵偵測
+///      c. POR 時. 如固訂 Random seed 使用用固定的seed, 相反. 設定一個random seed. 並且記憶此seed   
+///  206 CLRWDT bit (1Ch.2) alway read 1                                               2022/12/08
+///  207 a.fix timer count 的準確度.														2023/06/14
+///  208 fix WDT 記算準確度										2023/06/21 
+
+
+GUI history
+
+/// 2.01 a. 鬼鍵偵測                                                                                 2022/12/26
+///      b. Font color 自訂義
+///      c. cycle info report windows 修改
+///      d. CTRL-R 快速key 同時清除 cycle count 時間及 cycle info
+///      f. POR 時. 如固訂 Random seed 使用用固定的seed, 相反. 設定一個random seed. 並且記憶此seed
+///      g. WDT sim button
+///      h. WDT overflow reset 提出警告
+/// 2.02 跟別的app 透過WinMessage 溝通功能    2022/02/07
+///      需要 PortET.dll 1.1.0.3 版 
+/// 2.03 修正 segment 切換 ENDS 的處理       2022/02/13
+///      減少list file view 更新閃爍問題
+///      win10 IO report 使用 Edge(Chromium) 核心顯示
+///      win7  使用舊IE 核心顯示
+/// 2.04 a. 修改 break point 設定方法        2022/03/09
+///      b. IO report 可自選顯示項目 
+/// 2.05 LCD 上面顯示的silder 訂義的位置可不用由小到大訂義. 需搭配LCDSegCom2.dll  1.0.0.11 版     2023/06/21
