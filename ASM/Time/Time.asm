@@ -13,10 +13,15 @@ L_End_Update_Time_Prog:
 	RTS
 ;====================================================
 F_Update_STW_Prog:
+	BBS3	Sys_Flag_B,L_End_MAX_CTW_Prog		;判断是否到结束
 	BBR1	Sys_Flag_B,L_End_Update_STW_Prog
 	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog
+	;倒计时逻辑
 
 
+	BRA		L_End_Update_STW_Prog
+L_End_MAX_CTW_Prog: 
+	RMB1	Sys_Flag_B
 L_End_Update_STW_Prog:
 	; JMP		L_CMP_Alarm_Prog
 	RTS
@@ -28,6 +33,7 @@ L_Update_STW_FORW_Prog:
 	JSR		R_CtwInc_Min
 	BCC		L_Update_STW_FORW_End_Prog
 L_Update_STW_FORW_End_Prog:
+	;对比正计时最大值逻辑
 	RTS
 ;====================================================
 ;----------------------------------------------------

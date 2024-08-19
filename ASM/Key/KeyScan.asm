@@ -6,6 +6,7 @@ D_Key3S		.EQU  30*3
 D_Key2		.EQU  %00000100
 D_Key5		.EQU  %00100000
 D_Key7		.EQU  %10000000
+D_Key57		.EQU  %10100000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 L_32Hz_Prog:	
@@ -59,8 +60,23 @@ L_KeyLine1_:
 	CMP		#D_Key7
 	BEQ		L_Key7_Enter
 
+	CMP		#D_Key57
+	BEQ		L_Key57_Enter
 	JMP		L_ManyKey
-
+;============================================================
+L_Key57_Enter:
+	BBR0	Sys_Flag_B,L_Key57_Enter_RTS
+	BBS4	Sys_Flag_A,L_Key57_Enter_RTS
+	SMB4	Sys_Flag_A
+	
+	LDA		#0
+	STA		R_Stw_Sec
+	STA		R_Stw_Min
+	RMB2	Sys_Flag_B
+	RMB1	Sys_Flag_B	
+	JMP		L_Display_Mode0Prog
+L_Key57_Enter_RTS:
+	RTS
 ;============================================================
 L_Key2_Enter:
 	BBS4	Sys_Flag_A,?RTS		;;判断Sys_Flag_A的bit4=1？ 不为1，则往下执行；为1 说明按键已经按下，直接跳转
@@ -149,6 +165,7 @@ L_Key7_Enter_End:
 	STA		R_Fast_Time	
 	JSR		L_FastDec_Prog
 	RTS
+
 ;============================================================
 L_Inc_Fast_Time:
 	CLC
@@ -199,7 +216,6 @@ L_End_Null_Key_Prog:
 	RTS
 ;============================================================
 L_REALSE_2KEY:
-
 	BBR0	R_Key_Flag, L_REALSE_2KEY_RTS  ;;判断bit0=0?  =0：不是2key，跳转
 	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
 
