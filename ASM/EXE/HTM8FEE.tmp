@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=big5">
 <meta name="GENERATOR" content="Microsoft FrontPage 6.0">
 <meta name="ProgId" content="FrontPage.Editor.Document">
-<title>ET50P104</title>
+<title>$HtmlTitle$</title>
 <style type="text/css">
 <!--
 table { font-size: 8pt;text-align:center}
@@ -14,7 +14,7 @@ table { font-size: 8pt;text-align:center}
 </style>
 </head>
 <body  >
-
+$Title$$Date$$Version$$ProgramCount$
 <table border="1" width="100%" style="border-collapse: collapse" bordercolor="#000000" cellspacing="0">
   <tr>
     <td width="10%" rowspan="2" align="center">Main Clock</td>     
@@ -29,13 +29,13 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" id="ww"></td>
   </tr>
   <tr>
-    <td width="10%" align="center" >0 (OFF)</td>
-    <td width="10%" align="center" >560K Hz</td>
-    <td width="10%" align="center" >280K Hz (/2)</td>
-    <td width="10%" align="center" >35K Hz (Fext)</td>
-    <td width="10%" align="center" >Normal</td>
-    <td width="10%" align="center" >80h (560K Hz)</td>
-    <td width="10%" align="center" >560K Hz</td>
+    <td width="10%" align="center" >$foscON$</td>
+    <td width="10%" align="center" >$fosc$</td>
+    <td width="10%" align="center" >$fsys$</td>
+    <td width="10%" align="center" >$fcpu$</td>
+    <td width="10%" align="center" >$halt$</td>
+    <td width="10%" align="center" >$MCB$</td>
+    <td width="10%" align="center" >$MainORG$</td>
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
@@ -51,12 +51,12 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center" >1 (ON)</td>
-    <td width="10%" align="center" >BR35K (--)</td>
-    <td width="10%" align="center" >Strong</td>
-    <td width="10%" align="center" >35K Hz (Fext)</td>
-    <td width="10%" align="center" >8h (35K Hz)</td>
-    <td width="10%" align="center" >35K Hz</td>
+    <td width="10%" align="center" >$fextOn$</td>
+    <td width="10%" align="center" >$fextType$</td>
+    <td width="10%" align="center" >$fextws$</td>
+    <td width="10%" align="center" >$fsubSelect$</td>
+    <td width="10%" align="center" >$SCB$</td>
+    <td width="10%" align="center" >$SubORG$</td>
 
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
@@ -74,10 +74,10 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" ></td>
   </tr>
   <tr>
-    <td width="10%">0 (OFF)</td>
-    <td width="10%">DIV</td>
-    <td width="10%">0 (NO)</td>
-    <td width="10%">0/4</td>
+    <td width="10%">$wdt$</td>
+    <td width="10%">$wdts$</td>
+    <td width="10%">$to$</td>
+    <td width="10%">$WDTCnt$</td>
     <td width="10%"></td>
     <td width="10%"></td>
     <td width="10%"></td>
@@ -98,24 +98,24 @@ table { font-size: 8pt;text-align:center}
   <tr>
     <td width="10%"   align="center" >IER</td>
     <td width="10%" align="center" >　</td>
-    <td width="10%" align="center" >0</td>
+    <td width="10%" align="center" >$IERLCD$</td>
     <td width="10%" align="center" >　</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
+    <td width="10%" align="center" >$IERPA$</td>
+    <td width="10%" align="center" >$IERTMR2$</td>
+    <td width="10%" align="center" >$IERTMR1$</td>
+    <td width="10%" align="center" >$IERTMR0$</td>
+    <td width="10%" align="center" >$IERDIV$</td>
   </tr>
   <tr>
     <td width="10%"   align="center" >IFR</td>
     <td width="10%" align="center" >　</td>
-    <td width="10%" align="center" >0</td>
+    <td width="10%" align="center" >$IFRLCD$</td>
     <td width="10%" align="center" >　</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
+    <td width="10%" align="center" >$IFRPA$</td>
+    <td width="10%" align="center" >$IFRTMR2$</td>
+    <td width="10%" align="center" >$IFRTMR1$</td>
+    <td width="10%" align="center" >$IFRTMR0$</td>
+    <td width="10%" align="center" >$IFRDIV$</td>
   </tr>
   <tr>
     <td width="10%" rowspan="2" align="center">Timer0</td>
@@ -130,9 +130,9 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center" >0 (OFF)</td>
-    <td width="10%" align="center" >Fosc/4</td>
-    <td width="10%" align="center" >60h</td>
+    <td width="10%" align="center" >$tmr0on$</td>
+    <td width="10%" align="center" >$tmr0s$</td>
+    <td width="10%" align="center" >$tmr0$</td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
@@ -152,9 +152,9 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center" >0 (OFF)</td>
-    <td width="10%" align="center" >TMR0</td>
-    <td width="10%" align="center" >86h</td>
+    <td width="10%" align="center" >$tmr1on$</td>
+    <td width="10%" align="center" >$tmr1s$</td>
+    <td width="10%" align="center" >$tmr1$</td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
@@ -175,9 +175,9 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center" >0 (OFF)</td>
-    <td width="10%" align="center" >DIV</td>
-    <td width="10%" align="center" >B4h</td>
+    <td width="10%" align="center" >$tmr2on$</td>
+    <td width="10%" align="center" >$tmr2s$</td>
+    <td width="10%" align="center" >$tmr2$</td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
@@ -200,14 +200,14 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" id=ww >Frame Rate</td>
   </tr>
   <tr>
-    <td width="10%" align="center" >0 (OFF)</td>
-    <td width="10%" align="center" >1X (1/3 bias 3.0V)</td>
-    <td width="10%" align="center" >11b (Strong 8 cycles)</td>
-    <td width="10%" align="center" >0 (Disable)</td>
-    <td width="10%" align="center" >2h (19*5)</td>
-    <td width="10%" align="center" >1800h</td>
-    <td width="10%" align="center" >0 (Frame Rate/2)</td>
-    <td width="10%" align="center" >72</td>
+    <td width="10%" align="center" >$lcdon$</td>
+    <td width="10%" align="center" >$LCD_BIS$</td>
+    <td width="10%" align="center" >$lcdHiDr$</td>
+    <td width="10%" align="center" >$LCDEnch$</td>
+    <td width="10%" align="center" >$lcdcom$</td>
+    <td width="10%" align="center" >$LCD_SA$</td>
+    <td width="10%" align="center" >$LCDIS$</td>
+    <td width="10%" align="center" >$lcdFrameRate$</td>
   </tr>
   <tr>
     <td width="10%" rowspan="2" align="center">Sound</td>
@@ -222,11 +222,11 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center">0 (OFF)</td>
-    <td width="10%" align="center">Logic High</td>
-    <td width="10%" align="center">2M</td>
-    <td width="10%" align="center">OFF</td>
-    <td width="10%" align="center">OFF</td>
+    <td width="10%" align="center">$SoundOn$</td>
+    <td width="10%" align="center">$tone0$</td>
+    <td width="10%" align="center">$B/P$</td>
+    <td width="10%" align="center">$PP$</td>
+    <td width="10%" align="center">$PN$</td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
@@ -245,7 +245,7 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center" colspan="2">546 Hz (Fsub/64)</td>
+    <td width="10%" align="center" colspan="2">$divs$</td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
@@ -269,71 +269,71 @@ table { font-size: 8pt;text-align:center}
   <tr>
     <td width="10%"   align="center" >
       PAx</td>
-    <td width="10%" align="center" >PA7</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >PA5</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >PA3</td>
-    <td width="10%" align="center" >PA2</td>
-    <td width="10%" align="center" >PA1</td>
-    <td width="10%" align="center" >PA0</td>
+    <td width="10%" align="center" >$PA7x$</td>
+    <td width="10%" align="center" >$PA6x$</td>
+    <td width="10%" align="center" >$PA5x$</td>
+    <td width="10%" align="center" >$PA4x$</td>
+    <td width="10%" align="center" >$PA3x$</td>
+    <td width="10%" align="center" >$PA2x$</td>
+    <td width="10%" align="center" >$PA1x$</td>
+    <td width="10%" align="center" >$PA0x$</td>
   </tr>
   <tr>
     <td width="10%"   align="center" >
       <p>IO</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
+    <td width="10%" align="center" >$PA7IO$</td>
+    <td width="10%" align="center" >$PA6IO$</td>
+    <td width="10%" align="center" >$PA5IO$</td>
+    <td width="10%" align="center" >$PA4IO$</td>
+    <td width="10%" align="center" >$PA3IO$</td>
+    <td width="10%" align="center" >$PA2IO$</td>
+    <td width="10%" align="center" >$PA1IO$</td>
+    <td width="10%" align="center" >$PA0IO$</td>
   </tr>
     <tr>
     <td width="10%"   align="center"  >Type</td>
-    <td width="10%" align="center"    >--</td>
-    <td width="10%" align="center"    >--</td>
-    <td width="10%" align="center"    >--</td>
-    <td width="10%" align="center"    >--</td>
-    <td width="10%" align="center"    >--</td>
-    <td width="10%" align="center"    >--</td>
-    <td width="10%" align="center"    >--</td>
-    <td width="10%" align="center"    >--</td>
+    <td width="10%" align="center"    >$PA7Type$</td>
+    <td width="10%" align="center"    >$PA6Type$</td>
+    <td width="10%" align="center"    >$PA5Type$</td>
+    <td width="10%" align="center"    >$PA4Type$</td>
+    <td width="10%" align="center"    >$PA3Type$</td>
+    <td width="10%" align="center"    >$PA2Type$</td>
+    <td width="10%" align="center"    >$PA1Type$</td>
+    <td width="10%" align="center"    >$PA0Type$</td>
   </tr>
 
   <tr>
     <td width="10%" align="center" >Data</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
+    <td width="10%" align="center" >$PA7Data$</td>
+    <td width="10%" align="center" >$PA6Data$</td>
+    <td width="10%" align="center" >$PA5Data$</td>
+    <td width="10%" align="center" >$PA4Data$</td>
+    <td width="10%" align="center" >$PA3Data$</td>
+    <td width="10%" align="center" >$PA2Data$</td>
+    <td width="10%" align="center" >$PA1Data$</td>
+    <td width="10%" align="center" >$PA0Data$</td>
   </tr>
   <tr>
     <td width="10%" align="center" >Pull Hi/Low/Tri</td>
-    <td width="10%" align="center" >Pull-Low</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >Pull-Low</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >Pull-Low</td>
-    <td width="10%" align="center" >Pull-Low</td>
-    <td width="10%" align="center" >Pull-Low</td>
-    <td width="10%" align="center" >Pull-Low</td>
+    <td width="10%" align="center" >$PA7Pullhi$</td>
+    <td width="10%" align="center" >$PA6Pullhi$</td>
+    <td width="10%" align="center" >$PA5Pullhi$</td>
+    <td width="10%" align="center" >$PA4Pullhi$</td>
+    <td width="10%" align="center" >$PA3Pullhi$</td>
+    <td width="10%" align="center" >$PA2Pullhi$</td>
+    <td width="10%" align="center" >$PA1Pullhi$</td>
+    <td width="10%" align="center" >$PA0Pullhi$</td>
   </tr>
     <tr>
     <td width="10%" align="center" >WakeUp</td>
-    <td width="10%" align="center" >NO</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >NO</td>
-    <td width="10%" align="center" >--</td>
-    <td width="10%" align="center" >NO</td>
-    <td width="10%" align="center" >NO</td>
-    <td width="10%" align="center" >NO</td>
-    <td width="10%" align="center" >NO</td>
+    <td width="10%" align="center" >$PA7WakeUp$</td>
+    <td width="10%" align="center" >$PA6WakeUp$</td>
+    <td width="10%" align="center" >$PA5WakeUp$</td>
+    <td width="10%" align="center" >$PA4WakeUp$</td>
+    <td width="10%" align="center" >$PA3WakeUp$</td>
+    <td width="10%" align="center" >$PA2WakeUp$</td>
+    <td width="10%" align="center" >$PA1WakeUp$</td>
+    <td width="10%" align="center" >$PA0WakeUp$</td>
   </tr>
   <tr>
     <td width="10%"  rowspan="4" align="center">PB</td>
@@ -353,8 +353,8 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
-    <td width="10%" align="center" >PB3</td>
-    <td width="10%" align="center" >PB2</td>
+    <td width="10%" align="center" >$PB3x$</td>
+    <td width="10%" align="center" >$PB2x$</td>
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
   </tr>
@@ -364,8 +364,8 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
-    <td width="10%" align="center" >NMOS</td>
-    <td width="10%" align="center" >NMOS</td>
+    <td width="10%" align="center" >$PB3Type$</td>
+    <td width="10%" align="center" >$PB2Type$</td>
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
   </tr>
@@ -375,8 +375,8 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
-    <td width="10%" align="center" >1</td>
-    <td width="10%" align="center" >1</td>
+    <td width="10%" align="center" >$PB3Data$</td>
+    <td width="10%" align="center" >$PB2Data$</td>
     <td width="10%" align="center" >　</td>
     <td width="10%" align="center" >　</td>
   </tr>
@@ -394,47 +394,47 @@ table { font-size: 8pt;text-align:center}
   </tr>
   <tr>
     <td width="10%" align="center" >PCx</td>
-    <td width="10%" align="center" >PC7</td>
-    <td width="10%" align="center" >PC6</td>
-    <td width="10%" align="center" >PC5</td>
-    <td width="10%" align="center" >PC4</td>
-    <td width="10%" align="center" >PC3</td>
-    <td width="10%" align="center" >PC2</td>
-    <td width="10%" align="center" >PC1</td>
-    <td width="10%" align="center" >PC0</td>
+    <td width="10%" align="center" >$PC7x$</td>
+    <td width="10%" align="center" >$PC6x$</td>
+    <td width="10%" align="center" >$PC5x$</td>
+    <td width="10%" align="center" >$PC4x$</td>
+    <td width="10%" align="center" >$PC3x$</td>
+    <td width="10%" align="center" >$PC2x$</td>
+    <td width="10%" align="center" >$PC1x$</td>
+    <td width="10%" align="center" >$PC0x$</td>
   </tr>
   <tr>
     <td width="10%" align="center" >IO</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
+    <td width="10%" align="center" >$PC7IO$</td>
+    <td width="10%" align="center" >$PC6IO$</td>
+    <td width="10%" align="center" >$PC5IO$</td>
+    <td width="10%" align="center" >$PC4IO$</td>
+    <td width="10%" align="center" >$PC3IO$</td>
+    <td width="10%" align="center" >$PC2IO$</td>
+    <td width="10%" align="center" >$PC1IO$</td>
+    <td width="10%" align="center" >$PC0IO$</td>
   </tr>
   <tr>
     <td width="10%" align="center" >Data</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
+    <td width="10%" align="center" >$PC7Data$</td>
+    <td width="10%" align="center" >$PC6Data$</td>
+    <td width="10%" align="center" >$PC5Data$</td>
+    <td width="10%" align="center" >$PC4Data$</td>
+    <td width="10%" align="center" >$PC3Data$</td>
+    <td width="10%" align="center" >$PC2Data$</td>
+    <td width="10%" align="center" >$PC1Data$</td>
+    <td width="10%" align="center" >$PC0Data$</td>
   </tr>
   <tr>
     <td width="10%" align="center" >Pull Low</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
+    <td width="10%" align="center" >$PC7Pullhi$</td>
+    <td width="10%" align="center" >$PC6Pullhi$</td>
+    <td width="10%" align="center" >$PC5Pullhi$</td>
+    <td width="10%" align="center" >$PC4Pullhi$</td>
+    <td width="10%" align="center" >$PC3Pullhi$</td>
+    <td width="10%" align="center" >$PC2Pullhi$</td>
+    <td width="10%" align="center" >$PC1Pullhi$</td>
+    <td width="10%" align="center" >$PC0Pullhi$</td>
   </tr>
 
   <tr>
@@ -451,47 +451,47 @@ table { font-size: 8pt;text-align:center}
   </tr>
   <tr>
     <td width="10%" align="center" >PDx</td>
-    <td width="10%" align="center" >PD7</td>
-    <td width="10%" align="center" >PD6</td>
-    <td width="10%" align="center" >PD5</td>
-    <td width="10%" align="center" >PD4</td>
-    <td width="10%" align="center" >PD3</td>
-    <td width="10%" align="center" >PD2</td>
-    <td width="10%" align="center" >PD1</td>
-    <td width="10%" align="center" >PD0</td>
+    <td width="10%" align="center" >$PD7x$</td>
+    <td width="10%" align="center" >$PD6x$</td>
+    <td width="10%" align="center" >$PD5x$</td>
+    <td width="10%" align="center" >$PD4x$</td>
+    <td width="10%" align="center" >$PD3x$</td>
+    <td width="10%" align="center" >$PD2x$</td>
+    <td width="10%" align="center" >$PD1x$</td>
+    <td width="10%" align="center" >$PD0x$</td>
   </tr>
   <tr>
     <td width="10%" align="center" >IO</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
-    <td width="10%" align="center" >Input</td>
+    <td width="10%" align="center" >$PD7IO$</td>
+    <td width="10%" align="center" >$PD6IO$</td>
+    <td width="10%" align="center" >$PD5IO$</td>
+    <td width="10%" align="center" >$PD4IO$</td>
+    <td width="10%" align="center" >$PD3IO$</td>
+    <td width="10%" align="center" >$PD2IO$</td>
+    <td width="10%" align="center" >$PD1IO$</td>
+    <td width="10%" align="center" >$PD0IO$</td>
   </tr>
   <tr>
     <td width="10%" align="center" >Data</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
-    <td width="10%" align="center" >0</td>
+    <td width="10%" align="center" >$PD7Data$</td>
+    <td width="10%" align="center" >$PD6Data$</td>
+    <td width="10%" align="center" >$PD5Data$</td>
+    <td width="10%" align="center" >$PD4Data$</td>
+    <td width="10%" align="center" >$PD3Data$</td>
+    <td width="10%" align="center" >$PD2Data$</td>
+    <td width="10%" align="center" >$PD1Data$</td>
+    <td width="10%" align="center" >$PD0Data$</td>
   </tr>
   <tr>
     <td width="10%" align="center" >Pull Low</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
-    <td width="10%" align="center" >YES</td>
+    <td width="10%" align="center" >$PD7Pullhi$</td>
+    <td width="10%" align="center" >$PD6Pullhi$</td>
+    <td width="10%" align="center" >$PD5Pullhi$</td>
+    <td width="10%" align="center" >$PD4Pullhi$</td>
+    <td width="10%" align="center" >$PD3Pullhi$</td>
+    <td width="10%" align="center" >$PD2Pullhi$</td>
+    <td width="10%" align="center" >$PD1Pullhi$</td>
+    <td width="10%" align="center" >$PD0Pullhi$</td>
   </tr>
 
 
@@ -508,10 +508,10 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center" >0 (Disable)</td>
-    <td width="10%" align="center" >2.30V</td>
-    <td width="10%" align="center" >0 (VDD&gt;LVD)</td>
-    <td width="10%" align="center" >1</td>
+    <td width="10%" align="center" >$ENLVC$</td>
+    <td width="10%" align="center" >$LVDS$</td>
+    <td width="10%" align="center" >$LVDF$</td>
+    <td width="10%" align="center" >$LVRF$</td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
     <td width="10%" align="center" ></td>
@@ -531,14 +531,14 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" id=ww>OS0</td>
   </tr>
   <tr>
-    <td width="10%" align="center">1: PA7</td>
-    <td width="10%" align="center">1: VDD=3.0V</td>
+    <td width="10%" align="center">$RST_SEL$</td>
+    <td width="10%" align="center">$VOLT$</td>
     <td width="10%" align="center"></td>
     <td width="10%" align="center"></td>
-    <td width="10%" align="center">1</td>
-    <td width="10%" align="center">Ignored</td>
+    <td width="10%" align="center">$PAIM$</td>
+    <td width="10%" align="center">$ACT$</td>
     <td width="10%" align="center"></td>
-    <td width="10%" align="center">1 : BR560K</td>
+    <td width="10%" align="center">$OS0$</td>
   </tr>
 
   <tr>
@@ -555,7 +555,7 @@ table { font-size: 8pt;text-align:center}
   </tr>
   <tr>
     <td width="10%" align="center"></td>
-    <td width="10%" align="center">1</td>
+    <td width="10%" align="center">$PB32IS$</td>
     <td width="10%" align="center"></td>
     <td width="10%" align="center"></td>
     <td width="10%" align="center"></td>
@@ -579,9 +579,9 @@ table { font-size: 8pt;text-align:center}
     <td width="10%" align="center" ></td>
   </tr>
   <tr>
-    <td width="10%" align="center">00H</td>
-    <td width="10%" align="center">00H</td>
-    <td width="10%" align="center">F000H</td>
+    <td width="10%" align="center">$SPBeg$</td>
+    <td width="10%" align="center">$SPend$</td>
+    <td width="10%" align="center">$CheckSum$</td>
     <td width="10%" align="center"></td>
     <td width="10%" align="center"></td>
     <td width="10%" align="center"></td>

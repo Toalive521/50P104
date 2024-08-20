@@ -9,31 +9,59 @@ F_Update_Time_Prog:
 	BCC		L_End_Update_Time_Prog
 
 L_End_Update_Time_Prog:
-	; JMP		L_CMP_Alarm_Prog
 	RTS
 ;====================================================
 F_Update_STW_Prog:
-	BBS3	Sys_Flag_B,L_End_MAX_CTW_Prog		;判断是否到结束
-	BBR1	Sys_Flag_B,L_End_Update_STW_Prog
-	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog
-	;倒计时逻辑
-
-
-	BRA		L_End_Update_STW_Prog
-L_End_MAX_CTW_Prog: 
-	RMB1	Sys_Flag_B
-L_End_Update_STW_Prog:
-	; JMP		L_CMP_Alarm_Prog
+	BBS3	Sys_Flag_B,L_End_MAX_STW_Prog		;判断是否到结束(正计时最大值)
+	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停，0：结束，不在继续计时
+	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog	;;0：正计时/1：倒计时
+	BRA		L_Update_CTW_FORW_Prog
 	RTS
 
 
+;;倒计时
+L_Update_CTW_FORW_Prog:
+	JSR		R_CtwDec_Sec
+	BCS		L_Update_CTW_FORW_End_Prog
+	JSR		R_CtwDec_Min
+	BCS		L_Update_CTW_FORW_End_Prog
+L_Update_CTW_FORW_End_Prog:
+	RTS
+
+L_End_MAX_STW_Prog: 
+	RMB1	Sys_Flag_B		;;正计时最大值，结束计时(暂停计时)
+L_End_Update_STW_Prog:
+	RTS
+
+;;正计时
 L_Update_STW_FORW_Prog:
 	JSR		R_CtwInc_Sec
 	BCC		L_Update_STW_FORW_End_Prog
 	JSR		R_CtwInc_Min
 	BCC		L_Update_STW_FORW_End_Prog
 L_Update_STW_FORW_End_Prog:
-	;对比正计时最大值逻辑
+	;对比正计时最大值
+	LDA		R_Stw_Min
+	CMP		#$99
+	BCC		?RTS
+	LDA		R_Stw_Sec
+	CMP		#$59
+	BCC		?RTS
+	RMB1	Sys_Flag_B
+	SMB3	Sys_Flag_B		;;标记正计时达到99M59S
+?RTS:
+	RTS
+;====================================================
+L_STWorCTW_Display:
+	LDA		R_Stw_Min
+	BNE		?STW_Display
+	LDA		R_Stw_Sec
+	BNE		?STW_Display
+	JSR		L_Update_CTW_FORW_Prog
+	RTS
+
+?STW_Display:
+	JSR		L_Update_STW_FORW_Prog
 	RTS
 ;====================================================
 ;----------------------------------------------------
@@ -143,11 +171,18 @@ R_CtwInc_Sec:
 
 R_CtwInc_Min:
 	LDX		#(R_Stw_Min-Time_str_Addr)
+	LDA		#$99
 	; TXA
 	; CLC
 	; ADC		P_Temp+4
 	; TAX
-	BRA		L_Inc_To_60
+	BRA		L_Inc_0_To_99_Count_Prog
+
+L_Inc_0_To_99_Count_Prog:
+	STA		P_Temp+1	;最大值
+	LDA		#$00
+	BRA		L_Inc_Any_To_Any_Count_Prog
+
 
 ; F_StwHrInc:
 ; 	LDX		#(R_Stw_Hr-Time_str_Addr)
@@ -161,18 +196,18 @@ R_CtwInc_Min:
 
 R_CtwDec_Sec:		
 	LDX		#(R_Stw_Sec-Time_str_Addr)
-	TXA
-	CLC
-	ADC		P_Temp+4
-	TAX
+	; TXA
+	; CLC
+	; ADC		P_Temp+4
+	; TAX
 	BRA		L_Dec_To_60_Prog
 
 R_CtwDec_Min:
 	LDX		#(R_Stw_Min-Time_str_Addr)
-	TXA
-	CLC
-	ADC		P_Temp+4
-	TAX
+	; TXA
+	; CLC
+	; ADC		P_Temp+4
+	; TAX
 	BRA		L_Dec_To_60_Prog
 
 ; F_StwHrDec:

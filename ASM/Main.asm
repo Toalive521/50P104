@@ -36,7 +36,7 @@ V_RESET:
     NOP
     SEI
     LDX     #STACK_BOT  
-    TXS     ; ��ʼ����ջָ��
+    TXS     ; 锟斤拷始锟斤拷锟斤拷栈指锟斤拷
     LDA     #$07    
     STA     P_SYSCLK    ;Fcpu=560K, Fext=32768,Strong ,Fosc/1
     ClrAllRam               
@@ -102,7 +102,7 @@ Mainloop:
 ; ;    JSR     L_Mode_Prog
 ;     ; JSR     L_32Hz_Prog
     
-    BBS7    P_TMRC,Mainloop ;������
+    BBS7    P_TMRC,Mainloop ;锟斤拷锟斤拷锟斤拷
     ; LDA     R_Light_Unit
     ; BNE     Mainloop
     Fsys_Fosc_2
@@ -192,14 +192,14 @@ L_Timer1_IRQ_Prog:
     JMP     L_End_IRQ_Prog
     
 L_PA_IRQ_Prog:
-    RMB4    P_IFR           ;���PA�жϱ�־
-    DIS_PA_IRQ              ;��PA�ж�ʹ��  
-    EN_LCD_IRQ              ;��32HZ�ж�ʹ��                
+    RMB4    P_IFR           ;锟斤拷锟絇A锟叫断憋拷志
+    DIS_PA_IRQ              ;锟斤拷PA锟叫讹拷使锟斤拷  
+    EN_LCD_IRQ              ;锟斤拷32HZ锟叫讹拷使锟斤拷                
     JMP     L_End_IRQ_Prog
     
 L_LCD_IRQ_Prog:
-    RMB6    P_IFR           ;���LCD�жϱ�־
-;   SMB2    Sys_Flag_A      ;����LCD init flag
+    RMB6    P_IFR           ;锟斤拷锟絃CD锟叫断憋拷志
+;   SMB2    Sys_Flag_A      ;锟斤拷锟斤拷LCD init flag
     LDA     Sys_Flag_A
     ORA     #BIT2
     STA     Sys_Flag_A      ;32HZ

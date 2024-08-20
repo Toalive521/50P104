@@ -42,8 +42,13 @@ L_End_Mode_Prog:
 L_STWDisplay_Prog:
 	JSR		F_DisCol
 	JSR		F_DisMs
+
+    LDA     #$5
+	STA		R_Stw_Min
 	LDA		R_Stw_Min
 	JSR		L_Dis_Digit12
+	LDA		#$0
+	STA		R_Stw_Sec
 	LDA		R_Stw_Sec
 	JSR		L_Dis_Digit34
 	RTS
