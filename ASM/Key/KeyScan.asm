@@ -94,7 +94,7 @@ L_Key2_Enter:
 	RTS
 
 L_Key2_Enter_End:			;;满足3S
-	BBR0	R_Key_Flag, ?RTS  ;;判断bit2=0?  =0：不是2key，跳转
+	BBR0	R_Key_Flag, ?RTS  ;;判断bit0=0?  =0：不是2key，跳转
 	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
 	LDA		#0					
 	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
@@ -106,7 +106,6 @@ L_Key2_Enter_End:			;;满足3S
 	JSR		L_Display_Mode0Prog	;;R_Set_Flag=1
 ?RTS:
 	RTS
-
 ;=================================================	
 L_Key5_Enter:
 	BBS6	Sys_Flag_A,?RTS
@@ -135,8 +134,14 @@ L_Key5_Enter_End:
 	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
 	LDA		#0
 	STA		R_Fast_Time			;;达到按键时长,R_Fast_Time>=C_Fast_Time,C=1不跳转,R_Fast_Time重置为0,一次快加结束
+	; BBS0	Sys_Flag_B,?STW_CTW		;;判断时间(0)/计时(1)模式
 	JSR		L_FastAdd_Prog
 	RTS
+; ?STW_CTW:
+; 	BBS1	Sys_Flag_B,?RTS		;;判断计时开始(1)/暂停(0)
+; 	JSR		L_FastAdd_Prog
+; ?RTS:
+; 	RTS
 
 ;==================================================	
 L_Key7_Enter:
@@ -221,12 +226,11 @@ L_End_Null_Key_Prog:
 L_REALSE_2KEY:
 	BBR0	R_Key_Flag, L_REALSE_2KEY_RTS  ;;判断bit0=0?  =0：不是2key，跳转
 	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
-
-	BBS0	Sys_Flag_B,?Start		;;判断是否已经进入计时模式
 	LDA		#0
 	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
 	LDA		#0					
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+	BBS0	Sys_Flag_B,?Start		;;判断是否已经进入计时模式
 	LDA		R_Set_Flag
 	BEQ		?RTS		;;判断R_Set_Flag=0？ 为0 ：不执行 不为0：R_Set_Flag+1
 	INC		R_Set_Flag
@@ -239,10 +243,10 @@ L_REALSE_2KEY:
 	LDA		#0				;;R_Set_Flag置0
 	STA		R_Set_Flag
 	RTS
-?RTS:
-	SMB0	Sys_Flag_B			;;set=0，短按标记，进入计时模式
-	; SMB2	Sys_Flag_B			;;标记倒计时
 
+?RTS:
+	SMB0	Sys_Flag_B			;;set=0，短按标记，进入计时模式(默认正计时)
+	SMB2	Sys_Flag_B			;;标记倒计时
 	JSR		L_Display_Mode0Prog
 	RTS
 
@@ -260,18 +264,17 @@ L_REALSE_2KEY:
 	RMB2	Sys_Flag_B			;;清零后，标记为正计时
 	JMP		L_Display_Mode0Prog
 
-
 L_REALSE_2KEY_RTS:
 	RTS
 ;============================================================
 L_REALSE_5KEY:
 	BBR1	R_Key_Flag,L_REALSE_5KEY_RTS	;;判断是否是PA5按下
-	LDA		R_Set_Flag
-	BEQ		?STW					;;Set=0？ =0：跳转去判断计时模式
 	LDA		#0
 	STA		R_No_Key
 	LDA		#0			
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+	LDA		R_Set_Flag
+	BEQ		?STW					;;Set=0？ =0：跳转去判断计时模式
 	JSR		L_Set_Flag_Prog
 	JSR		L_Display_Mode0Prog
 	RTS
@@ -289,8 +292,9 @@ L_REALSE_5KEY:
 	RTS
 
 ?CTW_5Key:
+	RMB1	R_Key_Flag
 	SMB0	Sys_Flag_B			;;标记计时模式
-	; SMB2	Sys_Flag_B			;;标记开始时进入计时为倒计时
+	SMB2	Sys_Flag_B			;;标记开始时进入计时为倒计时
 	JSR		L_Display_Mode0Prog
 	RTS
 
@@ -301,12 +305,12 @@ L_REALSE_5KEY_RTS:
 ;===============================================================
 L_REALSE_7KEY:
 	BBR2	R_Key_Flag,L_REALSE_7KEY_RTS
-	LDA		R_Set_Flag
-	BEQ		?STW
 	LDA		#0
 	STA		R_No_Key
 	LDA		#0					
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+	LDA		R_Set_Flag
+	BEQ		?STW
 	JSR		L_Set_Flag_Prog
 	JSR		L_Display_Mode0Prog
 	RTS
@@ -324,13 +328,14 @@ L_REALSE_7KEY:
 	RTS
 
 ?CTW_7Key:
+	RMB2	R_Key_Flag
 	SMB0	Sys_Flag_B			;;标记计时模式
-	; SMB2	Sys_Flag_B			;;标记开始进入计时为倒计时
+	SMB2	Sys_Flag_B			;;标记开始进入计时为倒计时
 	JSR		L_Display_Mode0Prog
 	RTS
 
 L_REALSE_7KEY_RTS:
-	RMB1	R_Key_Flag
+	RMB2	R_Key_Flag
 	RTS
 
 ;===============================================================

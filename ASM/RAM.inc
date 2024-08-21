@@ -79,7 +79,7 @@ Sys_Flag_B		DS	1
 ;bit4 = 
 ;bit5 = 12/24HR	0：24Hr  1:12hr
 ;bit6 = 
-;bit7 =	
+;bit7 =
 
 Sys_Flag_C		DS	1
 ;bit0 = 	快加/快减标志
