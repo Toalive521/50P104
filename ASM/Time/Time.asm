@@ -13,9 +13,10 @@ L_End_Update_Time_Prog:
 ;====================================================
 F_Update_STW_Prog:
 	BBS3	Sys_Flag_B,L_End_MAX_STW_Prog		;判断是否到结束(正计时最大值)
-	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停，0：结束，不在继续计时
+
+	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停
 	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog	;;0：正计时/1：倒计时
-	BRA		L_Update_CTW_FORW_Prog
+	JSR		L_Update_CTW_FORW_Prog
 	RTS
 
 
@@ -30,7 +31,15 @@ L_Update_CTW_FORW_End_Prog:
 
 L_End_MAX_STW_Prog: 
 	RMB1	Sys_Flag_B		;;正计时最大值，结束计时(暂停计时)
+	rts
 L_End_Update_STW_Prog:
+	LDA		R_Stw_Sec
+	AND		R_Stw_Min
+	BNE		?CTW			;;min sec均为0时，为正计时
+	; RMB2	Sys_Flag_B		;;标记正计时
+	RTS
+?CTW:
+	SMB2	Sys_Flag_B		;;标记倒计时
 	RTS
 
 ;;正计时
@@ -41,28 +50,33 @@ L_Update_STW_FORW_Prog:
 	BCC		L_Update_STW_FORW_End_Prog
 L_Update_STW_FORW_End_Prog:
 	;对比正计时最大值
-	LDA		R_Stw_Min
-	CMP		#$99
-	BCC		?RTS
 	LDA		R_Stw_Sec
 	CMP		#$59
 	BCC		?RTS
+	LDA		R_Stw_Min
+	CMP		#$99
+	BCC		?RTS
+
 	RMB1	Sys_Flag_B
 	SMB3	Sys_Flag_B		;;标记正计时达到99M59S
 ?RTS:
 	RTS
 ;====================================================
-L_STWorCTW_Display:
-	LDA		R_Stw_Min
-	BNE		?STW_Display
-	LDA		R_Stw_Sec
-	BNE		?STW_Display
-	JSR		L_Update_CTW_FORW_Prog
-	RTS
+; L_STWorCTW_Display:
+; 	; LDA		R_Stw_Sec
+; 	; BNE		?STW_Display
+; 	; LDA		R_Stw_Min
+; 	; BNE		?STW_Display
+; 	LDA		R_Stw_Sec
+; 	AND		R_Stw_Min
+; 	BNE		L_Update_CTW_FORW_Prog		;;倒
 
-?STW_Display:
-	JSR		L_Update_STW_FORW_Prog
-	RTS
+; 	JSR		L_Update_STW_FORW_Prog		;;正
+; 	RTS
+
+; ?STW_Display:
+; 	JSR		L_Update_CTW_FORW_Prog		;;倒
+; 	RTS
 ;====================================================
 ;----------------------------------------------------
 F_HrInc:

@@ -109,7 +109,6 @@ L_Key2_Enter_End:			;;满足3S
 
 ;=================================================	
 L_Key5_Enter:
-	BBS1	Sys_Flag_B,?End		;;判断计时开始/暂停状态
 	BBS6	Sys_Flag_A,?RTS
 	SMB6	Sys_Flag_A
 	SMB1	R_Key_Flag		;;bit1=1
@@ -141,7 +140,6 @@ L_Key5_Enter_End:
 
 ;==================================================	
 L_Key7_Enter:
-	BBS1	Sys_Flag_B,?End		;;判断计时开始/暂停状态
 	BBS7	Sys_Flag_A,?RTS
 	SMB7	Sys_Flag_A
 	SMB2	R_Key_Flag		;;bit2=1
@@ -243,6 +241,8 @@ L_REALSE_2KEY:
 	RTS
 ?RTS:
 	SMB0	Sys_Flag_B			;;set=0，短按标记，进入计时模式
+	; SMB2	Sys_Flag_B			;;标记倒计时
+
 	JSR		L_Display_Mode0Prog
 	RTS
 
@@ -267,27 +267,37 @@ L_REALSE_2KEY_RTS:
 L_REALSE_5KEY:
 	BBR1	R_Key_Flag,L_REALSE_5KEY_RTS	;;判断是否是PA5按下
 	LDA		R_Set_Flag
-	BEQ		?STW					;;Set=0？ =0：计时模式
+	BEQ		?STW					;;Set=0？ =0：跳转去判断计时模式
 	LDA		#0
 	STA		R_No_Key
-	LDA		#0					
+	LDA		#0			
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	JSR		L_Set_Flag_Prog
 	JSR		L_Display_Mode0Prog
 	RTS
 ?STW:
-	BBR0	Sys_Flag_B,?CTW_5Key		;;判断是否为计时模式(BIT0=0,跳转)
-	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;判断是否为暂停状态
+	BBR0	Sys_Flag_B,?CTW_5Key		;;判断是否为计时模式(BIT0=0,跳转)，时间模式切换为计时模式的时候
+	BBS2	Sys_Flag_B,?Ctw_D			;;计时模式下，判断正/倒计时
+	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;正计时模式，判断是否为暂停状态
+	SMB2	Sys_Flag_B						;;正计时暂停状态下，按下PA5，标记倒计时
+	JSR		L_Set_Flag_Prog
+	RTS
+
+?Ctw_D:
+	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;倒计时模式，判断是否为暂停状态
 	JSR		L_Set_Flag_Prog
 	RTS
 
 ?CTW_5Key:
 	SMB0	Sys_Flag_B			;;标记计时模式
+	; SMB2	Sys_Flag_B			;;标记开始时进入计时为倒计时
 	JSR		L_Display_Mode0Prog
 	RTS
 
 L_REALSE_5KEY_RTS:
+	RMB1	R_Key_Flag
 	RTS
+
 ;===============================================================
 L_REALSE_7KEY:
 	BBR2	R_Key_Flag,L_REALSE_7KEY_RTS
@@ -301,16 +311,28 @@ L_REALSE_7KEY:
 	JSR		L_Display_Mode0Prog
 	RTS
 ?STW:
-	BBR0	Sys_Flag_B,?CTW_7Key		;;判断是否为计时模式(BIT0=0,跳转)
-	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;判断是否为暂停状态
+	BBR0	Sys_Flag_B,?CTW_7Key		;;判断是否为计时模式(BIT0=0,跳转)，时间模式切换为计时模式的时候
+	BBS2	Sys_Flag_B,?Ctw_D			;;判断正/倒计时
+	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;正计时模式，判断是否为暂停状态
+	SMB2	Sys_Flag_B						;;正计时暂停状态下，按下PA7，标记倒计时
 	JSR		L_Set_Flag_Prog
 	RTS
-?CTW_7Key:	
-	SMB0	Sys_Flag_B
+
+?Ctw_D:
+	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;倒计时模式，判断是否为暂停状态
+	JSR		L_Set_Flag_Prog
+	RTS
+
+?CTW_7Key:
+	SMB0	Sys_Flag_B			;;标记计时模式
+	; SMB2	Sys_Flag_B			;;标记开始进入计时为倒计时
 	JSR		L_Display_Mode0Prog
 	RTS
+
 L_REALSE_7KEY_RTS:
+	RMB1	R_Key_Flag
 	RTS
+
 ;===============================================================
 ;===============================================================
 L_Display_Mode0Prog:
@@ -325,6 +347,8 @@ L_Display_Mode0Prog:
 	PHA
 	RTS
 ?STW:
+	RMB1	R_Key_Flag
+	RMB2	R_Key_Flag
 	JMP		L_STWDisplay_Prog
 
 T_Display_Table:
