@@ -96,7 +96,7 @@ F_DisMs:
 
 F_ClrMs:
 	LDX		#lcd_ms
-	JMP		F_ClrpSymbol	;显示MS	
+	JMP		F_ClrpSymbol		
 ; F_DisClock:
 ; 	LDX		#lcd_clock
 ; 	JMP		F_DispSymbol	;显示时钟图标

@@ -1,5 +1,5 @@
 ;=====================================================
-; ;=====================================================
+;=====================================================
 F_Update_Time_Prog:	
 	JSR		F_SecInc
 	BCC		L_End_Update_Time_Prog
@@ -12,9 +12,11 @@ L_End_Update_Time_Prog:
 	RTS
 ;====================================================
 F_Update_STW_Prog:
-	BBS3	Sys_Flag_B,L_End_MAX_STW_Prog		;判断是否到结束(正计时最大值)
+	BBS3	Sys_Flag_B,L_End_MAX_STW_Prog		;判断是否到结束(正计时99M59S)
+	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停(暂停跳转)
+	JSR		L_End_Update_STW_Prog
 
-	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停
+	; JSR		L_Zero_Start_STW
 	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog	;;0：正计时/1：倒计时
 	JSR		L_Update_CTW_FORW_Prog
 	RTS
@@ -26,7 +28,16 @@ L_Update_CTW_FORW_Prog:
 	BCS		L_Update_CTW_FORW_End_Prog
 	JSR		R_CtwDec_Min
 	BCS		L_Update_CTW_FORW_End_Prog
+	JSR		L_CTW_Zero
 L_Update_CTW_FORW_End_Prog:
+	RTS
+
+L_CTW_Zero:
+	LDA		#$0
+	STA		R_Stw_Sec
+	STA		R_Stw_Min
+	RMB1	Sys_Flag_B		;;暂停
+	SMB7	Sys_Flag_B		;;倒计时结束
 	RTS
 
 L_End_MAX_STW_Prog: 
@@ -36,7 +47,6 @@ L_End_Update_STW_Prog:
 	LDA		R_Stw_Sec
 	AND		R_Stw_Min
 	BNE		?CTW			;;min sec均为0时，为正计时
-	; RMB2	Sys_Flag_B		;;标记正计时
 	RTS
 ?CTW:
 	SMB2	Sys_Flag_B		;;标记倒计时
@@ -57,26 +67,26 @@ L_Update_STW_FORW_End_Prog:
 	CMP		#$99
 	BCC		?RTS
 
-	RMB1	Sys_Flag_B
+	RMB1	Sys_Flag_B		;;暂停计时
 	SMB3	Sys_Flag_B		;;标记正计时达到99M59S
 ?RTS:
 	RTS
-;====================================================
-; L_STWorCTW_Display:
-; 	; LDA		R_Stw_Sec
-; 	; BNE		?STW_Display
-; 	; LDA		R_Stw_Min
-; 	; BNE		?STW_Display
+
+; L_Zero_Start_STW:
 ; 	LDA		R_Stw_Sec
-; 	AND		R_Stw_Min
-; 	BNE		L_Update_CTW_FORW_Prog		;;倒
-
-; 	JSR		L_Update_STW_FORW_Prog		;;正
+; 	EOR		#0
+; 	BNE		?CTW_2
+; 	LDA		R_Stw_Min
+; 	EOR		#0
+; 	BNE		?CTW_2
+; 	RMB2	Sys_Flag_B		;;标记正计时
 ; 	RTS
 
-; ?STW_Display:
-; 	JSR		L_Update_CTW_FORW_Prog		;;倒
+; ?CTW_2:
+; 	SMB2	Sys_Flag_B		;;标记倒计时
 ; 	RTS
+
+;====================================================
 ;====================================================
 ;----------------------------------------------------
 F_HrInc:

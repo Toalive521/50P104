@@ -570,8 +570,8 @@
   "keylist.x2": 388,
   "keylist.y1": 101,
   "keylist.y2": 511,
-  "lcd.left": 1414,
-  "lcd.top": 269,
+  "lcd.left": 1251,
+  "lcd.top": 360,
   "lcdShow": 1,
   "luaRec": {
     "count": 0
@@ -582,6 +582,6 @@
   "minV": "1.000000",
   "powerProvideUA": "7.500000",
   "seed.enable": 0,
-  "seed.seed": 44350,
+  "seed.seed": 40148,
   "uF": "4.700000"
 }

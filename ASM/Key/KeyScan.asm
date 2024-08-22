@@ -230,7 +230,7 @@ L_REALSE_2KEY:
 	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
 	LDA		#0					
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
-	BBS0	Sys_Flag_B,?Start		;;判断是否已经进入计时模式
+	BBS0	Sys_Flag_B,?Start		;;判断是否为计时模式
 	LDA		R_Set_Flag
 	BEQ		?RTS		;;判断R_Set_Flag=0？ 为0 ：不执行 不为0：R_Set_Flag+1
 	INC		R_Set_Flag
@@ -251,18 +251,39 @@ L_REALSE_2KEY:
 	RTS
 
 ?Start:
-	BBS3	Sys_Flag_B,?CTW_Zero	;;判断是否是正计时最大状态下
+	BBS2	Sys_Flag_B,?STW			;;判断正/倒计时
+	BBS3	Sys_Flag_B,?CTW_Zero	;;判断是否是正计时为99MS59
 	LDA		Sys_Flag_B		;;控制计时开始/暂停
 	EOR		#BIT1
 	STA		Sys_Flag_B
 	rts
+?STW:
+	BBS7	Sys_Flag_B,?STW_Zero			;;倒计时00MS00
+	LDA		Sys_Flag_B		;;控制计时开始/暂停
+	EOR		#BIT1
+	STA		Sys_Flag_B
+	rts
+
+
 ?CTW_Zero:
 	LDA		#0
 	STA		R_Stw_Sec		;;清零
 	STA		R_Stw_Min
 	RMB3	Sys_Flag_B
 	RMB2	Sys_Flag_B			;;清零后，标记为正计时
+	RMB0	R_Key_Flag
 	JMP		L_Display_Mode0Prog
+	RTS
+
+?STW_Zero:
+	RMB2	Sys_Flag_B		;;清除倒计时
+	RMB0	Sys_Flag_B		;;时间模式
+	RMB7	Sys_Flag_B		;;清除倒计时结束
+	RMB0	R_Key_Flag
+
+	RMB1	Sys_Flag_B
+	JSR		L_Display_Mode0Prog
+	RTS	
 
 L_REALSE_2KEY_RTS:
 	RTS
@@ -288,6 +309,7 @@ L_REALSE_5KEY:
 
 ?Ctw_D:
 	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;倒计时模式，判断是否为暂停状态
+	BBS7	Sys_Flag_B,?STW_Zero			;;00MS00
 	JSR		L_Set_Flag_Prog
 	RTS
 
@@ -295,6 +317,16 @@ L_REALSE_5KEY:
 	RMB1	R_Key_Flag
 	SMB0	Sys_Flag_B			;;标记计时模式
 	SMB2	Sys_Flag_B			;;标记开始时进入计时为倒计时
+	JSR		L_Display_Mode0Prog
+	RTS
+
+?STW_Zero:
+	RMB2	Sys_Flag_B		;;清除倒计时
+	RMB0	Sys_Flag_B		;;时间模式
+	RMB7	Sys_Flag_B		;;清除倒计时结束
+	RMB1	R_Key_Flag
+
+	RMB1	Sys_Flag_B
 	JSR		L_Display_Mode0Prog
 	RTS
 
@@ -324,6 +356,7 @@ L_REALSE_7KEY:
 
 ?Ctw_D:
 	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;倒计时模式，判断是否为暂停状态
+	BBS7	Sys_Flag_B,?STW_Zero			;;00MS00
 	JSR		L_Set_Flag_Prog
 	RTS
 
@@ -331,6 +364,16 @@ L_REALSE_7KEY:
 	RMB2	R_Key_Flag
 	SMB0	Sys_Flag_B			;;标记计时模式
 	SMB2	Sys_Flag_B			;;标记开始进入计时为倒计时
+	JSR		L_Display_Mode0Prog
+	RTS
+
+?STW_Zero:
+	RMB2	Sys_Flag_B		;;清除倒计时
+	RMB0	Sys_Flag_B		;;时间模式
+	RMB7	Sys_Flag_B		;;清除倒计时结束
+	RMB2	R_Key_Flag
+	
+	RMB1	Sys_Flag_B
 	JSR		L_Display_Mode0Prog
 	RTS
 
@@ -371,7 +414,8 @@ L_Display_Prog:
 ;===============================================================
 ;===============================================================
 L_1Hz_Flash_Prog:
-	BBS1	Sys_Flag_B,L_MS_Flash
+	BBS1	Sys_Flag_B,L_MS_Flash	;;是否开始状态
+	BBS7	Sys_Flag_B,L_STW_Stop	;;是否结束倒计时
 	BBS0	Sys_Flag_C,?RTS			;;判断bit0=1? =1:快加/快减标志,不执行闪烁
 	LDA		R_Set_Flag
 	CLC
@@ -391,7 +435,7 @@ T_Flash_Table:
 	DW		L_Flash_Set3-1		;;R_Set_Flag=3
 
 L_Flash_Set0:
-	BBS0	Sys_Flag_B,?RTS
+	BBS0	Sys_Flag_B,?RTS		;;判断时间/计时模式
 	JSR		F_ClrCol
 ?RTS:
 	rts
@@ -408,6 +452,12 @@ L_Flash_Set3:
 
 L_MS_Flash:
 	JSR		F_ClrMs
+	RTS
+
+L_STW_Stop:
+	JSR		F_ClrMs
+	JSR		F_Clr12
+	JSR		F_Clr34
 	RTS
 ; ;=======================================================	
 L_Set_Flag_Prog:
