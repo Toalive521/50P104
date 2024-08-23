@@ -67,7 +67,7 @@ Sys_Flag_A	 DS		1
 ;bit2 = 32HZ 
 ;bit3 =
 ;bit4 = 标记PA2按键是否按下
-;bit5 =
+;bit5 =	标记PA5、PA7按键是否按下
 ;bit6 =	标记PA5按键是否按下
 ;bit7 =	标记PA7按键是否按下
 

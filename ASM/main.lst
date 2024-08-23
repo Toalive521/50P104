@@ -1,4 +1,4 @@
-Fri Aug 23 14:03:20 2024
+Fri Aug 23 18:59:32 2024
 -------------------------
 CAS V2.15.1-rc1 - (C) Copyright 2000-2012 CHIPMAST TECHNOLOGY CO. LTD.
 Main file   : main.asm
@@ -188,7 +188,7 @@ Current file: main.asm
     67                        ;bit2 = 32HZ
     68                        ;bit3 =
     69                        ;bit4 = 标记PA2按键是否按下
-    70                        ;bit5 =
+    70                        ;bit5 =	标记PA5、PA7按键是否按下
     71                        ;bit6 =	标记PA5按键是否按下
     72                        ;bit7 =	标记PA7按键是否按下
     73                        
@@ -1320,7 +1320,7 @@ Current file: main.asm
     99                        ;--------------------------------------------------------
    100                        Mainloop:
    101                        
-   102 00:F063: 15 AB F5          JSR     L_2Hz_Prog
+   102 00:F063: 15 AF F5          JSR     L_2Hz_Prog
    103 00:F066: 15 D8 F1          JSR     L_32Hz_Prog
    104                        
    105                        
@@ -1836,15 +1836,15 @@ Current file: main.asm
     25 00:F1E9: 09            	RTS
     26                        ;---------------------------------------------------------
     27                        L_Scankey_Prog:
-    28 00:F1EA: 15 91 F5      	JSR		F_KeyIoPAInputHigh
+    28 00:F1EA: 15 95 F5      	JSR		F_KeyIoPAInputHigh
     29                        
-    30 00:F1ED: 15 A2 F5      	JSR		L_ScanKey_Delay_Prog		;	等待功能，跑循环
+    30 00:F1ED: 15 A6 F5      	JSR		L_ScanKey_Delay_Prog		;	等待功能，跑循环
     31 00:F1F0: 73 01         	LDA     P_PA
     32 00:F1F2: 52 A4             EOR     #10100100B			;;取反，区分按下和未按下的键
     33 00:F1F4: 51 A4             AND     #10100100B			;;去除其余干扰位，确定按键
     34 00:F1F6: 7F C3             STA     P_Temp+1
     35 00:F1F8: 12 03         	BNE		L_Havekey
-    36 00:F1FA: 16 C9 F2      	JMP		L_Null_Key_Prog
+    36 00:F1FA: 16 E3 F2      	JMP		L_Null_Key_Prog
     37                        L_Havekey:
     38 00:F1FD: 73 C3         	LDA		P_Temp+1
     39 00:F1FF: 76 CF         	CMP		R_KeyValue
@@ -1862,825 +1862,812 @@ Current file: main.asm
     51                        ;	JSR		Stop_Alarm_Beep		;有键按下即关闭闹钟
     52                        
     53 00:F20D: 73 C3         	LDA		P_Temp+1
-    54 00:F20F: 56 04         	CMP		#D_Key2
-    55 00:F211: 13 25         	BEQ		L_Key2_Enter
+    54 00:F20F: 56 A0         	CMP		#D_Key57
+    55 00:F211: 13 0F         	BEQ		L_Key57_Enter
     56                        
-    57 00:F213: 56 20         	CMP		#D_Key5
-    58 00:F215: 13 4B         	BEQ		L_Key5_Enter
+    57 00:F213: 56 04         	CMP		#D_Key2
+    58 00:F215: 13 21         	BEQ		L_Key2_Enter
     59                        
-    60 00:F217: 56 80         	CMP		#D_Key7
-    61 00:F219: 13 73         	BEQ		L_Key7_Enter
+    60 00:F217: 56 20         	CMP		#D_Key5
+    61 00:F219: 13 4B         	BEQ		L_Key5_Enter
     62                        
-    63 00:F21B: 56 A0         	CMP		#D_Key57
-    64 00:F21D: 13 03         	BEQ		L_Key57_Enter
+    63 00:F21B: 56 80         	CMP		#D_Key7
+    64 00:F21D: 13 7C         	BEQ		L_Key7_Enter
     65                        
-    66 00:F21F: 16 C2 F2      	JMP		L_ManyKey
+    66 00:F21F: 16 DC F2      	JMP		L_ManyKey
     67                        ;============================================================
     68                        L_Key57_Enter:
     69 00:F222: 30 9A 12      	BBR0	Sys_Flag_B,L_Key57_Enter_RTS	;;判断是否在计时模式下
-    70 00:F225: 3C 99 0F      	BBS4	Sys_Flag_A,L_Key57_Enter_RTS	;;标记57键是否为按下状态
-    71 00:F228: 2C 99         	SMB4	Sys_Flag_A
+    70 00:F225: 3B 99 0F      	BBS3	Sys_Flag_A,L_Key57_Enter_RTS	;;标记57键是否为按下状态
+    71 00:F228: 2B 99         	SMB3	Sys_Flag_A
     72                        
     73 00:F22A: 53 00         	LDA		#0
     74 00:F22C: 7F AB         	STA		R_Stw_Sec		;;同时按下则清零
     75 00:F22E: 7F AC         	STA		R_Stw_Min
     76 00:F230: 22 9A         	RMB2	Sys_Flag_B			;;清零后，标记为正计时
     77 00:F232: 21 9A         	RMB1	Sys_Flag_B			;;计时暂停状态
-    78 00:F234: 16 0D F4      	JMP		L_Display_Mode0Prog
+    78 00:F234: 16 29 F4      	JMP		L_Display_Mode0Prog
     79                        L_Key57_Enter_RTS:
     80 00:F237: 09            	RTS
     81                        ;============================================================
     82                        L_Key2_Enter:
-    83 00:F238: 3C 99 04      	BBS4	Sys_Flag_A,?RTS		;;判断Sys_Flag_A的bit4=1？ 不为1，则往下执行；为1 说明按键已经按下，直接跳转
+    83 00:F238: 3C 99 07      	BBS4	Sys_Flag_A,?RTS		;;判断Sys_Flag_A的bit4=1？ 不为1，则往下执行；为1 说明按键已经按下，直接跳转
     84 00:F23B: 2C 99         	SMB4	Sys_Flag_A		;;标记Sys_Flag_A的bit4=1
     85 00:F23D: 28 9D         	SMB0	R_Key_Flag		;;R_Key_Flag的bit0=1
-    86                        
+    86 00:F23F: 38 9A 21      	BBS0	Sys_Flag_B,L_Key2_Enter_RTS2
     87                        ?RTS:
-    88 00:F23F: 73 BE         	LDA		R_KeyHold_Time
-    89 00:F241: 56 5A         	CMP		#D_Key3S
-    90 00:F243: 13 06         	BEQ		L_Key2_Enter_End		;;判断是否按下满足3S
-    91 00:F245: 73 BE         	LDA		R_KeyHold_Time
-    92 00:F247: 03            	INC
-    93 00:F248: 7F BE         	STA		R_KeyHold_Time
-    94 00:F24A: 09            	RTS
-    95                        
-    96                        L_Key2_Enter_End:			;;满足3S
-    97 00:F24B: 30 9D 13      	BBR0	R_Key_Flag,?RTS  ;;判断bit0=0?  =0：不是2key，跳转
-    98 00:F24E: 20 9D         	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
-    99 00:F250: 53 00         	LDA		#0
-   100 00:F252: 7F A2         	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
-   101 00:F254: 53 00         	LDA		#0
-   102 00:F256: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
-   103 00:F258: 73 A1         	LDA		R_Set_Flag
-   104 00:F25A: 12 05         	BNE		?RTS				;;判断R_Set_Flag不为0 ？ 不为0：跳转	为0 ：R_Set_Flag加1,R_Set_Flag=1
-   105 00:F25C: 78 A1         	INC		R_Set_Flag
-   106 00:F25E: 15 0D F4      	JSR		L_Display_Mode0Prog	;;R_Set_Flag=1
-   107                        ?RTS:
-   108 00:F261: 09            	RTS
-   109                        ;=================================================
-   110                        L_Key5_Enter:
-   111 00:F262: 3E 99 04      	BBS6	Sys_Flag_A,?RTS
-   112 00:F265: 2E 99         	SMB6	Sys_Flag_A
-   113 00:F267: 29 9D         	SMB1	R_Key_Flag		;;bit1=1
-   114                        
+    88 00:F242: 73 BE         	LDA		R_KeyHold_Time
+    89 00:F244: 56 5A         	CMP		#D_Key3S
+    90 00:F246: 13 06         	BEQ		L_Key2_Enter_End		;;判断是否按下满足3S
+    91 00:F248: 73 BE         	LDA		R_KeyHold_Time
+    92 00:F24A: 03            	INC
+    93 00:F24B: 7F BE         	STA		R_KeyHold_Time
+    94 00:F24D: 09            	RTS
+    95                        L_Key2_Enter_End:			;;满足3S
+    96 00:F24E: 30 9D 11      	BBR0	R_Key_Flag,L_Key2_Enter_RTS  ;;判断bit0=0?  =0：不是2key，跳转
+    97 00:F251: 20 9D         	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
+    98 00:F253: 53 00         	LDA		#0
+    99 00:F255: 7F A2         	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
+   100 00:F257: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+   101 00:F259: 73 A1         	LDA		R_Set_Flag
+   102 00:F25B: 12 05         	BNE		L_Key2_Enter_RTS	;;判断R_Set_Flag不为0 ？ 不为0：跳转	为0 ：R_Set_Flag加1,R_Set_Flag=1
+   103 00:F25D: 78 A1         	INC		R_Set_Flag
+   104 00:F25F: 15 29 F4      	JSR		L_Display_Mode0Prog	;;R_Set_Flag=1
+   105                        L_Key2_Enter_RTS:
+   106 00:F262: 09            	RTS
+   107                        L_Key2_Enter_RTS2:
+   108 00:F263: 24 99         	RMB4	Sys_Flag_A
+   109 00:F265: 09            	RTS
+   110                        ;=================================================
+   111                        L_Key5_Enter:
+   112 00:F266: 3E 99 04      	BBS6	Sys_Flag_A,?RTS
+   113 00:F269: 2E 99         	SMB6	Sys_Flag_A
+   114 00:F26B: 29 9D         	SMB1	R_Key_Flag		;;bit1=1
    115                        ?RTS:
-   116 00:F269: 73 BE         	LDA		R_KeyHold_Time
-   117 00:F26B: 56 5A         	CMP		#D_Key3S
-   118 00:F26D: 13 07         	BEQ		L_Key5_Enter_End
-   119 00:F26F: 73 BE         	LDA		R_KeyHold_Time
-   120 00:F271: 03            	INC
-   121 00:F272: 7F BE         	STA		R_KeyHold_Time
-   122 00:F274: 09            	RTS
-   123                        ?End:
-   124 00:F275: 09            	RTS
-   125                        
-   126                        L_Key5_Enter_End:
-   127 00:F276: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   128 00:F278: 53 00         	LDA		#0
-   129 00:F27A: 7F A2         	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
-   130 00:F27C: 53 00         	LDA		#0
-   131 00:F27E: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
-   132 00:F280: 73 BF         	LDA		R_Fast_Time
-   133 00:F282: 56 04         	CMP		#C_Fast_Time
-   134 00:F284: 10 34         	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
-   135 00:F286: 53 00         	LDA		#0
-   136 00:F288: 7F BF         	STA		R_Fast_Time			;;达到按键时长,R_Fast_Time>=C_Fast_Time,C=1不跳转,R_Fast_Time重置为0,一次快加结束
-   137                        	; BBS0	Sys_Flag_B,?STW_Fastadd
-   138 00:F28A: 15 02 F5      	JSR		L_FastAdd_Prog
-   139 00:F28D: 09            	RTS
-   140                        ; ?STW_Fastadd:
-   141                        ; 	BBS1	Sys_Flag_B,?RTS
-   142                        ; 	LDA		#0
-   143                        ; 	STA		R_Set_Flag
-   144                        ; 	JSR		L_FastAdd_Prog
-   145                        ; ?RTS:
-   146                        ; 	RTS
-   147                        
-   148                        ;==================================================
-   149                        L_Key7_Enter:
-   150 00:F28E: 3F 99 04      	BBS7	Sys_Flag_A,?RTS
-   151 00:F291: 2F 99         	SMB7	Sys_Flag_A
-   152 00:F293: 2A 9D         	SMB2	R_Key_Flag		;;bit2=1
-   153                        
-   154                        ?RTS:
-   155 00:F295: 73 BE         	LDA		R_KeyHold_Time
-   156 00:F297: 56 5A         	CMP		#D_Key3S
-   157 00:F299: 13 07         	BEQ		L_Key7_Enter_End
-   158 00:F29B: 73 BE         	LDA		R_KeyHold_Time
-   159 00:F29D: 03            	INC
-   160 00:F29E: 7F BE         	STA		R_KeyHold_Time
-   161 00:F2A0: 09            	RTS
-   162                        ?End:
-   163 00:F2A1: 09            	RTS
-   164                        
-   165                        L_Key7_Enter_End:
-   166 00:F2A2: 53 00         	LDA		#0
-   167 00:F2A4: 7F A2         	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
-   168 00:F2A6: 53 00         	LDA		#0
-   169 00:F2A8: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
-   170 00:F2AA: 22 9D         	RMB2	R_Key_Flag
-   171 00:F2AC: 73 BF         	LDA		R_Fast_Time
-   172 00:F2AE: 56 04         	CMP		#C_Fast_Time
-   173 00:F2B0: 10 08         	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
-   174 00:F2B2: 53 00         	LDA		#0
-   175 00:F2B4: 7F BF         	STA		R_Fast_Time
-   176 00:F2B6: 15 46 F5      	JSR		L_FastDec_Prog
-   177 00:F2B9: 09            	RTS
-   178                        
-   179                        ;============================================================
-   180                        L_Inc_Fast_Time:
-   181 00:F2BA: 04            	CLC
-   182 00:F2BB: 73 BF         	LDA		R_Fast_Time
-   183 00:F2BD: 54 01         	ADC		#1
-   184 00:F2BF: 7F BF         	STA		R_Fast_Time
-   185 00:F2C1: 09            	RTS
-   186                        ;============================================================
-   187                        L_ManyKey:
-   188 00:F2C2: 73 9D         	LDA		R_Key_Flag
-   189 00:F2C4: 50 80         	ORA		#BIT7
-   190 00:F2C6: 7F 9D         	STA		R_Key_Flag
-   191                        L_End_KeyScan_Prog:
-   192 00:F2C8: 09            	RTS
-   193                        
+   116 00:F26D: 73 BE         	LDA		R_KeyHold_Time
+   117 00:F26F: 56 5A         	CMP		#D_Key3S
+   118 00:F271: 13 06         	BEQ		L_Key5_Enter_End
+   119 00:F273: 73 BE         	LDA		R_KeyHold_Time
+   120 00:F275: 03            	INC
+   121 00:F276: 7F BE         	STA		R_KeyHold_Time
+   122 00:F278: 09            	RTS
+   123                        L_Key5_Enter_End:
+   124 00:F279: 53 00         	LDA		#0
+   125 00:F27B: 7F A2         	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
+   126 00:F27D: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+   127 00:F27F: 73 BF         	LDA		R_Fast_Time
+   128 00:F281: 56 04         	CMP		#C_Fast_Time
+   129 00:F283: 10 4F         	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
+   130 00:F285: 53 00         	LDA		#0
+   131 00:F287: 7F BF         	STA		R_Fast_Time			;;达到按键时长,R_Fast_Time>=C_Fast_Time,C=1不跳转,R_Fast_Time重置为0,一次快加结束
+   132 00:F289: 38 9A 04      	BBS0	Sys_Flag_B,?5Key_STW_Fastadd
+   133 00:F28C: 15 1E F5      	JSR		L_FastAdd_Prog
+   134 00:F28F: 09            	RTS
+   135                        ?5Key_STW_Fastadd:
+   136 00:F290: 39 9A 07      	BBS1	Sys_Flag_B,?RTS
+   137 00:F293: 53 00         	LDA		#0
+   138 00:F295: 7F A1         	STA		R_Set_Flag
+   139 00:F297: 15 1E F5      	JSR		L_FastAdd_Prog
+   140                        ?RTS:
+   141 00:F29A: 09            	RTS
+   142                        ;==================================================
+   143                        L_Key7_Enter:
+   144 00:F29B: 3F 99 04      	BBS7	Sys_Flag_A,?RTS
+   145 00:F29E: 2F 99         	SMB7	Sys_Flag_A
+   146 00:F2A0: 2A 9D         	SMB2	R_Key_Flag		;;bit2=1
+   147                        ?RTS:
+   148 00:F2A2: 73 BE         	LDA		R_KeyHold_Time
+   149 00:F2A4: 56 5A         	CMP		#D_Key3S
+   150 00:F2A6: 13 06         	BEQ		L_Key7_Enter_End
+   151 00:F2A8: 73 BE         	LDA		R_KeyHold_Time
+   152 00:F2AA: 03            	INC
+   153 00:F2AB: 7F BE         	STA		R_KeyHold_Time
+   154 00:F2AD: 09            	RTS
+   155                        
+   156                        L_Key7_Enter_End:
+   157 00:F2AE: 53 00         	LDA		#0
+   158 00:F2B0: 7F A2         	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
+   159 00:F2B2: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+   160 00:F2B4: 22 9D         	RMB2	R_Key_Flag
+   161 00:F2B6: 73 BF         	LDA		R_Fast_Time
+   162 00:F2B8: 56 04         	CMP		#C_Fast_Time
+   163 00:F2BA: 10 18         	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
+   164 00:F2BC: 53 00         	LDA		#0
+   165 00:F2BE: 7F BF         	STA		R_Fast_Time
+   166 00:F2C0: 38 9A 04      	BBS0	Sys_Flag_B,?7Key_STW_Fastadd
+   167 00:F2C3: 15 66 F5      	JSR		L_FastDec_Prog
+   168 00:F2C6: 09            	RTS
+   169                        ?7Key_STW_Fastadd:
+   170 00:F2C7: 39 9A 09      	BBS1	Sys_Flag_B,?RTS
+   171 00:F2CA: 2A 9D         	SMB2	R_Key_Flag
+   172 00:F2CC: 53 00         	LDA		#0
+   173 00:F2CE: 7F A1         	STA		R_Set_Flag
+   174 00:F2D0: 15 1E F5      	JSR		L_FastAdd_Prog
+   175                        ?RTS:
+   176 00:F2D3: 09            	RTS
+   177                        
+   178                        ;============================================================
+   179                        L_Inc_Fast_Time:
+   180 00:F2D4: 04            	CLC
+   181 00:F2D5: 73 BF         	LDA		R_Fast_Time
+   182 00:F2D7: 54 01         	ADC		#1
+   183 00:F2D9: 7F BF         	STA		R_Fast_Time
+   184 00:F2DB: 09            	RTS
+   185                        ;============================================================
+   186                        L_ManyKey:
+   187 00:F2DC: 73 9D         	LDA		R_Key_Flag
+   188 00:F2DE: 50 80         	ORA		#BIT7
+   189 00:F2E0: 7F 9D         	STA		R_Key_Flag
+   190                        L_End_KeyScan_Prog:
+   191 00:F2E2: 09            	RTS
+   192                        
+   193                        ;============================================================
    194                        ;============================================================
-   195                        ;============================================================
-   196                        L_Null_Key_Prog:
-   197 00:F2C9: 15 91 F5      	JSR		F_KeyIoPAInputHigh
-   198 00:F2CC: 53 00         	LDA		#$0
-   199 00:F2CE: 7F BE         	STA		R_KeyHold_Time
-   200                        
-   201 00:F2D0: 15 F5 F2      	JSR		L_REALSE_2KEY
-   202 00:F2D3: 15 63 F3      	JSR		L_REALSE_5KEY
-   203 00:F2D6: 15 B8 F3      	JSR		L_REALSE_7KEY
-   204                        
-   205 00:F2D9: 24 99         	RMB4 	Sys_Flag_A
-   206 00:F2DB: 26 99         	RMB6 	Sys_Flag_A
-   207 00:F2DD: 27 99         	RMB7 	Sys_Flag_A
-   208                        
-   209 00:F2DF: 20 9B         	RMB0	Sys_Flag_C		;;清除快加/快减标志位
-   210                        
-   211 00:F2E1: 73 9D         	LDA		R_Key_Flag
-   212 00:F2E3: 51 7F         	AND		#%01111111
-   213 00:F2E5: 7F 9D         	STA		R_Key_Flag
-   214                        
-   215 00:F2E7: 15 8A F5      	JSR		Stz_Fast_Hold_Key
-   216 00:F2EA: 73 BD         	LDA		R_Voice_Unit
-   217 00:F2EC: 12 06         	BNE		L_End_Null_Key_Prog
-   218                        
-   219                        ;;L_Exit_Null_Key_Prog:
-   220                        ;	ST_DIS
-   221                        	DIS_LCD_IRQ
-+  221 00:F2EE: 26 0E          RMB6 P_IER
-   222 00:F2F0: 24 0F         	RMB4	P_IFR
-   223                        	EN_PA_IRQ
-+  223 00:F2F2: 2C 0E          SMB4 P_IER
-   224                        L_End_Null_Key_Prog:
-   225 00:F2F4: 09            	RTS
-   226                        ;============================================================
-   227                        L_REALSE_2KEY:
-   228 00:F2F5: 30 9D 6A      	BBR0	R_Key_Flag, L_REALSE_2KEY_RTS  ;;判断bit0=0?  =0：不是2key，跳转
-   229 00:F2F8: 20 9D         	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
-   230 00:F2FA: 53 00         	LDA		#0
-   231 00:F2FC: 7F A2         	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
-   232 00:F2FE: 53 00         	LDA		#0
-   233 00:F300: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
-   234 00:F302: 38 9A 2A      	BBS0	Sys_Flag_B,?Start		;;判断是否为计时模式
-   235 00:F305: 73 A1         	LDA		R_Set_Flag
-   236 00:F307: 13 11         	BEQ		?RTS		;;判断R_Set_Flag=0？ 为0 ：不执行 不为0：R_Set_Flag+1
-   237 00:F309: 78 A1         	INC		R_Set_Flag
-   238 00:F30B: 73 A1         	LDA		R_Set_Flag
-   239 00:F30D: 56 04         	CMP		#4			;;判断R_Set_Flag
-   240 00:F30F: 13 04         	BEQ		?ZERO
-   241 00:F311: 15 0D F4      	JSR		L_Display_Mode0Prog
-   242 00:F314: 09            	RTS
-   243                        ?ZERO:
-   244 00:F315: 53 00         	LDA		#0				;;R_Set_Flag置0
-   245 00:F317: 7F A1         	STA		R_Set_Flag
-   246 00:F319: 09            	RTS
-   247                        
-   248                        ?RTS:
-   249 00:F31A: 3F 9A 08      	BBS7	Sys_Flag_B,?Start_2	;;倒计时结束切换至时间模式后，再按任意键进入计时为正计时
-   250 00:F31D: 28 9A         	SMB0	Sys_Flag_B			;;set=0，短按标记，进入计时模式(默认正计时)
-   251 00:F31F: 2A 9A         	SMB2	Sys_Flag_B			;;标记倒计时
-   252 00:F321: 15 0D F4      	JSR		L_Display_Mode0Prog
-   253 00:F324: 09            	RTS
-   254                        
-   255                        ?Start_2:						;;倒计时结束-->时间模式-->正计时模式
-   256 00:F325: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
-   257 00:F327: 27 9A         	RMB7	Sys_Flag_B			;;清除标记倒计时结束
-   258 00:F329: 22 9A         	RMB2	Sys_Flag_B			;;标记正计时
-   259 00:F32B: 15 0D F4      	JSR		L_Display_Mode0Prog
-   260 00:F32E: 09            	RTS
-   261                        
-   262                        ?Start:
-   263 00:F32F: 3A 9A 0A      	BBS2	Sys_Flag_B,?STW			;;判断正/倒计时
-   264 00:F332: 3B 9A 11      	BBS3	Sys_Flag_B,?CTW_Zero	;;判断是否是正计时为99MS59
-   265 00:F335: 73 9A         	LDA		Sys_Flag_B		;;控制计时开始/暂停
-   266 00:F337: 52 02         	EOR		#BIT1
-   267 00:F339: 7F 9A         	STA		Sys_Flag_B
-   268 00:F33B: 09            	rts
-   269                        ?STW:
-   270 00:F33C: 3F 9A 17      	BBS7	Sys_Flag_B,?STW_Zero			;;倒计时00MS00
-   271 00:F33F: 73 9A         	LDA		Sys_Flag_B		;;控制计时开始/暂停
-   272 00:F341: 52 02         	EOR		#BIT1
-   273 00:F343: 7F 9A         	STA		Sys_Flag_B
-   274 00:F345: 09            	rts
+   195                        L_Null_Key_Prog:
+   196 00:F2E3: 15 95 F5      	JSR		F_KeyIoPAInputHigh
+   197 00:F2E6: 53 00         	LDA		#$0
+   198 00:F2E8: 7F BE         	STA		R_KeyHold_Time
+   199                        
+   200 00:F2EA: 15 11 F3      	JSR		L_REALSE_2KEY
+   201 00:F2ED: 24 99         	RMB4	Sys_Flag_A
+   202 00:F2EF: 15 7F F3      	JSR		L_REALSE_5KEY
+   203 00:F2F2: 26 99         	RMB6	Sys_Flag_A
+   204 00:F2F4: 15 D4 F3      	JSR		L_REALSE_7KEY
+   205 00:F2F7: 27 99         	RMB7	Sys_Flag_A
+   206                        
+   207 00:F2F9: 23 99         	RMB3	Sys_Flag_A
+   208 00:F2FB: 20 9B         	RMB0	Sys_Flag_C		;;清除快加/快减标志位
+   209                        
+   210 00:F2FD: 73 9D         	LDA		R_Key_Flag
+   211 00:F2FF: 51 7F         	AND		#%01111111
+   212 00:F301: 7F 9D         	STA		R_Key_Flag
+   213                        
+   214 00:F303: 15 8E F5      	JSR		Stz_Fast_Hold_Key
+   215 00:F306: 73 BD         	LDA		R_Voice_Unit
+   216 00:F308: 12 06         	BNE		L_End_Null_Key_Prog
+   217                        
+   218                        ;;L_Exit_Null_Key_Prog:
+   219                        ;	ST_DIS
+   220                        	DIS_LCD_IRQ
++  220 00:F30A: 26 0E          RMB6 P_IER
+   221 00:F30C: 24 0F         	RMB4	P_IFR
+   222                        	EN_PA_IRQ
++  222 00:F30E: 2C 0E          SMB4 P_IER
+   223                        L_End_Null_Key_Prog:
+   224 00:F310: 09            	RTS
+   225                        ;============================================================
+   226                        L_REALSE_2KEY:
+   227 00:F311: 30 9D 6A      	BBR0	R_Key_Flag, L_REALSE_2KEY_RTS  ;;判断bit0=0?  =0：不是2key，跳转
+   228 00:F314: 20 9D         	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
+   229 00:F316: 53 00         	LDA		#0
+   230 00:F318: 7F A2         	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
+   231 00:F31A: 53 00         	LDA		#0
+   232 00:F31C: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+   233 00:F31E: 38 9A 2A      	BBS0	Sys_Flag_B,?Start		;;判断是否为计时模式
+   234 00:F321: 73 A1         	LDA		R_Set_Flag
+   235 00:F323: 13 11         	BEQ		?RTS		;;判断R_Set_Flag=0？ 为0 ：不执行 不为0：R_Set_Flag+1
+   236 00:F325: 78 A1         	INC		R_Set_Flag
+   237 00:F327: 73 A1         	LDA		R_Set_Flag
+   238 00:F329: 56 04         	CMP		#4			;;判断R_Set_Flag
+   239 00:F32B: 13 04         	BEQ		?ZERO
+   240 00:F32D: 15 29 F4      	JSR		L_Display_Mode0Prog
+   241 00:F330: 09            	RTS
+   242                        ?ZERO:
+   243 00:F331: 53 00         	LDA		#0				;;R_Set_Flag置0
+   244 00:F333: 7F A1         	STA		R_Set_Flag
+   245 00:F335: 09            	RTS
+   246                        
+   247                        ?RTS:
+   248 00:F336: 3F 9A 08      	BBS7	Sys_Flag_B,?Start_2	;;倒计时结束切换至时间模式后，再按任意键进入计时为正计时
+   249 00:F339: 28 9A         	SMB0	Sys_Flag_B			;;set=0，短按标记，进入计时模式(默认正计时)
+   250 00:F33B: 2A 9A         	SMB2	Sys_Flag_B			;;标记倒计时
+   251 00:F33D: 15 29 F4      	JSR		L_Display_Mode0Prog
+   252 00:F340: 09            	RTS
+   253                        
+   254                        ?Start_2:						;;倒计时结束-->时间模式-->正计时模式
+   255 00:F341: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
+   256 00:F343: 27 9A         	RMB7	Sys_Flag_B			;;清除标记倒计时结束
+   257 00:F345: 22 9A         	RMB2	Sys_Flag_B			;;标记正计时
+   258 00:F347: 15 29 F4      	JSR		L_Display_Mode0Prog
+   259 00:F34A: 09            	RTS
+   260                        
+   261                        ?Start:
+   262 00:F34B: 3A 9A 0A      	BBS2	Sys_Flag_B,?STW			;;判断正/倒计时
+   263 00:F34E: 3B 9A 11      	BBS3	Sys_Flag_B,?CTW_Zero	;;判断是否是正计时为99MS59
+   264 00:F351: 73 9A         	LDA		Sys_Flag_B		;;控制计时开始/暂停
+   265 00:F353: 52 02         	EOR		#BIT1
+   266 00:F355: 7F 9A         	STA		Sys_Flag_B
+   267 00:F357: 09            	rts
+   268                        ?STW:
+   269 00:F358: 3F 9A 17      	BBS7	Sys_Flag_B,?STW_Zero			;;倒计时00MS00
+   270 00:F35B: 73 9A         	LDA		Sys_Flag_B		;;控制计时开始/暂停
+   271 00:F35D: 52 02         	EOR		#BIT1
+   272 00:F35F: 7F 9A         	STA		Sys_Flag_B
+   273 00:F361: 09            	rts
+   274                        
    275                        
-   276                        
-   277                        ?CTW_Zero:
-   278 00:F346: 53 00         	LDA		#0
-   279 00:F348: 7F AB         	STA		R_Stw_Sec		;;清零
-   280 00:F34A: 7F AC         	STA		R_Stw_Min
-   281 00:F34C: 23 9A         	RMB3	Sys_Flag_B
-   282 00:F34E: 22 9A         	RMB2	Sys_Flag_B			;;清零后，标记为正计时
-   283 00:F350: 20 9D         	RMB0	R_Key_Flag
-   284 00:F352: 16 0D F4      	JMP		L_Display_Mode0Prog
-   285 00:F355: 09            	RTS
-   286                        
-   287                        ?STW_Zero:
-   288 00:F356: 22 9A         	RMB2	Sys_Flag_B		;;清除倒计时
-   289 00:F358: 20 9A         	RMB0	Sys_Flag_B		;;时间模式
-   290                        	; RMB7	Sys_Flag_B		;;清除倒计时结束
-   291 00:F35A: 20 9D         	RMB0	R_Key_Flag
-   292                        
-   293 00:F35C: 21 9A         	RMB1	Sys_Flag_B
-   294 00:F35E: 15 0D F4      	JSR		L_Display_Mode0Prog
-   295 00:F361: 09            	RTS
-   296                        
-   297                        L_REALSE_2KEY_RTS:
-   298 00:F362: 09            	RTS
-   299                        ;============================================================
-   300                        L_REALSE_5KEY:
-   301 00:F363: 31 9D 4F      	BBR1	R_Key_Flag,L_REALSE_5KEY_RTS	;;判断是否是PA5按下
-   302 00:F366: 53 00         	LDA		#0
-   303 00:F368: 7F A2         	STA		R_No_Key
-   304 00:F36A: 53 00         	LDA		#0
-   305 00:F36C: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
-   306 00:F36E: 73 A1         	LDA		R_Set_Flag
-   307 00:F370: 13 07         	BEQ		?STW					;;Set=0？ =0：跳转去判断计时模式
-   308 00:F372: 15 83 F4      	JSR		L_Set_Flag_Prog
-   309 00:F375: 15 0D F4      	JSR		L_Display_Mode0Prog
-   310 00:F378: 09            	RTS
-   311                        ?STW:
-   312 00:F379: 30 9A 16      	BBR0	Sys_Flag_B,?CTW_5Key		;;判断是否为计时模式(BIT0=0,跳转)，时间模式切换为计时模式的时候
-   313 00:F37C: 3A 9A 09      	BBS2	Sys_Flag_B,?Ctw_D			;;计时模式下，判断正/倒计时
-   314 00:F37F: 39 9A 33      	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;正计时模式，判断是否为暂停状态
-   315 00:F382: 2A 9A         	SMB2	Sys_Flag_B						;;正计时暂停状态下，按下PA5，标记倒计时
-   316 00:F384: 15 83 F4      	JSR		L_Set_Flag_Prog
-   317 00:F387: 09            	RTS
-   318                        
-   319                        ?Ctw_D:
-   320 00:F388: 39 9A 2A      	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;倒计时模式，判断是否为暂停状态
-   321 00:F38B: 3F 9A 11      	BBS7	Sys_Flag_B,?STW_Zero			;;00MS00
-   322 00:F38E: 15 83 F4      	JSR		L_Set_Flag_Prog
-   323 00:F391: 09            	RTS
-   324                        
-   325                        ?CTW_5Key:
-   326 00:F392: 21 9D         	RMB1	R_Key_Flag
-   327 00:F394: 3F 9A 14      	BBS7	Sys_Flag_B,?Start_5Key_STW		;;倒计时结束切换至时间模式后，再按任意键进入计时为正计时
-   328 00:F397: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
-   329 00:F399: 2A 9A         	SMB2	Sys_Flag_B			;;标记开始时进入计时为倒计时
-   330 00:F39B: 15 0D F4      	JSR		L_Display_Mode0Prog
-   331 00:F39E: 09            	RTS
-   332                        
-   333                        ?STW_Zero:
-   334 00:F39F: 22 9A         	RMB2	Sys_Flag_B		;;清除倒计时
-   335 00:F3A1: 20 9A         	RMB0	Sys_Flag_B		;;时间模式
-   336                        	; RMB7	Sys_Flag_B		;;清除倒计时结束
-   337 00:F3A3: 21 9D         	RMB1	R_Key_Flag
-   338 00:F3A5: 21 9A         	RMB1	Sys_Flag_B
-   339 00:F3A7: 15 0D F4      	JSR		L_Display_Mode0Prog
-   340 00:F3AA: 09            	RTS
-   341                        
-   342                        ?Start_5Key_STW:
-   343 00:F3AB: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
-   344 00:F3AD: 27 9A         	RMB7	Sys_Flag_B			;;清除标记倒计时结束
-   345 00:F3AF: 22 9A         	RMB2	Sys_Flag_B			;;标记正计时
-   346 00:F3B1: 15 0D F4      	JSR		L_Display_Mode0Prog
-   347 00:F3B4: 09            	RTS
+   276                        ?CTW_Zero:
+   277 00:F362: 53 00         	LDA		#0
+   278 00:F364: 7F AB         	STA		R_Stw_Sec		;;清零
+   279 00:F366: 7F AC         	STA		R_Stw_Min
+   280 00:F368: 23 9A         	RMB3	Sys_Flag_B
+   281 00:F36A: 22 9A         	RMB2	Sys_Flag_B			;;清零后，标记为正计时
+   282 00:F36C: 20 9D         	RMB0	R_Key_Flag
+   283 00:F36E: 16 29 F4      	JMP		L_Display_Mode0Prog
+   284 00:F371: 09            	RTS
+   285                        
+   286                        ?STW_Zero:
+   287 00:F372: 22 9A         	RMB2	Sys_Flag_B		;;清除倒计时
+   288 00:F374: 20 9A         	RMB0	Sys_Flag_B		;;时间模式
+   289                        	; RMB7	Sys_Flag_B		;;清除倒计时结束
+   290 00:F376: 20 9D         	RMB0	R_Key_Flag
+   291                        
+   292 00:F378: 21 9A         	RMB1	Sys_Flag_B
+   293 00:F37A: 15 29 F4      	JSR		L_Display_Mode0Prog
+   294 00:F37D: 09            	RTS
+   295                        
+   296                        L_REALSE_2KEY_RTS:
+   297 00:F37E: 09            	RTS
+   298                        ;============================================================
+   299                        L_REALSE_5KEY:
+   300 00:F37F: 31 9D 4F      	BBR1	R_Key_Flag,L_REALSE_5KEY_RTS	;;判断是否是PA5按下
+   301 00:F382: 53 00         	LDA		#0
+   302 00:F384: 7F A2         	STA		R_No_Key
+   303 00:F386: 53 00         	LDA		#0
+   304 00:F388: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+   305 00:F38A: 73 A1         	LDA		R_Set_Flag
+   306 00:F38C: 13 07         	BEQ		?STW					;;Set=0？ =0：跳转去判断计时模式
+   307 00:F38E: 15 9F F4      	JSR		L_Set_Flag_Prog
+   308 00:F391: 15 29 F4      	JSR		L_Display_Mode0Prog
+   309 00:F394: 09            	RTS
+   310                        ?STW:
+   311 00:F395: 30 9A 16      	BBR0	Sys_Flag_B,?CTW_5Key		;;判断是否为计时模式(BIT0=0,跳转)，时间模式切换为计时模式的时候
+   312 00:F398: 3A 9A 09      	BBS2	Sys_Flag_B,?Ctw_D			;;计时模式下，判断正/倒计时
+   313 00:F39B: 39 9A 33      	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;正计时模式，判断是否为暂停状态
+   314 00:F39E: 2A 9A         	SMB2	Sys_Flag_B						;;正计时暂停状态下，按下PA5，标记倒计时
+   315 00:F3A0: 15 9F F4      	JSR		L_Set_Flag_Prog
+   316 00:F3A3: 09            	RTS
+   317                        
+   318                        ?Ctw_D:
+   319 00:F3A4: 39 9A 2A      	BBS1	Sys_Flag_B,L_REALSE_5KEY_RTS	;;倒计时模式，判断是否为暂停状态
+   320 00:F3A7: 3F 9A 11      	BBS7	Sys_Flag_B,?STW_Zero			;;00MS00
+   321 00:F3AA: 15 9F F4      	JSR		L_Set_Flag_Prog
+   322 00:F3AD: 09            	RTS
+   323                        
+   324                        ?CTW_5Key:
+   325 00:F3AE: 21 9D         	RMB1	R_Key_Flag
+   326 00:F3B0: 3F 9A 14      	BBS7	Sys_Flag_B,?Start_5Key_STW		;;倒计时结束切换至时间模式后，再按任意键进入计时为正计时
+   327 00:F3B3: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
+   328 00:F3B5: 2A 9A         	SMB2	Sys_Flag_B			;;标记开始时进入计时为倒计时
+   329 00:F3B7: 15 29 F4      	JSR		L_Display_Mode0Prog
+   330 00:F3BA: 09            	RTS
+   331                        
+   332                        ?STW_Zero:
+   333 00:F3BB: 22 9A         	RMB2	Sys_Flag_B		;;清除倒计时
+   334 00:F3BD: 20 9A         	RMB0	Sys_Flag_B		;;时间模式
+   335                        	; RMB7	Sys_Flag_B		;;清除倒计时结束
+   336 00:F3BF: 21 9D         	RMB1	R_Key_Flag
+   337 00:F3C1: 21 9A         	RMB1	Sys_Flag_B
+   338 00:F3C3: 15 29 F4      	JSR		L_Display_Mode0Prog
+   339 00:F3C6: 09            	RTS
+   340                        
+   341                        ?Start_5Key_STW:
+   342 00:F3C7: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
+   343 00:F3C9: 27 9A         	RMB7	Sys_Flag_B			;;清除标记倒计时结束
+   344 00:F3CB: 22 9A         	RMB2	Sys_Flag_B			;;标记正计时
+   345 00:F3CD: 15 29 F4      	JSR		L_Display_Mode0Prog
+   346 00:F3D0: 09            	RTS
+   347                        
    348                        
-   349                        
-   350                        L_REALSE_5KEY_RTS:
-   351 00:F3B5: 21 9D         	RMB1	R_Key_Flag
-   352 00:F3B7: 09            	RTS
-   353                        
-   354                        ;===============================================================
-   355                        L_REALSE_7KEY:
-   356 00:F3B8: 32 9D 4F      	BBR2	R_Key_Flag,L_REALSE_7KEY_RTS
-   357 00:F3BB: 53 00         	LDA		#0
-   358 00:F3BD: 7F A2         	STA		R_No_Key
-   359 00:F3BF: 53 00         	LDA		#0
-   360 00:F3C1: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
-   361 00:F3C3: 73 A1         	LDA		R_Set_Flag
-   362 00:F3C5: 13 07         	BEQ		?STW
-   363 00:F3C7: 15 83 F4      	JSR		L_Set_Flag_Prog
-   364 00:F3CA: 15 0D F4      	JSR		L_Display_Mode0Prog
-   365 00:F3CD: 09            	RTS
-   366                        ?STW:
-   367 00:F3CE: 30 9A 16      	BBR0	Sys_Flag_B,?CTW_7Key		;;判断是否为计时模式(BIT0=0,跳转)，时间模式切换为计时模式的时候
-   368 00:F3D1: 3A 9A 09      	BBS2	Sys_Flag_B,?Ctw_D			;;判断正/倒计时
-   369 00:F3D4: 39 9A 33      	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;正计时模式，判断是否为暂停状态
-   370 00:F3D7: 2A 9A         	SMB2	Sys_Flag_B						;;正计时暂停状态下，按下PA7，标记倒计时
-   371 00:F3D9: 15 83 F4      	JSR		L_Set_Flag_Prog
-   372 00:F3DC: 09            	RTS
-   373                        
-   374                        ?Ctw_D:
-   375 00:F3DD: 39 9A 2A      	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;倒计时模式，判断是否为暂停状态
-   376 00:F3E0: 3F 9A 11      	BBS7	Sys_Flag_B,?STW_Zero			;;00MS00
-   377 00:F3E3: 15 83 F4      	JSR		L_Set_Flag_Prog
-   378 00:F3E6: 09            	RTS
-   379                        
-   380                        ?CTW_7Key:
-   381 00:F3E7: 22 9D         	RMB2	R_Key_Flag
-   382 00:F3E9: 3F 9A 14      	BBS7	Sys_Flag_B,?Start_7Key_STW	;;倒计时结束切换至时间模式后，再按任意键进入计时为正计时
-   383 00:F3EC: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
-   384 00:F3EE: 2A 9A         	SMB2	Sys_Flag_B			;;标记开始进入计时为倒计时
-   385 00:F3F0: 15 0D F4      	JSR		L_Display_Mode0Prog
-   386 00:F3F3: 09            	RTS
-   387                        
-   388                        ?STW_Zero:
-   389 00:F3F4: 22 9A         	RMB2	Sys_Flag_B		;;清除倒计时
-   390 00:F3F6: 20 9A         	RMB0	Sys_Flag_B		;;时间模式
-   391                        	; RMB7	Sys_Flag_B		;;清除倒计时结束
-   392 00:F3F8: 22 9D         	RMB2	R_Key_Flag
-   393 00:F3FA: 21 9A         	RMB1	Sys_Flag_B
-   394 00:F3FC: 15 0D F4      	JSR		L_Display_Mode0Prog
-   395 00:F3FF: 09            	RTS
-   396                        
-   397                        ?Start_7Key_STW:
-   398 00:F400: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
-   399 00:F402: 27 9A         	RMB7	Sys_Flag_B			;;清除标记倒计时结束
-   400 00:F404: 22 9A         	RMB2	Sys_Flag_B			;;标记正计时
-   401 00:F406: 15 0D F4      	JSR		L_Display_Mode0Prog
-   402 00:F409: 09            	RTS
-   403                        
-   404                        L_REALSE_7KEY_RTS:
-   405 00:F40A: 22 9D         	RMB2	R_Key_Flag
-   406 00:F40C: 09            	RTS
-   407                        
+   349                        L_REALSE_5KEY_RTS:
+   350 00:F3D1: 21 9D         	RMB1	R_Key_Flag
+   351 00:F3D3: 09            	RTS
+   352                        
+   353                        ;===============================================================
+   354                        L_REALSE_7KEY:
+   355 00:F3D4: 32 9D 4F      	BBR2	R_Key_Flag,L_REALSE_7KEY_RTS
+   356 00:F3D7: 53 00         	LDA		#0
+   357 00:F3D9: 7F A2         	STA		R_No_Key
+   358 00:F3DB: 53 00         	LDA		#0
+   359 00:F3DD: 7F A3         	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
+   360 00:F3DF: 73 A1         	LDA		R_Set_Flag
+   361 00:F3E1: 13 07         	BEQ		?STW
+   362 00:F3E3: 15 9F F4      	JSR		L_Set_Flag_Prog
+   363 00:F3E6: 15 29 F4      	JSR		L_Display_Mode0Prog
+   364 00:F3E9: 09            	RTS
+   365                        ?STW:
+   366 00:F3EA: 30 9A 16      	BBR0	Sys_Flag_B,?CTW_7Key		;;判断是否为计时模式(BIT0=0,跳转)，时间模式切换为计时模式的时候
+   367 00:F3ED: 3A 9A 09      	BBS2	Sys_Flag_B,?Ctw_D			;;判断正/倒计时
+   368 00:F3F0: 39 9A 33      	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;正计时模式，判断是否为暂停状态
+   369 00:F3F3: 2A 9A         	SMB2	Sys_Flag_B						;;正计时暂停状态下，按下PA7，标记倒计时
+   370 00:F3F5: 15 9F F4      	JSR		L_Set_Flag_Prog
+   371 00:F3F8: 09            	RTS
+   372                        
+   373                        ?Ctw_D:
+   374 00:F3F9: 39 9A 2A      	BBS1	Sys_Flag_B,L_REALSE_7KEY_RTS	;;倒计时模式，判断是否为暂停状态
+   375 00:F3FC: 3F 9A 11      	BBS7	Sys_Flag_B,?STW_Zero			;;00MS00
+   376 00:F3FF: 15 9F F4      	JSR		L_Set_Flag_Prog
+   377 00:F402: 09            	RTS
+   378                        
+   379                        ?CTW_7Key:
+   380 00:F403: 22 9D         	RMB2	R_Key_Flag
+   381 00:F405: 3F 9A 14      	BBS7	Sys_Flag_B,?Start_7Key_STW	;;倒计时结束切换至时间模式后，再按任意键进入计时为正计时
+   382 00:F408: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
+   383 00:F40A: 2A 9A         	SMB2	Sys_Flag_B			;;标记开始进入计时为倒计时
+   384 00:F40C: 15 29 F4      	JSR		L_Display_Mode0Prog
+   385 00:F40F: 09            	RTS
+   386                        
+   387                        ?STW_Zero:
+   388 00:F410: 22 9A         	RMB2	Sys_Flag_B		;;清除倒计时
+   389 00:F412: 20 9A         	RMB0	Sys_Flag_B		;;时间模式
+   390                        	; RMB7	Sys_Flag_B		;;清除倒计时结束
+   391 00:F414: 22 9D         	RMB2	R_Key_Flag
+   392 00:F416: 21 9A         	RMB1	Sys_Flag_B
+   393 00:F418: 15 29 F4      	JSR		L_Display_Mode0Prog
+   394 00:F41B: 09            	RTS
+   395                        
+   396                        ?Start_7Key_STW:
+   397 00:F41C: 28 9A         	SMB0	Sys_Flag_B			;;标记计时模式
+   398 00:F41E: 27 9A         	RMB7	Sys_Flag_B			;;清除标记倒计时结束
+   399 00:F420: 22 9A         	RMB2	Sys_Flag_B			;;标记正计时
+   400 00:F422: 15 29 F4      	JSR		L_Display_Mode0Prog
+   401 00:F425: 09            	RTS
+   402                        
+   403                        L_REALSE_7KEY_RTS:
+   404 00:F426: 22 9D         	RMB2	R_Key_Flag
+   405 00:F428: 09            	RTS
+   406                        
+   407                        ;===============================================================
    408                        ;===============================================================
-   409                        ;===============================================================
-   410                        L_Display_Mode0Prog:
-   411 00:F40D: 38 9A 0E      	BBS0	Sys_Flag_B,?STW
-   412 00:F410: 73 A1         	LDA		R_Set_Flag
-   413 00:F412: 04            	CLC
-   414 00:F413: 18            	ROL
-   415 00:F414: 1B            	TAX
-   416 00:F415: 63 26 F4      	LDA		T_Display_Table+1,X
-   417 00:F418: 0A            	PHA
-   418 00:F419: 63 25 F4      	LDA		T_Display_Table,X
-   419 00:F41C: 0A            	PHA
-   420 00:F41D: 09            	RTS
-   421                        ?STW:
-   422 00:F41E: 21 9D         	RMB1	R_Key_Flag
-   423 00:F420: 22 9D         	RMB2	R_Key_Flag
-   424 00:F422: 16 03 F6      	JMP		L_STWDisplay_Prog
-   425                        
-   426                        T_Display_Table:
-   427 00:F425: 2C F4         	DW		L_Display_Prog-1	;;R_Set_Flag=0
-   428 00:F427: CA F6         	DW		L_Key5_DisHR-1		;;R_Set_Flag=1
-   429 00:F429: 2C F4         	DW		L_Display_Prog-1	;;R_Set_Flag=2
-   430 00:F42B: 2C F4         	DW		L_Display_Prog-1	;;R_Set_Flag=3
-   431                        
-   432                        L_Display_Prog:
-   433 00:F42D: 15 59 F6      	JSR		F_ClrMs
-   434 00:F430: 15 E5 F7      	JSR		L_Dis_TimeHr
-   435 00:F433: 15 C5 F6      	JSR		L_Dis_TimeMin
-   436 00:F436: 15 C1 F6      	JSR		L_DisCol_Prog
-   437 00:F439: 09            	RTS
+   409                        L_Display_Mode0Prog:
+   410 00:F429: 38 9A 0E      	BBS0	Sys_Flag_B,?STW
+   411 00:F42C: 73 A1         	LDA		R_Set_Flag
+   412 00:F42E: 04            	CLC
+   413 00:F42F: 18            	ROL
+   414 00:F430: 1B            	TAX
+   415 00:F431: 63 42 F4      	LDA		T_Display_Table+1,X
+   416 00:F434: 0A            	PHA
+   417 00:F435: 63 41 F4      	LDA		T_Display_Table,X
+   418 00:F438: 0A            	PHA
+   419 00:F439: 09            	RTS
+   420                        ?STW:
+   421 00:F43A: 21 9D         	RMB1	R_Key_Flag
+   422 00:F43C: 22 9D         	RMB2	R_Key_Flag
+   423 00:F43E: 16 07 F6      	JMP		L_STWDisplay_Prog
+   424                        
+   425                        T_Display_Table:
+   426 00:F441: 48 F4         	DW		L_Display_Prog-1	;;R_Set_Flag=0
+   427 00:F443: CE F6         	DW		L_Key5_DisHR-1		;;R_Set_Flag=1
+   428 00:F445: 48 F4         	DW		L_Display_Prog-1	;;R_Set_Flag=2
+   429 00:F447: 48 F4         	DW		L_Display_Prog-1	;;R_Set_Flag=3
+   430                        
+   431                        L_Display_Prog:
+   432 00:F449: 15 5D F6      	JSR		F_ClrMs
+   433 00:F44C: 15 E9 F7      	JSR		L_Dis_TimeHr
+   434 00:F44F: 15 C9 F6      	JSR		L_Dis_TimeMin
+   435 00:F452: 15 C5 F6      	JSR		L_DisCol_Prog
+   436 00:F455: 09            	RTS
+   437                        ;===============================================================
    438                        ;===============================================================
-   439                        ;===============================================================
-   440                        L_1Hz_Flash_Prog:
-   441 00:F43A: 39 9A 32      	BBS1	Sys_Flag_B,L_MS_Flash	;;是否计时开始状态
-   442 00:F43D: 3F 9A 33      	BBS7	Sys_Flag_B,L_STW_Stop	;;是否结束倒计时
-   443                        L_1Hz_Flash_Prog2:
-   444 00:F440: 38 9B 0D      	BBS0	Sys_Flag_C,?RTS			;;判断bit0=1? =1:快加/快减标志,不执行闪烁
-   445 00:F443: 73 A1         	LDA		R_Set_Flag
-   446 00:F445: 04            	CLC
-   447 00:F446: 18            	ROL
-   448 00:F447: 1B            	TAX
-   449 00:F448: 63 52 F4      	LDA		T_Flash_Table+1,X
-   450 00:F44B: 0A            	PHA
-   451 00:F44C: 63 51 F4      	LDA		T_Flash_Table,X
-   452 00:F44F: 0A            	PHA
-   453                        ?RTS:
-   454 00:F450: 09            	RTS
-   455                        
-   456                        T_Flash_Table:
-   457 00:F451: 58 F4         	DW		L_Flash_Set0-1		;;R_Set_Flag=0
-   458 00:F453: 5F F4         	DW		L_Flash_Set1-1		;;R_Set_Flag=1
-   459 00:F455: 66 F4         	DW		L_Flash_Set2-1		;;R_Set_Flag=2
-   460 00:F457: 6A F4         	DW		L_Flash_Set3-1		;;R_Set_Flag=3
-   461                        
-   462                        L_Flash_Set0:
-   463 00:F459: 38 9A 03      	BBS0	Sys_Flag_B,?RTS		;;判断时间/计时模式
-   464 00:F45C: 15 1F F6      	JSR		F_ClrCol
-   465                        ?RTS:
-   466 00:F45F: 09            	rts
-   467                        L_Flash_Set1:
-   468 00:F460: 15 24 F6      	JSR		F_Clr12
-   469 00:F463: 15 32 F6      	JSR		F_Clr34
-   470 00:F466: 09            	rts
-   471                        L_Flash_Set2:
-   472 00:F467: 15 24 F6      	JSR		F_Clr12
-   473 00:F46A: 09            	rts
-   474                        L_Flash_Set3:
-   475 00:F46B: 15 32 F6      	JSR		F_Clr34
-   476 00:F46E: 09            	rts
-   477                        
-   478                        L_MS_Flash:
-   479 00:F46F: 15 59 F6      	JSR		F_ClrMs
-   480 00:F472: 09            	RTS
-   481                        
-   482                        L_STW_Stop:
-   483 00:F473: 30 9A 09      	BBR0	Sys_Flag_B,?RTS		;;判断时间/计时模式
-   484 00:F476: 15 59 F6      	JSR		F_ClrMs
-   485 00:F479: 15 24 F6      	JSR		F_Clr12
-   486 00:F47C: 15 32 F6      	JSR		F_Clr34
-   487                        ?RTS:
-   488 00:F47F: 15 40 F4      	JSR		L_1Hz_Flash_Prog2
-   489 00:F482: 09            	RTS
-   490                        ; ;=======================================================
-   491                        L_Set_Flag_Prog:
-   492 00:F483: 73 A1         	LDA		R_Set_Flag
-   493 00:F485: 04            	CLC
-   494 00:F486: 18            	ROL
-   495 00:F487: 1B            	TAX
-   496 00:F488: 63 92 F4      	LDA		T_Set_Table+1,X
-   497 00:F48B: 0A            	PHA
-   498 00:F48C: 63 91 F4      	LDA		T_Set_Table,X
-   499 00:F48F: 0A            	PHA
-   500 00:F490: 09            	RTS
-   501                        
-   502                        T_Set_Table:
-   503 00:F491: 98 F4         	DW		L_Flag_Set0-1		;;R_Set_Flag=0
-   504 00:F493: B5 F4         	DW		L_Flag_Set1-1		;;R_Set_Flag=1
-   505 00:F495: CF F4         	DW		L_Flag_Set2-1		;;R_Set_Flag=2
-   506 00:F497: E8 F4         	DW		L_Flag_Set3-1		;;R_Set_Flag=3
-   507                        
-   508                        L_Flag_Set0:
-   509 00:F499: 31 9D 0B      	BBR1	R_Key_Flag, L_REALSE_CTW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
-   510 00:F49C: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   511 00:F49E: 15 CE F7      	JSR		R_CtwInc_Min				;;"分"加
-   512 00:F4A1: 73 AC         	LDA		R_Stw_Min
-   513 00:F4A3: 15 77 F6      	JSR		L_Dis_Digit12
-   514 00:F4A6: 09            	RTS
-   515                        L_REALSE_CTW7KEY_SecFlag:
-   516 00:F4A7: 32 9D 0B      	BBR2	R_Key_Flag,?RTS  ;;判断bit2=0?  =0：不是7key，跳转
-   517 00:F4AA: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
-   518 00:F4AC: 15 CA F7      	JSR		R_CtwInc_Sec				;;"秒"加
-   519 00:F4AF: 73 AB         	LDA		R_Stw_Sec
-   520 00:F4B1: 15 8A F6      	JSR		L_Dis_Digit34
-   521 00:F4B4: 09            	RTS
-   522                        ?RTS:
-   523 00:F4B5: 09            	rts
+   439                        L_1Hz_Flash_Prog:
+   440 00:F456: 39 9A 32      	BBS1	Sys_Flag_B,L_MS_Flash	;;是否计时开始状态
+   441 00:F459: 3F 9A 33      	BBS7	Sys_Flag_B,L_STW_Stop	;;是否结束倒计时
+   442                        L_1Hz_Flash_Prog2:
+   443 00:F45C: 38 9B 0D      	BBS0	Sys_Flag_C,?RTS			;;判断bit0=1? =1:快加/快减标志,不执行闪烁
+   444 00:F45F: 73 A1         	LDA		R_Set_Flag
+   445 00:F461: 04            	CLC
+   446 00:F462: 18            	ROL
+   447 00:F463: 1B            	TAX
+   448 00:F464: 63 6E F4      	LDA		T_Flash_Table+1,X
+   449 00:F467: 0A            	PHA
+   450 00:F468: 63 6D F4      	LDA		T_Flash_Table,X
+   451 00:F46B: 0A            	PHA
+   452                        ?RTS:
+   453 00:F46C: 09            	RTS
+   454                        
+   455                        T_Flash_Table:
+   456 00:F46D: 74 F4         	DW		L_Flash_Set0-1		;;R_Set_Flag=0
+   457 00:F46F: 7B F4         	DW		L_Flash_Set1-1		;;R_Set_Flag=1
+   458 00:F471: 82 F4         	DW		L_Flash_Set2-1		;;R_Set_Flag=2
+   459 00:F473: 86 F4         	DW		L_Flash_Set3-1		;;R_Set_Flag=3
+   460                        
+   461                        L_Flash_Set0:
+   462 00:F475: 38 9A 03      	BBS0	Sys_Flag_B,?RTS		;;判断时间/计时模式
+   463 00:F478: 15 23 F6      	JSR		F_ClrCol
+   464                        ?RTS:
+   465 00:F47B: 09            	rts
+   466                        L_Flash_Set1:
+   467 00:F47C: 15 28 F6      	JSR		F_Clr12
+   468 00:F47F: 15 36 F6      	JSR		F_Clr34
+   469 00:F482: 09            	rts
+   470                        L_Flash_Set2:
+   471 00:F483: 15 28 F6      	JSR		F_Clr12
+   472 00:F486: 09            	rts
+   473                        L_Flash_Set3:
+   474 00:F487: 15 36 F6      	JSR		F_Clr34
+   475 00:F48A: 09            	rts
+   476                        
+   477                        L_MS_Flash:
+   478 00:F48B: 15 5D F6      	JSR		F_ClrMs
+   479 00:F48E: 09            	RTS
+   480                        
+   481                        L_STW_Stop:
+   482 00:F48F: 30 9A 09      	BBR0	Sys_Flag_B,?RTS		;;判断时间/计时模式
+   483 00:F492: 15 5D F6      	JSR		F_ClrMs
+   484 00:F495: 15 28 F6      	JSR		F_Clr12
+   485 00:F498: 15 36 F6      	JSR		F_Clr34
+   486                        ?RTS:
+   487 00:F49B: 15 5C F4      	JSR		L_1Hz_Flash_Prog2
+   488 00:F49E: 09            	RTS
+   489                        ; ;=======================================================
+   490                        L_Set_Flag_Prog:
+   491 00:F49F: 73 A1         	LDA		R_Set_Flag
+   492 00:F4A1: 04            	CLC
+   493 00:F4A2: 18            	ROL
+   494 00:F4A3: 1B            	TAX
+   495 00:F4A4: 63 AE F4      	LDA		T_Set_Table+1,X
+   496 00:F4A7: 0A            	PHA
+   497 00:F4A8: 63 AD F4      	LDA		T_Set_Table,X
+   498 00:F4AB: 0A            	PHA
+   499 00:F4AC: 09            	RTS
+   500                        
+   501                        T_Set_Table:
+   502 00:F4AD: B4 F4         	DW		L_Flag_Set0-1		;;R_Set_Flag=0
+   503 00:F4AF: D1 F4         	DW		L_Flag_Set1-1		;;R_Set_Flag=1
+   504 00:F4B1: EB F4         	DW		L_Flag_Set2-1		;;R_Set_Flag=2
+   505 00:F4B3: 04 F5         	DW		L_Flag_Set3-1		;;R_Set_Flag=3
+   506                        
+   507                        L_Flag_Set0:
+   508 00:F4B5: 31 9D 0B      	BBR1	R_Key_Flag, L_REALSE_CTW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
+   509 00:F4B8: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   510 00:F4BA: 15 D2 F7      	JSR		R_CtwInc_Min				;;"分"加
+   511 00:F4BD: 73 AC         	LDA		R_Stw_Min
+   512 00:F4BF: 15 7B F6      	JSR		L_Dis_Digit12
+   513 00:F4C2: 09            	RTS
+   514                        L_REALSE_CTW7KEY_SecFlag:
+   515 00:F4C3: 32 9D 0B      	BBR2	R_Key_Flag,?RTS  ;;判断bit2=0?  =0：不是7key，跳转
+   516 00:F4C6: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
+   517 00:F4C8: 15 CE F7      	JSR		R_CtwInc_Sec				;;"秒"加
+   518 00:F4CB: 73 AB         	LDA		R_Stw_Sec
+   519 00:F4CD: 15 8E F6      	JSR		L_Dis_Digit34
+   520 00:F4D0: 09            	RTS
+   521                        ?RTS:
+   522 00:F4D1: 09            	rts
+   523                        
    524                        
-   525                        
-   526                        L_Flag_Set1:					;;12/24HR
-   527 00:F4B6: 31 9D 06      	BBR1	R_Key_Flag, L_REALSE_7KEY_12or24Flag  ;;判断bit1=0?  =0：不是5key，跳转
-   528 00:F4B9: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   529 00:F4BB: 15 C9 F4      	JSR		L_REALSE_12or24Flag
-   530 00:F4BE: 09            	RTS
-   531                        L_REALSE_7KEY_12or24Flag:
-   532 00:F4BF: 32 9D 06      	BBR2	R_Key_Flag,?RTS  	;;判断bit2=0?  =0：不是7key，跳转
-   533 00:F4C2: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
-   534 00:F4C4: 15 C9 F4      	JSR		L_REALSE_12or24Flag
-   535 00:F4C7: 09            	RTS
-   536                        ?RTS:
-   537 00:F4C8: 09            	rts
-   538                        
-   539                        L_REALSE_12or24Flag:
-   540 00:F4C9: 73 9A         	LDA		Sys_Flag_B
-   541 00:F4CB: 52 20         	EOR		#BIT5
-   542 00:F4CD: 7F 9A         	STA		Sys_Flag_B			;;改变bit5位
-   543 00:F4CF: 09            	RTS
+   525                        L_Flag_Set1:					;;12/24HR
+   526 00:F4D2: 31 9D 06      	BBR1	R_Key_Flag, L_REALSE_7KEY_12or24Flag  ;;判断bit1=0?  =0：不是5key，跳转
+   527 00:F4D5: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   528 00:F4D7: 15 E5 F4      	JSR		L_REALSE_12or24Flag
+   529 00:F4DA: 09            	RTS
+   530                        L_REALSE_7KEY_12or24Flag:
+   531 00:F4DB: 32 9D 06      	BBR2	R_Key_Flag,?RTS  	;;判断bit2=0?  =0：不是7key，跳转
+   532 00:F4DE: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
+   533 00:F4E0: 15 E5 F4      	JSR		L_REALSE_12or24Flag
+   534 00:F4E3: 09            	RTS
+   535                        ?RTS:
+   536 00:F4E4: 09            	rts
+   537                        
+   538                        L_REALSE_12or24Flag:
+   539 00:F4E5: 73 9A         	LDA		Sys_Flag_B
+   540 00:F4E7: 52 20         	EOR		#BIT5
+   541 00:F4E9: 7F 9A         	STA		Sys_Flag_B			;;改变bit5位
+   542 00:F4EB: 09            	RTS
+   543                        
    544                        
-   545                        
-   546                        L_Flag_Set2:
-   547 00:F4D0: 31 9D 09      	BBR1	R_Key_Flag, L_REALSE_7KEY_HrFlag  ;;判断bit1=0?  =0：不是5key，跳转
-   548 00:F4D3: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   549 00:F4D5: 15 6E F7      	JSR		F_HrInc				;;"时"加
-   550 00:F4D8: 15 E5 F7      	JSR		L_Dis_TimeHr
-   551 00:F4DB: 09            	RTS
-   552                        L_REALSE_7KEY_HrFlag:
-   553 00:F4DC: 32 9D 09      	BBR2	R_Key_Flag,?RTS  ;;判断bit2=0?  =0：不是7key，跳转
-   554 00:F4DF: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
-   555 00:F4E1: 15 74 F7      	JSR		F_HrDec				;;"时"减
-   556 00:F4E4: 15 E5 F7      	JSR		L_Dis_TimeHr
-   557 00:F4E7: 09            	RTS
-   558                        ?RTS:
-   559 00:F4E8: 09            	rts
-   560                        
-   561                        L_Flag_Set3:
-   562 00:F4E9: 31 9D 09      	BBR1	R_Key_Flag, L_REALSE_7KEY_MinFlag  ;;判断bit1=0?  =0：不是5key，跳转
-   563 00:F4EC: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   564 00:F4EE: 15 7A F7      	JSR		F_MinInc				;;"分"加
-   565 00:F4F1: 15 E5 F7      	JSR		L_Dis_TimeHr
-   566 00:F4F4: 09            	RTS
-   567                        L_REALSE_7KEY_MinFlag:
-   568 00:F4F5: 32 9D 09      	BBR2	R_Key_Flag,?RTS	 ;;判断bit2=0?  =0：不是7key，跳转
-   569 00:F4F8: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
-   570 00:F4FA: 15 7E F7      	JSR		F_MinDec				;;"分"减
-   571 00:F4FD: 15 E5 F7      	JSR		L_Dis_TimeHr
-   572 00:F500: 09            	RTS
-   573                        ?RTS:
-   574 00:F501: 09            	rts
-   575                        ; ;=======================================================
-   576                        L_FastAdd_Prog:
-   577 00:F502: 28 9B         	SMB0	Sys_Flag_C			;;标记快加
-   578 00:F504: 73 A1         	LDA		R_Set_Flag
-   579 00:F506: 04            	CLC
-   580 00:F507: 18            	ROL
-   581 00:F508: 1B            	TAX
-   582 00:F509: 63 13 F5      	LDA		T_FastAdd_Table+1,X
-   583 00:F50C: 0A            	PHA
-   584 00:F50D: 63 12 F5      	LDA		T_FastAdd_Table,X
-   585 00:F510: 0A            	PHA
-   586 00:F511: 09            	RTS
-   587                        
-   588                        T_FastAdd_Table:
-   589 00:F512: 19 F5         	DW		L_FastAdd_Set0-1		;;R_Set_Flag=0
-   590 00:F514: 36 F5         	DW		L_FastAdd_Set1-1		;;R_Set_Flag=1
-   591 00:F516: 37 F5         	DW		L_FastAdd_Set2-1		;;R_Set_Flag=2
-   592 00:F518: 3E F5         	DW		L_FastAdd_Set3-1		;;R_Set_Flag=3
-   593                        
-   594                        L_FastAdd_Set0:
-   595 00:F51A: 31 9D 0B      	BBR1	R_Key_Flag,L_FsatAdd_CTW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
-   596 00:F51D: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   597 00:F51F: 15 CE F7      	JSR		R_CtwInc_Min				;;"分"加
-   598 00:F522: 73 AC         	LDA		R_Stw_Min
-   599 00:F524: 15 77 F6      	JSR		L_Dis_Digit12
-   600 00:F527: 09            	RTS
+   545                        L_Flag_Set2:
+   546 00:F4EC: 31 9D 09      	BBR1	R_Key_Flag, L_REALSE_7KEY_HrFlag  ;;判断bit1=0?  =0：不是5key，跳转
+   547 00:F4EF: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   548 00:F4F1: 15 72 F7      	JSR		F_HrInc				;;"时"加
+   549 00:F4F4: 15 E9 F7      	JSR		L_Dis_TimeHr
+   550 00:F4F7: 09            	RTS
+   551                        L_REALSE_7KEY_HrFlag:
+   552 00:F4F8: 32 9D 09      	BBR2	R_Key_Flag,?RTS  ;;判断bit2=0?  =0：不是7key，跳转
+   553 00:F4FB: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
+   554 00:F4FD: 15 78 F7      	JSR		F_HrDec				;;"时"减
+   555 00:F500: 15 E9 F7      	JSR		L_Dis_TimeHr
+   556 00:F503: 09            	RTS
+   557                        ?RTS:
+   558 00:F504: 09            	rts
+   559                        
+   560                        L_Flag_Set3:
+   561 00:F505: 31 9D 09      	BBR1	R_Key_Flag, L_REALSE_7KEY_MinFlag  ;;判断bit1=0?  =0：不是5key，跳转
+   562 00:F508: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   563 00:F50A: 15 7E F7      	JSR		F_MinInc				;;"分"加
+   564 00:F50D: 15 E9 F7      	JSR		L_Dis_TimeHr
+   565 00:F510: 09            	RTS
+   566                        L_REALSE_7KEY_MinFlag:
+   567 00:F511: 32 9D 09      	BBR2	R_Key_Flag,?RTS	 ;;判断bit2=0?  =0：不是7key，跳转
+   568 00:F514: 22 9D         	RMB2	R_Key_Flag			;;bit2=1时，清除-->bit2=0
+   569 00:F516: 15 82 F7      	JSR		F_MinDec				;;"分"减
+   570 00:F519: 15 E9 F7      	JSR		L_Dis_TimeHr
+   571 00:F51C: 09            	RTS
+   572                        ?RTS:
+   573 00:F51D: 09            	rts
+   574                        ; ;=======================================================
+   575                        L_FastAdd_Prog:
+   576 00:F51E: 28 9B         	SMB0	Sys_Flag_C			;;标记快加
+   577 00:F520: 73 A1         	LDA		R_Set_Flag
+   578 00:F522: 04            	CLC
+   579 00:F523: 18            	ROL
+   580 00:F524: 1B            	TAX
+   581 00:F525: 63 2F F5      	LDA		T_FastAdd_Table+1,X
+   582 00:F528: 0A            	PHA
+   583 00:F529: 63 2E F5      	LDA		T_FastAdd_Table,X
+   584 00:F52C: 0A            	PHA
+   585 00:F52D: 09            	RTS
+   586                        
+   587                        T_FastAdd_Table:
+   588 00:F52E: 35 F5         	DW		L_FastAdd_Set0-1		;;R_Set_Flag=0
+   589 00:F530: 56 F5         	DW		L_FastAdd_Set1-1		;;R_Set_Flag=1
+   590 00:F532: 57 F5         	DW		L_FastAdd_Set2-1		;;R_Set_Flag=2
+   591 00:F534: 5E F5         	DW		L_FastAdd_Set3-1		;;R_Set_Flag=3
+   592                        
+   593                        L_FastAdd_Set0:
+   594 00:F536: 31 9D 0D      	BBR1	R_Key_Flag,L_FsatAdd_CTW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
+   595 00:F539: 26 99         	RMB6	Sys_Flag_A
+   596 00:F53B: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   597 00:F53D: 15 D2 F7      	JSR		R_CtwInc_Min				;;"分"加
+   598 00:F540: 73 AC         	LDA		R_Stw_Min
+   599 00:F542: 15 7B F6      	JSR		L_Dis_Digit12
+   600 00:F545: 09            	RTS
    601                        L_FsatAdd_CTW7KEY_SecFlag:
-   602 00:F528: 32 9D 0B      	BBR2	R_Key_Flag,?RTS  ;;判断bit1=0?  =0：不是7key，跳转
-   603 00:F52B: 22 9D         	RMB2	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   604 00:F52D: 15 CA F7      	JSR		R_CtwInc_Sec				;;"秒"加
-   605 00:F530: 73 AB         	LDA		R_Stw_Sec
-   606 00:F532: 15 8A F6      	JSR		L_Dis_Digit34
-   607 00:F535: 09            	rts
-   608                        ?RTS:
-   609 00:F536: 09            	RTS
-   610                        
-   611                        L_FastAdd_Set1:
-   612 00:F537: 09            	rts
-   613                        L_FastAdd_Set2:
-   614 00:F538: 15 6E F7      	JSR		F_HrInc				;;"时"加
-   615 00:F53B: 15 E5 F7      	JSR		L_Dis_TimeHr
-   616 00:F53E: 09            	RTS
-   617                        
-   618                        L_FastAdd_Set3:
-   619 00:F53F: 15 7A F7      	JSR		F_MinInc				;;"分"加
-   620 00:F542: 15 C5 F6      	JSR		L_Dis_TimeMin
-   621 00:F545: 09            	RTS
-   622                        ; ;=======================================================
-   623                        L_FastDec_Prog:
-   624 00:F546: 28 9B         	SMB0	Sys_Flag_C		;;标记快减
-   625 00:F548: 73 A1         	LDA		R_Set_Flag
-   626 00:F54A: 04            	CLC
-   627 00:F54B: 18            	ROL
-   628 00:F54C: 1B            	TAX
-   629 00:F54D: 63 57 F5      	LDA		T_FastDec_Table+1,X
-   630 00:F550: 0A            	PHA
-   631 00:F551: 63 56 F5      	LDA		T_FastDec_Table,X
-   632 00:F554: 0A            	PHA
-   633 00:F555: 09            	RTS
-   634                        
-   635                        T_FastDec_Table:
-   636 00:F556: 5D F5         	DW		L_FastDec_Set0-1		;;R_Set_Flag=0
-   637 00:F558: 7A F5         	DW		L_FastDec_Set1-1		;;R_Set_Flag=1
-   638 00:F55A: 7B F5         	DW		L_FastDec_Set2-1		;;R_Set_Flag=2
-   639 00:F55C: 82 F5         	DW		L_FastDec_Set3-1		;;R_Set_Flag=3
-   640                        
-   641                        L_FastDec_Set0:
-   642 00:F55E: 31 9D 0B      	BBR1	R_Key_Flag, L_FsatAdd_STW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
-   643 00:F561: 21 9D         	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   644 00:F563: 15 CE F7      	JSR		R_CtwInc_Min				;;"分"加
-   645 00:F566: 73 AC         	LDA		R_Stw_Min
-   646 00:F568: 15 77 F6      	JSR		L_Dis_Digit12
-   647 00:F56B: 09            	RTS
-   648                        L_FsatAdd_STW7KEY_SecFlag:
-   649 00:F56C: 32 9D 0B      	BBR2	R_Key_Flag,?RTS  ;;判断bit1=0?  =0：不是7key，跳转
-   650 00:F56F: 22 9D         	RMB2	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-   651 00:F571: 15 CA F7      	JSR		R_CtwInc_Sec				;;"秒"加
-   652 00:F574: 73 AB         	LDA		R_Stw_Sec
-   653 00:F576: 15 8A F6      	JSR		L_Dis_Digit34
-   654 00:F579: 09            	rts
-   655                        ?RTS:
-   656 00:F57A: 09            	RTS
+   602 00:F546: 32 9D 0D      	BBR2	R_Key_Flag,?RTS  ;;判断bit1=0?  =0：不是7key，跳转
+   603 00:F549: 27 99         	RMB7	Sys_Flag_A
+   604 00:F54B: 22 9D         	RMB2	R_Key_Flag			;;bit1=1时，清除-->bit1=0
+   605 00:F54D: 15 CE F7      	JSR		R_CtwInc_Sec				;;"秒"加
+   606 00:F550: 73 AB         	LDA		R_Stw_Sec
+   607 00:F552: 15 8E F6      	JSR		L_Dis_Digit34
+   608 00:F555: 09            	rts
+   609                        ?RTS:
+   610 00:F556: 09            	RTS
+   611                        
+   612                        L_FastAdd_Set1:
+   613 00:F557: 09            	rts
+   614                        L_FastAdd_Set2:
+   615 00:F558: 15 72 F7      	JSR		F_HrInc				;;"时"加
+   616 00:F55B: 15 E9 F7      	JSR		L_Dis_TimeHr
+   617 00:F55E: 09            	RTS
+   618                        
+   619                        L_FastAdd_Set3:
+   620 00:F55F: 15 7E F7      	JSR		F_MinInc				;;"分"加
+   621 00:F562: 15 C9 F6      	JSR		L_Dis_TimeMin
+   622 00:F565: 09            	RTS
+   623                        ; ;=======================================================
+   624                        L_FastDec_Prog:
+   625 00:F566: 28 9B         	SMB0	Sys_Flag_C		;;标记快减
+   626 00:F568: 73 A1         	LDA		R_Set_Flag
+   627 00:F56A: 04            	CLC
+   628 00:F56B: 18            	ROL
+   629 00:F56C: 1B            	TAX
+   630 00:F56D: 63 77 F5      	LDA		T_FastDec_Table+1,X
+   631 00:F570: 0A            	PHA
+   632 00:F571: 63 76 F5      	LDA		T_FastDec_Table,X
+   633 00:F574: 0A            	PHA
+   634 00:F575: 09            	RTS
+   635                        
+   636                        T_FastDec_Table:
+   637 00:F576: 7D F5         	DW		L_FastDec_Set0-1		;;R_Set_Flag=0
+   638 00:F578: 7E F5         	DW		L_FastDec_Set1-1		;;R_Set_Flag=1
+   639 00:F57A: 7F F5         	DW		L_FastDec_Set2-1		;;R_Set_Flag=2
+   640 00:F57C: 86 F5         	DW		L_FastDec_Set3-1		;;R_Set_Flag=3
+   641                        
+   642                        L_FastDec_Set0:
+   643 00:F57E: 09            	RTS
+   644                        
+   645                        L_FastDec_Set1:
+   646 00:F57F: 09            	rts
+   647                        L_FastDec_Set2:
+   648 00:F580: 15 78 F7      	JSR		F_HrDec				;;"时"减
+   649 00:F583: 15 E9 F7      	JSR		L_Dis_TimeHr
+   650 00:F586: 09            	RTS
+   651                        
+   652                        L_FastDec_Set3:
+   653 00:F587: 15 82 F7      	JSR		F_MinDec				;;"分"减
+   654 00:F58A: 15 C9 F6      	JSR		L_Dis_TimeMin
+   655 00:F58D: 09            	RTS
+   656                        
    657                        
-   658                        L_FastDec_Set1:
-   659 00:F57B: 09            	rts
-   660                        L_FastDec_Set2:
-   661 00:F57C: 15 74 F7      	JSR		F_HrDec				;;"时"减
-   662 00:F57F: 15 E5 F7      	JSR		L_Dis_TimeHr
-   663 00:F582: 09            	RTS
-   664                        
-   665                        L_FastDec_Set3:
-   666 00:F583: 15 7E F7      	JSR		F_MinDec				;;"分"减
-   667 00:F586: 15 C5 F6      	JSR		L_Dis_TimeMin
-   668 00:F589: 09            	RTS
+   658                        ;============================================================
+   659                        Stz_Fast_Hold_Key:
+   660 00:F58E: 53 00         	LDA		#0
+   661 00:F590: 7F BF         	STA		R_Fast_Time
+   662 00:F592: 7F BE         	STA		R_KeyHold_Time
+   663 00:F594: 09            	RTS
+   664                        ;============================================================
+   665                        ;===============================================================
+   666                        ; F_KeyUpdateDis:
+   667                        ; 	JSR		F_ClearScreen
+   668                        ; 	; JMP		L_Display_Prog
    669                        
    670                        
-   671                        ;============================================================
-   672                        Stz_Fast_Hold_Key:
-   673 00:F58A: 53 00         	LDA		#0
-   674 00:F58C: 7F BF         	STA		R_Fast_Time
-   675 00:F58E: 7F BE         	STA		R_KeyHold_Time
-   676 00:F590: 09            	RTS
-   677                        ;============================================================
-   678                        ;===============================================================
-   679                        ; F_KeyUpdateDis:
-   680                        ; 	JSR		F_ClearScreen
-   681                        ; 	; JMP		L_Display_Prog
-   682                        
+   671                        ; L_Beep_Control_Prog:			;控制声音频率
+   672                        ; 	LDA		Sys_Flag_B
+   673                        ; 	AND		#BIT2				;静音状态不发出声音
+   674                        ; 	BNE		L_StzVoice
+   675                        
+   676                        ; 	LDA     Sys_Flag_B
+   677                        ;     AND     #BIT3
+   678                        ;     BEQ     L_Set16HzBIT
+   679                        
+   680                        ; 	LDA		Sys_Flag_B
+   681                        ; 	AND		#BIT3_
+   682                        ; 	STA		Sys_Flag_B
    683                        
-   684                        ; L_Beep_Control_Prog:			;控制声音频率
-   685                        ; 	LDA		Sys_Flag_B
-   686                        ; 	AND		#BIT2				;静音状态不发出声音
-   687                        ; 	BNE		L_StzVoice
-   688                        
-   689                        ; 	LDA     Sys_Flag_B
-   690                        ;     AND     #BIT3
-   691                        ;     BEQ     L_Set16HzBIT
-   692                        
-   693                        ; 	LDA		Sys_Flag_B
-   694                        ; 	AND		#BIT3_
-   695                        ; 	STA		Sys_Flag_B
-   696                        
-   697                        
-   698                        
-   699                        ; 	LDA		R_Voice_Unit
-   700                        ; 	BEQ		L_End_OpenBeep
-   701                        ; 	DEC		R_Voice_Unit
-   702                        ; 	BNE		L_ContinueJudge
-   703                        ; 	;JSR		L_LightOff
-   704                        ; 	BRA		L_CloseBeep
-   705                        ; L_ContinueJudge:
-   706                        ; 	LDA		R_Voice_Unit
-   707                        ; 	AND		#BIT0
-   708                        ; 	BEQ		L_JudgeOpenBeep	;L_OpenBeep
-   709                        ; 	BRA		L_CloseBeep
-   710                        ; ;	JSR		L_LightOn
-   711                        ; L_StzVoice:
-   712                        ; 	LDA		#0
-   713                        ; 	STA		R_Voice_Unit
-   714                        ; L_CloseBeep:
-   715                        ; 	PB2_PB2_NMOS
-   716                        ; 	PB3_PB3_NMOS
-   717                        ; 	LDA	 #$FF
-   718                        ; 	STA	 P_PB
-   719                        ; 	PWM_OFF
-   720                        ; 	RTS
-   721                        
-   722                        ; L_JudgeOpenBeep:
-   723                        ; ;	JSR		L_LightOff
-   724                        ; L_OpenBeep:
-   725                        ; 	PB2_PWM
-   726                        ;     LDA	 #$FF
-   727                        ; 	STA	 P_PB
-   728                        ; 	PB3_PWM
-   729                        ; 	PWM_ON
-   730                        
-   731                        ; ?3Key:
-   732                        ;     TONE_4KHZ_3_4_Duty
-   733                        ; 	;TONE_2KHZ_3_4_Duty
-   734                        ; 	;PWM_ON
-   735                        ; 	RTS
-   736                        ; L_End_OpenBeep:
-   737                        ; 	RTS
-   738                        
-   739                        ; L_Set16HzBIT:
-   740                        ; 	LDA		Sys_Flag_B
-   741                        ; 	ORA		#BIT3
-   742                        ; 	STA		Sys_Flag_B
-   743                        ; 	RTS
-   744                        ;;--------------------------------------------------------------
-   745                        ;;==============================================================
-   746                        ;;==============================================================
-   747                        ; F_KeyIoPCInputLow:
-   748                        ; 	LDA		PCDIR_TEMP
-   749                        ; 	AND		#00000000B
-   750                        ; 	STA		PCDIR_TEMP
-   751                        ; 	STA		PCDIR
-   752                        ; 	LDA		PC_TEMP
-   753                        ; 	AND		#00000000B
-   754                        ; 	STA		PC_TEMP
-   755                        ; 	STA		PC
-   756                        ; 	NOP
-   757                        ; 	LDA		PCDIR_TEMP
-   758                        ; 	ORA		#00111111B
-   759                        ; 	STA		PCDIR_TEMP
-   760                        ; 	STA		PCDIR
-   761                        ; 	LDA		PC_TEMP
-   762                        ; 	ORA		#00111111B
-   763                        ; 	STA		PC_TEMP
-   764                        ; 	STA		PC
-   765                        ; 	RTS
-   766                        
-   767                        ; F_KeyIoPCOutputLow:
-   768                        ; 	LDA		PCDIR_TEMP
-   769                        ; 	AND		#00000000B
-   770                        ; 	STA		PCDIR_TEMP
-   771                        ; 	STA		PCDIR
-   772                        ; 	LDA		PC_TEMP
-   773                        ; 	AND		#00000000B
-   774                        ; 	STA		PC_TEMP
-   775                        ; 	STA		PC
-   776                        ; 	RTS
-   777                        
-   778                        
-   779                        ; F_KeyIoPAOutputLow:
-   780                        ; 	LDA		PADIR_TEMP
-   781                        ; 	AND		#11111011B
-   782                        ; 	STA		PADIR_TEMP
-   783                        ; 	STA		PADIR
-   784                        ; 	LDA		PA_TEMP
-   785                        ; 	ORA		#00000100B
-   786                        ; 	STA		PA_TEMP
-   787                        ; 	STA		PA
-   788                        ; 	RTS
-   789                        
-   790                        F_KeyIoPAInputHigh:
-   791 00:F591: 73 CB         	LDA		PADIR_TEMP
-   792 00:F593: 50 A4         	ORA		#10100100B
-   793 00:F595: 7F CB         	STA		PADIR_TEMP
-   794 00:F597: 7F 04         	STA		PADIR
-   795 00:F599: 73 CC         	LDA		PA_TEMP
-   796 00:F59B: 51 5B         	AND		#01011011B
-   797 00:F59D: 7F CC         	STA		PA_TEMP
-   798 00:F59F: 7F 01         	STA		PA
-   799 00:F5A1: 09            	RTS
+   684                        
+   685                        
+   686                        ; 	LDA		R_Voice_Unit
+   687                        ; 	BEQ		L_End_OpenBeep
+   688                        ; 	DEC		R_Voice_Unit
+   689                        ; 	BNE		L_ContinueJudge
+   690                        ; 	;JSR		L_LightOff
+   691                        ; 	BRA		L_CloseBeep
+   692                        ; L_ContinueJudge:
+   693                        ; 	LDA		R_Voice_Unit
+   694                        ; 	AND		#BIT0
+   695                        ; 	BEQ		L_JudgeOpenBeep	;L_OpenBeep
+   696                        ; 	BRA		L_CloseBeep
+   697                        ; ;	JSR		L_LightOn
+   698                        ; L_StzVoice:
+   699                        ; 	LDA		#0
+   700                        ; 	STA		R_Voice_Unit
+   701                        ; L_CloseBeep:
+   702                        ; 	PB2_PB2_NMOS
+   703                        ; 	PB3_PB3_NMOS
+   704                        ; 	LDA	 #$FF
+   705                        ; 	STA	 P_PB
+   706                        ; 	PWM_OFF
+   707                        ; 	RTS
+   708                        
+   709                        ; L_JudgeOpenBeep:
+   710                        ; ;	JSR		L_LightOff
+   711                        ; L_OpenBeep:
+   712                        ; 	PB2_PWM
+   713                        ;     LDA	 #$FF
+   714                        ; 	STA	 P_PB
+   715                        ; 	PB3_PWM
+   716                        ; 	PWM_ON
+   717                        
+   718                        ; ?3Key:
+   719                        ;     TONE_4KHZ_3_4_Duty
+   720                        ; 	;TONE_2KHZ_3_4_Duty
+   721                        ; 	;PWM_ON
+   722                        ; 	RTS
+   723                        ; L_End_OpenBeep:
+   724                        ; 	RTS
+   725                        
+   726                        ; L_Set16HzBIT:
+   727                        ; 	LDA		Sys_Flag_B
+   728                        ; 	ORA		#BIT3
+   729                        ; 	STA		Sys_Flag_B
+   730                        ; 	RTS
+   731                        ;;--------------------------------------------------------------
+   732                        ;;==============================================================
+   733                        ;;==============================================================
+   734                        ; F_KeyIoPCInputLow:
+   735                        ; 	LDA		PCDIR_TEMP
+   736                        ; 	AND		#00000000B
+   737                        ; 	STA		PCDIR_TEMP
+   738                        ; 	STA		PCDIR
+   739                        ; 	LDA		PC_TEMP
+   740                        ; 	AND		#00000000B
+   741                        ; 	STA		PC_TEMP
+   742                        ; 	STA		PC
+   743                        ; 	NOP
+   744                        ; 	LDA		PCDIR_TEMP
+   745                        ; 	ORA		#00111111B
+   746                        ; 	STA		PCDIR_TEMP
+   747                        ; 	STA		PCDIR
+   748                        ; 	LDA		PC_TEMP
+   749                        ; 	ORA		#00111111B
+   750                        ; 	STA		PC_TEMP
+   751                        ; 	STA		PC
+   752                        ; 	RTS
+   753                        
+   754                        ; F_KeyIoPCOutputLow:
+   755                        ; 	LDA		PCDIR_TEMP
+   756                        ; 	AND		#00000000B
+   757                        ; 	STA		PCDIR_TEMP
+   758                        ; 	STA		PCDIR
+   759                        ; 	LDA		PC_TEMP
+   760                        ; 	AND		#00000000B
+   761                        ; 	STA		PC_TEMP
+   762                        ; 	STA		PC
+   763                        ; 	RTS
+   764                        
+   765                        
+   766                        ; F_KeyIoPAOutputLow:
+   767                        ; 	LDA		PADIR_TEMP
+   768                        ; 	AND		#11111011B
+   769                        ; 	STA		PADIR_TEMP
+   770                        ; 	STA		PADIR
+   771                        ; 	LDA		PA_TEMP
+   772                        ; 	ORA		#00000100B
+   773                        ; 	STA		PA_TEMP
+   774                        ; 	STA		PA
+   775                        ; 	RTS
+   776                        
+   777                        F_KeyIoPAInputHigh:
+   778 00:F595: 73 CB         	LDA		PADIR_TEMP
+   779 00:F597: 50 A4         	ORA		#10100100B
+   780 00:F599: 7F CB         	STA		PADIR_TEMP
+   781 00:F59B: 7F 04         	STA		PADIR
+   782 00:F59D: 73 CC         	LDA		PA_TEMP
+   783 00:F59F: 51 5B         	AND		#01011011B
+   784 00:F5A1: 7F CC         	STA		PA_TEMP
+   785 00:F5A3: 7F 01         	STA		PA
+   786 00:F5A5: 09            	RTS
+   787                        
+   788                        
+   789                        ;;===========================
+   790                        L_ScanKey_Delay_Prog:		;等待功能，循环
+   791 00:F5A6: 53 F0         	LDA		#$F0
+   792 00:F5A8: 7F C2         	STA		P_Temp
+   793                        L_Loop_ScanKey_Delay:
+   794 00:F5AA: 78 C2         	INC		P_Temp
+   795 00:F5AC: 12 FC         	BNE		L_Loop_ScanKey_Delay
+   796 00:F5AE: 09            	RTS
+   797                        ;;===========================
+   798                        
+   799                        ;;==========================
    800                        
-   801                        
-   802                        ;;===========================
-   803                        L_ScanKey_Delay_Prog:		;等待功能，循环
-   804 00:F5A2: 53 F0         	LDA		#$F0
-   805 00:F5A4: 7F C2         	STA		P_Temp
-   806                        L_Loop_ScanKey_Delay:
-   807 00:F5A6: 78 C2         	INC		P_Temp
-   808 00:F5A8: 12 FC         	BNE		L_Loop_ScanKey_Delay
-   809 00:F5AA: 09            	RTS
-   810                        ;;===========================
-   811                        
-   812                        ;;==========================
-   813                        
-   814                        ;===========================
-   815                        
-   816                        ;=================================================
-   817                        ; Judge_Stw_Ending_Voice:
-   818                        ;     LDA     Sys_Flag_B
-   819                        ;     AND     #BIT4
-   820                        ;     BNE     Judge_Stw_Ending_Voice_AlRun
-   821                        
-   822                        ; 	LDA		R_Key_Flag
-   823                        ; 	AND		#BIT7
-   824                        ; 	BNE		Skip_Then
-   825                        
-   826                        ; 	BRA		Judge_Stw_Ending_Voice_End
-   827                        
-   828                        ; Judge_Stw_Ending_Voice_AlRun:
-   829                        ; 	LDA     Sys_Flag_B
-   830                        ;     AND     #BIT4_
-   831                        ; 	STA		Sys_Flag_B
-   832                        
-   833                        ; 	LDA		#0
-   834                        ; 	STA		R_Beep_Time
-   835                        ; ;	JSR		Judge_F_AlarmBeepControl
-   836                        ; 	LDA		R_KeyValue
-   837                        ; 	CMP		#D_Key4
-   838                        ; 	BNE		Skip_Then
-   839                        
-   840                        ; 	LDA		Sys_Flag_B
-   841                        ; 	ORA		#BIT1
-   842                        ; 	STA		Sys_Flag_B
-   843                        
-   844                        
-   845                        ; ;	JSR		Judge_Alarm_Spl
-   846                        
-   847                        ; 	JSR		F_DisZZ
-   848                        
-   849                        ;     BRA     Skip_Then
-   850                        ; Skip_Then:
-   851                        ; 	LDA     R_Key_Flag
-   852                        ;     ORA     #BIT7
-   853                        ;     STA     R_Key_Flag
-   854                        
-   855                        ;     SEC
-   856                        ;     RTS
-   857                        ; Judge_Stw_Ending_Voice_End:
-   858                        ;     CLC
-   859                        ;     RTS
-   860                        ; ;===============
-   861                        ; Judge_NoVoice:
-   862                        ; 	LDA		Sys_Flag_B
-   863                        ; 	AND		#BIT2
-   864                        ; 	BEQ		Judge_NoVoice_End
-   865                        ; 	JSR		F_DisMute
-   866                        ; 	RTS
-   867                        ; Judge_NoVoice_End:
-   868                        ; 	JSR		F_ClrMute
-   869                        ; 	RTS
-   869                        
+   801                        ;===========================
+   802                        
+   803                        ;=================================================
+   804                        ; Judge_Stw_Ending_Voice:
+   805                        ;     LDA     Sys_Flag_B
+   806                        ;     AND     #BIT4
+   807                        ;     BNE     Judge_Stw_Ending_Voice_AlRun
+   808                        
+   809                        ; 	LDA		R_Key_Flag
+   810                        ; 	AND		#BIT7
+   811                        ; 	BNE		Skip_Then
+   812                        
+   813                        ; 	BRA		Judge_Stw_Ending_Voice_End
+   814                        
+   815                        ; Judge_Stw_Ending_Voice_AlRun:
+   816                        ; 	LDA     Sys_Flag_B
+   817                        ;     AND     #BIT4_
+   818                        ; 	STA		Sys_Flag_B
+   819                        
+   820                        ; 	LDA		#0
+   821                        ; 	STA		R_Beep_Time
+   822                        ; ;	JSR		Judge_F_AlarmBeepControl
+   823                        ; 	LDA		R_KeyValue
+   824                        ; 	CMP		#D_Key4
+   825                        ; 	BNE		Skip_Then
+   826                        
+   827                        ; 	LDA		Sys_Flag_B
+   828                        ; 	ORA		#BIT1
+   829                        ; 	STA		Sys_Flag_B
+   830                        
+   831                        
+   832                        ; ;	JSR		Judge_Alarm_Spl
+   833                        
+   834                        ; 	JSR		F_DisZZ
+   835                        
+   836                        ;     BRA     Skip_Then
+   837                        ; Skip_Then:
+   838                        ; 	LDA     R_Key_Flag
+   839                        ;     ORA     #BIT7
+   840                        ;     STA     R_Key_Flag
+   841                        
+   842                        ;     SEC
+   843                        ;     RTS
+   844                        ; Judge_Stw_Ending_Voice_End:
+   845                        ;     CLC
+   846                        ;     RTS
+   847                        ; ;===============
+   848                        ; Judge_NoVoice:
+   849                        ; 	LDA		Sys_Flag_B
+   850                        ; 	AND		#BIT2
+   851                        ; 	BEQ		Judge_NoVoice_End
+   852                        ; 	JSR		F_DisMute
+   853                        ; 	RTS
+   854                        ; Judge_NoVoice_End:
+   855                        ; 	JSR		F_ClrMute
+   856                        ; 	RTS
+   856                        
    137                        ; .include    Key\KeyNumb.asm
    138                        ; .include    Key\KeyLock.asm
    139                        ; .include    Key\KeyShort.asm
@@ -2689,77 +2676,77 @@ Current file: main.asm
    142                        .include    Half_S.asm
      1                        ;=======================================================
      2                        L_2Hz_Prog:
-     3 00:F5AB: 73 99         	LDA		Sys_Flag_A
-     4 00:F5AD: 51 01         	AND		#BIT0
-     5 00:F5AF: 13 11         	BEQ		L_End_2Hz_Prog
+     3 00:F5AF: 73 99         	LDA		Sys_Flag_A
+     4 00:F5B1: 51 01         	AND		#BIT0
+     5 00:F5B3: 13 11         	BEQ		L_End_2Hz_Prog
      6                        
      7                        
-     8 00:F5B1: 73 99         	LDA		Sys_Flag_A
-     9 00:F5B3: 51 FE         	AND		#~BIT0		;清半秒标志
-    10 00:F5B5: 52 02         	EOR		#BIT1
-    11 00:F5B7: 7F 99         	STA		Sys_Flag_A
+     8 00:F5B5: 73 99         	LDA		Sys_Flag_A
+     9 00:F5B7: 51 FE         	AND		#~BIT0		;清半秒标志
+    10 00:F5B9: 52 02         	EOR		#BIT1
+    11 00:F5BB: 7F 99         	STA		Sys_Flag_A
     12                        
     13                        	;JSR		Judge_Alarm_T1_Flash
     14                        	;JSR		Judge_Stw_TimeKeeping
     15                        	;JSR		Judge_Stw_Forward
     16                        
-    17 00:F5B9: 73 99         	LDA		Sys_Flag_A
-    18 00:F5BB: 51 02         	AND		#BIT1
-    19 00:F5BD: 13 04         	BEQ		L_1Hz_Prog
+    17 00:F5BD: 73 99         	LDA		Sys_Flag_A
+    18 00:F5BF: 51 02         	AND		#BIT1
+    19 00:F5C1: 13 04         	BEQ		L_1Hz_Prog
     20                        
-    21 00:F5BF: 15 3A F4      	JSR		L_1Hz_Flash_Prog	;;闪烁
+    21 00:F5C3: 15 56 F4      	JSR		L_1Hz_Flash_Prog	;;闪烁
     22                        L_End_2Hz_Prog:
-    23 00:F5C2: 09            	RTS
+    23 00:F5C6: 09            	RTS
     24                        ;========================================================
     25                        
     26                        L_1Hz_Prog:
-    27 00:F5C3: 15 13 F7      	JSR		F_Update_Time_Prog
-    28 00:F5C6: 15 23 F7      	JSR		F_Update_STW_Prog	;;更新计时
-    29 00:F5C9: 15 D3 F5      	JSR		L_Nokey_Save		;;10S无操作保存退出设置
-    30 00:F5CC: 15 E6 F5      	JSR		L_STWKey_Exit		;;计时模式30S无操作退出
-    31 00:F5CF: 15 0D F4      	JSR		L_Display_Mode0Prog
+    27 00:F5C7: 15 17 F7      	JSR		F_Update_Time_Prog
+    28 00:F5CA: 15 27 F7      	JSR		F_Update_STW_Prog	;;更新计时
+    29 00:F5CD: 15 D7 F5      	JSR		L_Nokey_Save		;;10S无操作保存退出设置
+    30 00:F5D0: 15 EA F5      	JSR		L_STWKey_Exit		;;计时模式30S无操作退出
+    31 00:F5D3: 15 29 F4      	JSR		L_Display_Mode0Prog
     32                        
     33                        L_1Hz_Prog_End:
-    34 00:F5D2: 09            	RTS
+    34 00:F5D6: 09            	RTS
     35                        
     36                        ; ;======================================================
     37                        ; ;============================================================
     38                        ;;设置过程中无操作10S，自动保存当前值，并退出设置模式
     39                        L_Nokey_Save:
-    40 00:F5D3: 73 A2         	LDA		R_No_Key
-    41 00:F5D5: 56 0A         	CMP		#10
-    42 00:F5D7: 10 07         	BCC		L_Inc_Nokey_Time
-    43 00:F5D9: 53 00         	LDA		#0
-    44 00:F5DB: 7F A1         	STA		R_Set_Flag
-    45 00:F5DD: 7F A2         	STA		R_No_Key
-    46 00:F5DF: 09            	RTS
+    40 00:F5D7: 73 A2         	LDA		R_No_Key
+    41 00:F5D9: 56 0A         	CMP		#10
+    42 00:F5DB: 10 07         	BCC		L_Inc_Nokey_Time
+    43 00:F5DD: 53 00         	LDA		#0
+    44 00:F5DF: 7F A1         	STA		R_Set_Flag
+    45 00:F5E1: 7F A2         	STA		R_No_Key
+    46 00:F5E3: 09            	RTS
     47                        L_Inc_Nokey_Time:
-    48 00:F5E0: 73 A2         	LDA		R_No_Key
-    49 00:F5E2: 03            	INC
-    50 00:F5E3: 7F A2         	STA		R_No_Key
-    51 00:F5E5: 09            	RTS
+    48 00:F5E4: 73 A2         	LDA		R_No_Key
+    49 00:F5E6: 03            	INC
+    50 00:F5E7: 7F A2         	STA		R_No_Key
+    51 00:F5E9: 09            	RTS
     52                        ;===============================================================
     53                        ;==============================================================
     54                        ;;计时结束后30秒内无操作退出到时间界面
     55                        L_STWKey_Exit:
-    56 00:F5E6: 30 9A 12      	BBR0	Sys_Flag_B,?RTS
-    57 00:F5E9: 39 9A 0F      	BBS1	Sys_Flag_B,?RTS
-    58 00:F5EC: 73 A3         	LDA		R_STW_Key
-    59 00:F5EE: 56 1E         	CMP		#30
-    60 00:F5F0: 10 0A         	BCC		L_Inc_STWKey_Time
-    61 00:F5F2: 53 00         	LDA		#0
-    62 00:F5F4: 7F A1         	STA		R_Set_Flag
-    63 00:F5F6: 7F A3         	STA		R_STW_Key
-    64 00:F5F8: 20 9A         	RMB0	Sys_Flag_B
-    65 00:F5FA: 09            	RTS
+    56 00:F5EA: 30 9A 12      	BBR0	Sys_Flag_B,?RTS
+    57 00:F5ED: 39 9A 0F      	BBS1	Sys_Flag_B,?RTS
+    58 00:F5F0: 73 A3         	LDA		R_STW_Key
+    59 00:F5F2: 56 1E         	CMP		#30
+    60 00:F5F4: 10 0A         	BCC		L_Inc_STWKey_Time
+    61 00:F5F6: 53 00         	LDA		#0
+    62 00:F5F8: 7F A1         	STA		R_Set_Flag
+    63 00:F5FA: 7F A3         	STA		R_STW_Key
+    64 00:F5FC: 20 9A         	RMB0	Sys_Flag_B
+    65 00:F5FE: 09            	RTS
     66                        
     67                        ?RTS:
-    68 00:F5FB: 09            	RTS
+    68 00:F5FF: 09            	RTS
     69                        L_Inc_STWKey_Time:
-    70 00:F5FC: 73 A3         	LDA		R_STW_Key
-    71 00:F5FE: 03            	INC
-    72 00:F5FF: 7F A3         	STA		R_STW_Key
-    73 00:F601: 09            	RTS
+    70 00:F600: 73 A3         	LDA		R_STW_Key
+    71 00:F602: 03            	INC
+    72 00:F603: 7F A3         	STA		R_STW_Key
+    73 00:F605: 09            	RTS
     74                        ;===============================================================
     75                        ; L_1Hz_Prog_Num:
     76                        ; 	JSR		F_Update_Time_Prog
@@ -2827,7 +2814,7 @@ Current file: main.asm
     31                        
     32                        
     33                        L_End_Mode_Prog:
-    34 00:F602: 09            	RTS
+    34 00:F606: 09            	RTS
     35                        
     36                        
     37                        ; L_Display_Prog:
@@ -2836,63 +2823,63 @@ Current file: main.asm
     40                        ;========================================
     41                        
     42                        L_STWDisplay_Prog:
-    43 00:F603: 15 45 F6      	JSR		F_ClrAm
-    44 00:F606: 15 4F F6      	JSR		F_ClrPm
-    45 00:F609: 15 1A F6      	JSR		F_DisCol
-    46 00:F60C: 15 54 F6      	JSR		F_DisMs
+    43 00:F607: 15 49 F6      	JSR		F_ClrAm
+    44 00:F60A: 15 53 F6      	JSR		F_ClrPm
+    45 00:F60D: 15 1E F6      	JSR		F_DisCol
+    46 00:F610: 15 58 F6      	JSR		F_DisMs
     47                        
-    48 00:F60F: 73 AC         	LDA		R_Stw_Min
-    49 00:F611: 15 77 F6      	JSR		L_Dis_Digit12
-    50 00:F614: 73 AB         	LDA		R_Stw_Sec
-    51 00:F616: 15 8A F6      	JSR		L_Dis_Digit34
-    52 00:F619: 09            	RTS
+    48 00:F613: 73 AC         	LDA		R_Stw_Min
+    49 00:F615: 15 7B F6      	JSR		L_Dis_Digit12
+    50 00:F618: 73 AB         	LDA		R_Stw_Sec
+    51 00:F61A: 15 8E F6      	JSR		L_Dis_Digit34
+    52 00:F61D: 09            	RTS
     53                        
     54                        F_DisCol:
-    55 00:F61A: 5E 1C         	LDX		#lcd_col
-    56 00:F61C: 16 5C F1      	JMP		F_DispSymbol	;显示 两点
+    55 00:F61E: 5E 1C         	LDX		#lcd_col
+    56 00:F620: 16 5C F1      	JMP		F_DispSymbol	;显示 两点
     57                        F_ClrCol:
-    58 00:F61F: 5E 1C         	LDX		#lcd_col
-    59 00:F621: 16 63 F1      	JMP		F_ClrpSymbol
+    58 00:F623: 5E 1C         	LDX		#lcd_col
+    59 00:F625: 16 63 F1      	JMP		F_ClrpSymbol
     60                        
     61                        F_Clr12:
-    62 00:F624: 53 0A         	LDA		#0AH
-    63 00:F626: 5E 00         	LDX		#lcd_d1
-    64 00:F628: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-    65 00:F62B: 53 0A         	LDA		#0AH
-    66 00:F62D: 5E 07         	LDX		#lcd_d2
-    67 00:F62F: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+    62 00:F628: 53 0A         	LDA		#0AH
+    63 00:F62A: 5E 00         	LDX		#lcd_d1
+    64 00:F62C: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    65 00:F62F: 53 0A         	LDA		#0AH
+    66 00:F631: 5E 07         	LDX		#lcd_d2
+    67 00:F633: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
     68                        
     69                        F_Clr34:
-    70 00:F632: 53 0A         	LDA		#0AH
-    71 00:F634: 5E 0E         	LDX		#lcd_d3
-    72 00:F636: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-    73 00:F639: 53 0A         	LDA		#0AH
-    74 00:F63B: 5E 15         	LDX		#lcd_d4
-    75 00:F63D: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+    70 00:F636: 53 0A         	LDA		#0AH
+    71 00:F638: 5E 0E         	LDX		#lcd_d3
+    72 00:F63A: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    73 00:F63D: 53 0A         	LDA		#0AH
+    74 00:F63F: 5E 15         	LDX		#lcd_d4
+    75 00:F641: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
     76                        
     77                        F_DisAm:
-    78 00:F640: 5E 1D         	LDX		#lcd_am
-    79 00:F642: 16 5C F1      	JMP		F_DispSymbol	;显示AM
+    78 00:F644: 5E 1D         	LDX		#lcd_am
+    79 00:F646: 16 5C F1      	JMP		F_DispSymbol	;显示AM
     80                        F_ClrAm:
-    81 00:F645: 5E 1D         	LDX		#lcd_am
-    82 00:F647: 16 63 F1      	JMP		F_ClrpSymbol
+    81 00:F649: 5E 1D         	LDX		#lcd_am
+    82 00:F64B: 16 63 F1      	JMP		F_ClrpSymbol
     83                        
     84                        
     85                        F_DisPM:
-    86 00:F64A: 5E 1E         	LDX		#lcd_pm
-    87 00:F64C: 16 5C F1      	JMP		F_DispSymbol	;显示PM
+    86 00:F64E: 5E 1E         	LDX		#lcd_pm
+    87 00:F650: 16 5C F1      	JMP		F_DispSymbol	;显示PM
     88                        F_ClrPm:
-    89 00:F64F: 5E 1E         	LDX		#lcd_pm
-    90 00:F651: 16 63 F1      	JMP		F_ClrpSymbol
+    89 00:F653: 5E 1E         	LDX		#lcd_pm
+    90 00:F655: 16 63 F1      	JMP		F_ClrpSymbol
     91                        
     92                        F_DisMs:
-    93 00:F654: 5E 1F         	LDX		#lcd_ms
-    94 00:F656: 16 5C F1      	JMP		F_DispSymbol	;显示MS
+    93 00:F658: 5E 1F         	LDX		#lcd_ms
+    94 00:F65A: 16 5C F1      	JMP		F_DispSymbol	;显示MS
     95                        
     96                        
     97                        F_ClrMs:
-    98 00:F659: 5E 1F         	LDX		#lcd_ms
-    99 00:F65B: 16 63 F1      	JMP		F_ClrpSymbol
+    98 00:F65D: 5E 1F         	LDX		#lcd_ms
+    99 00:F65F: 16 63 F1      	JMP		F_ClrpSymbol
    100                        ; F_DisClock:
    101                        ; 	LDX		#lcd_clock
    102                        ; 	JMP		F_DispSymbol	;显示时钟图标
@@ -3011,34 +2998,34 @@ Current file: main.asm
    215                        ;	JMP		F_ClrpSymbol
    216                        
    217                        L_Numtimer_ClrAllDis:
-   218 00:F65E: 53 00         	LDA		#0
-   219 00:F660: 4F 01 02      	STA		0201H
-   220 00:F663: 4F 02 02      	STA		0202H
-   221 00:F666: 4F 09 02      	STA		0209H
-   222 00:F669: 53 80         	LDA		#$80
-   223 00:F66B: 4F 03 02      	STA		0203H
-   224 00:F66E: 53 FE         	LDA		#$FE
-   225 00:F670: 4F 0A 02      	STA		020AH
-   226 00:F673: 4F 12 02      	STA		0212H
-   227 00:F676: 09            	RTS
+   218 00:F662: 53 00         	LDA		#0
+   219 00:F664: 4F 01 02      	STA		0201H
+   220 00:F667: 4F 02 02      	STA		0202H
+   221 00:F66A: 4F 09 02      	STA		0209H
+   222 00:F66D: 53 80         	LDA		#$80
+   223 00:F66F: 4F 03 02      	STA		0203H
+   224 00:F672: 53 FE         	LDA		#$FE
+   225 00:F674: 4F 0A 02      	STA		020AH
+   226 00:F677: 4F 12 02      	STA		0212H
+   227 00:F67A: 09            	RTS
    228                        ;==========================================
    229                        L_Dis_Digit_AlHr:
    230                        L_Dis_Digit_TimeHr:
    231                        L_Dis_Digit_TimeMonth:
    232                        L_Dis_Digit_TimerHr:
    233                        L_Dis_Digit12:
-   234 00:F677: 5E 00         	LDX		#lcd_d1
-   235 00:F679: 0A            	PHA
-   236 00:F67A: 15 7B F1      	JSR		L_ROR_4Bit_Prog
+   234 00:F67B: 5E 00         	LDX		#lcd_d1
+   235 00:F67D: 0A            	PHA
+   236 00:F67E: 15 7B F1      	JSR		L_ROR_4Bit_Prog
    237                        	; TAX
    238                        	; LDA		Lcd_1_table,X
-   239 00:F67D: 5E 00         	LDX		#lcd_d1
-   240 00:F67F: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-   241 00:F682: 5E 07         	LDX		#lcd_d2
-   242 00:F684: 0C            	PLA
+   239 00:F681: 5E 00         	LDX		#lcd_d1
+   240 00:F683: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+   241 00:F686: 5E 07         	LDX		#lcd_d2
+   242 00:F688: 0C            	PLA
    243                        
-   244 00:F685: 51 0F         	AND		#$0F
-   245 00:F687: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+   244 00:F689: 51 0F         	AND		#$0F
+   245 00:F68B: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
    246                        	;BRA		F_Dis_2Digit
    247                        ;=====================================================
    248                        ;=====================================================
@@ -3047,8 +3034,8 @@ Current file: main.asm
    251                        L_Dis_Digit_TimeDay:
    252                        L_Dis_Digit_TimerMin:
    253                        L_Dis_Digit34:
-   254 00:F68A: 5E 0E         	LDX		#lcd_d3
-   255 00:F68C: 17 00         	BRA		F_Dis_2Digit
+   254 00:F68E: 5E 0E         	LDX		#lcd_d3
+   255 00:F690: 17 00         	BRA		F_Dis_2Digit
    256                        ;===============================================
    257                        L_Dis_Digit_AlSec:
    258                        L_Dis_Digit_TimeSec:
@@ -3057,13 +3044,13 @@ Current file: main.asm
    261                        ; 	LDX		#lcd_d5
    262                        ; ;	BRA		F_Dis_2Digit
    263                        F_Dis_2Digit:
-   264 00:F68E: 0A            	PHA
-   265 00:F68F: 15 7B F1      	JSR		L_ROR_4Bit_Prog
-   266 00:F692: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-   267 00:F695: 7E C3         	LDX		P_Temp+1
-   268 00:F697: 0C            	PLA
-   269 00:F698: 51 0F         	AND		#$0F
-   270 00:F69A: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+   264 00:F692: 0A            	PHA
+   265 00:F693: 15 7B F1      	JSR		L_ROR_4Bit_Prog
+   266 00:F696: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+   267 00:F699: 7E C3         	LDX		P_Temp+1
+   268 00:F69B: 0C            	PLA
+   269 00:F69C: 51 0F         	AND		#$0F
+   270 00:F69E: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
    271                        ;===========================================================
    272                         ;;;;;;;;;;;;;;;;;;;;Flash Program;;;;;;;;;;;;;;;;;;;;;;;;
    273                        ;===========================================================
@@ -3080,13 +3067,13 @@ Current file: main.asm
    284                        ;	JMP		L_Flash_Prog_Number
    285                        
    286                        L_Flash_Digit3:
-   287 00:F69D: 5E 0E         	LDX		#lcd_d3
+   287 00:F6A1: 5E 0E         	LDX		#lcd_d3
    288                        L_Flash_Digit:
-   289 00:F69F: 53 0A         	LDA		#$0A
-   290 00:F6A1: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
+   289 00:F6A3: 53 0A         	LDA		#$0A
+   290 00:F6A5: 16 18 F1      	JMP		L_Dis_8Bit_DigitDot_Prog
    291                        L_Flash_Digit4:
-   292 00:F6A4: 5E 15         	LDX		#lcd_d4
-   293 00:F6A6: 17 F7         	BRA		L_Flash_Digit
+   292 00:F6A8: 5E 15         	LDX		#lcd_d4
+   293 00:F6AA: 17 F7         	BRA		L_Flash_Digit
    294                        ; L_Flash_Digit5:
    295                        ; 	LDX		#lcd_d5
    296                        ; 	BRA		L_Flash_Digit
@@ -3095,25 +3082,25 @@ Current file: main.asm
    299                        ; 	BRA		L_Flash_Digit
    300                        
    301                        L_Flash_Digit12:
-   302 00:F6A8: 53 AA         	LDA		#$AA
-   303 00:F6AA: 16 77 F6      	JMP		L_Dis_Digit12
+   302 00:F6AC: 53 AA         	LDA		#$AA
+   303 00:F6AE: 16 7B F6      	JMP		L_Dis_Digit12
    304                        L_Flash_Digit34:
-   305 00:F6AD: 53 AA         	LDA		#$AA
-   306 00:F6AF: 16 8A F6      	JMP		L_Dis_Digit34
+   305 00:F6B1: 53 AA         	LDA		#$AA
+   306 00:F6B3: 16 8E F6      	JMP		L_Dis_Digit34
    307                        L_Flash_Digit56:
-   308 00:F6B2: 53 AA         	LDA		#$AA
-   309 00:F6B4: 16 8E F6      	JMP		L_Dis_Digit56
+   308 00:F6B6: 53 AA         	LDA		#$AA
+   309 00:F6B8: 16 92 F6      	JMP		L_Dis_Digit56
    310                        
    311                        L_Flash_Digit23:
-   312 00:F6B7: 53 AA         	LDA		#$AA
-   313 00:F6B9: 5E 07         	LDX		#lcd_d2
-   314 00:F6BB: 16 8E F6      	JMP		F_Dis_2Digit
+   312 00:F6BB: 53 AA         	LDA		#$AA
+   313 00:F6BD: 5E 07         	LDX		#lcd_d2
+   314 00:F6BF: 16 92 F6      	JMP		F_Dis_2Digit
    315                        ;============================================================
    316                        ;============================================================
    317                        Lcd_1_table:
-   318 00:F6BE: 00            	.BYTE 	00h	;0
-   319 00:F6BF: 06            	.BYTE	06h	;1
-   320 00:F6C0: 03            	.BYTE	03h	;2
+   318 00:F6C2: 00            	.BYTE 	00h	;0
+   319 00:F6C3: 06            	.BYTE	06h	;1
+   320 00:F6C4: 03            	.BYTE	03h	;2
    321                        
    322                        
    323                        
@@ -3122,50 +3109,50 @@ Current file: main.asm
    325                        
    144                        .include    Time\Dis_number.asm
      1                        L_DisCol_Prog:
-     2 00:F6C1: 15 1A F6      	JSR		F_DisCol
-     3 00:F6C4: 09            	RTS
+     2 00:F6C5: 15 1E F6      	JSR		F_DisCol
+     3 00:F6C8: 09            	RTS
      4                        
      5                        L_Dis_TimeMin:
-     6 00:F6C5: 73 A7         	LDA		R_Time_Min
-     7 00:F6C7: 15 8A F6      	JSR		L_Dis_Digit34
-     8 00:F6CA: 09            	RTS
+     6 00:F6C9: 73 A7         	LDA		R_Time_Min
+     7 00:F6CB: 15 8E F6      	JSR		L_Dis_Digit34
+     8 00:F6CE: 09            	RTS
      9                        
     10                        L_Key5_DisHR:
-    11 00:F6CB: 15 1F F6      	JSR		F_ClrCol
-    12 00:F6CE: 15 45 F6      	JSR		F_ClrAm
-    13 00:F6D1: 15 4F F6      	JSR		F_ClrPm
-    14 00:F6D4: 3D 9A 1F      	BBS5	Sys_Flag_B,L_Key5_Dis12HR
-    15 00:F6D7: 17 00         	BRA		L_Key5_Dis24HR
+    11 00:F6CF: 15 23 F6      	JSR		F_ClrCol
+    12 00:F6D2: 15 49 F6      	JSR		F_ClrAm
+    13 00:F6D5: 15 53 F6      	JSR		F_ClrPm
+    14 00:F6D8: 3D 9A 1F      	BBS5	Sys_Flag_B,L_Key5_Dis12HR
+    15 00:F6DB: 17 00         	BRA		L_Key5_Dis24HR
     16                        
     17                        L_Key5_Dis24HR:
-    18 00:F6D9: 53 02         	LDA		#2
-    19 00:F6DB: 5E 00         	LDX		#lcd_d1
-    20 00:F6DD: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-    21 00:F6E0: 53 04         	LDA		#4
-    22 00:F6E2: 5E 07         	LDX		#lcd_d2
-    23 00:F6E4: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-    24 00:F6E7: 53 76         	LDA		#76H
-    25 00:F6E9: 5E 0E         	LDX		#lcd_d3
-    26 00:F6EB: 15 20 F1      	JSR		F_DispPro
-    27 00:F6EE: 53 50         	LDA		#50H
-    28 00:F6F0: 5E 15         	LDX		#lcd_d4
-    29 00:F6F2: 15 20 F1      	JSR		F_DispPro
-    30 00:F6F5: 09            	RTS
+    18 00:F6DD: 53 02         	LDA		#2
+    19 00:F6DF: 5E 00         	LDX		#lcd_d1
+    20 00:F6E1: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    21 00:F6E4: 53 04         	LDA		#4
+    22 00:F6E6: 5E 07         	LDX		#lcd_d2
+    23 00:F6E8: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    24 00:F6EB: 53 76         	LDA		#76H
+    25 00:F6ED: 5E 0E         	LDX		#lcd_d3
+    26 00:F6EF: 15 20 F1      	JSR		F_DispPro
+    27 00:F6F2: 53 50         	LDA		#50H
+    28 00:F6F4: 5E 15         	LDX		#lcd_d4
+    29 00:F6F6: 15 20 F1      	JSR		F_DispPro
+    30 00:F6F9: 09            	RTS
     31                        
     32                        L_Key5_Dis12HR:
-    33 00:F6F6: 53 01         	LDA		#1
-    34 00:F6F8: 5E 00         	LDX		#lcd_d1
-    35 00:F6FA: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-    36 00:F6FD: 53 02         	LDA		#2
-    37 00:F6FF: 5E 07         	LDX		#lcd_d2
-    38 00:F701: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
-    39 00:F704: 53 76         	LDA		#76H
-    40 00:F706: 5E 0E         	LDX		#lcd_d3
-    41 00:F708: 15 20 F1      	JSR		F_DispPro
-    42 00:F70B: 53 50         	LDA		#50H
-    43 00:F70D: 5E 15         	LDX		#lcd_d4
-    44 00:F70F: 15 20 F1      	JSR		F_DispPro
-    45 00:F712: 09            	RTS
+    33 00:F6FA: 53 01         	LDA		#1
+    34 00:F6FC: 5E 00         	LDX		#lcd_d1
+    35 00:F6FE: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    36 00:F701: 53 02         	LDA		#2
+    37 00:F703: 5E 07         	LDX		#lcd_d2
+    38 00:F705: 15 18 F1      	JSR		L_Dis_8Bit_DigitDot_Prog
+    39 00:F708: 53 76         	LDA		#76H
+    40 00:F70A: 5E 0E         	LDX		#lcd_d3
+    41 00:F70C: 15 20 F1      	JSR		F_DispPro
+    42 00:F70F: 53 50         	LDA		#50H
+    43 00:F711: 5E 15         	LDX		#lcd_d4
+    44 00:F713: 15 20 F1      	JSR		F_DispPro
+    45 00:F716: 09            	RTS
     46                        
     47                        
     47                        
@@ -3173,259 +3160,250 @@ Current file: main.asm
      1                        ;=====================================================
      2                        ;=====================================================
      3                        F_Update_Time_Prog:
-     4 00:F713: 15 84 F7      	JSR		F_SecInc
-     5 00:F716: 10 0A         	BCC		L_End_Update_Time_Prog
-     6 00:F718: 15 7A F7      	JSR		F_MinInc
-     7 00:F71B: 10 05         	BCC		L_End_Update_Time_Prog
-     8 00:F71D: 15 6E F7      	JSR		F_HrInc
-     9 00:F720: 10 00         	BCC		L_End_Update_Time_Prog
+     4 00:F717: 15 88 F7      	JSR		F_SecInc
+     5 00:F71A: 10 0A         	BCC		L_End_Update_Time_Prog
+     6 00:F71C: 15 7E F7      	JSR		F_MinInc
+     7 00:F71F: 10 05         	BCC		L_End_Update_Time_Prog
+     8 00:F721: 15 72 F7      	JSR		F_HrInc
+     9 00:F724: 10 00         	BCC		L_End_Update_Time_Prog
     10                        
     11                        L_End_Update_Time_Prog:
-    12 00:F722: 09            	RTS
+    12 00:F726: 09            	RTS
     13                        ;====================================================
     14                        F_Update_STW_Prog:
-    15 00:F723: 3B 9A 20      	BBS3	Sys_Flag_B,L_End_MAX_STW_Prog		;判断是否到结束(正计时99M59S)
-    16 00:F726: 31 9A 20      	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停(暂停跳转)
+    15 00:F727: 3B 9A 20      	BBS3	Sys_Flag_B,L_End_MAX_STW_Prog		;判断是否到结束(正计时99M59S)
+    16 00:F72A: 31 9A 20      	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停(暂停跳转)
     17                        
-    18 00:F729: 32 9A 27      	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog	;;0：正计时/1：倒计时
-    19 00:F72C: 15 30 F7      	JSR		L_Update_CTW_FORW_Prog
-    20 00:F72F: 09            	RTS
+    18 00:F72D: 32 9A 27      	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog	;;0：正计时/1：倒计时
+    19 00:F730: 15 34 F7      	JSR		L_Update_CTW_FORW_Prog
+    20 00:F733: 09            	RTS
     21                        
     22                        
     23                        ;;倒计时
     24                        L_Update_CTW_FORW_Prog:
-    25 00:F730: 15 DA F7      	JSR		R_CtwDec_Sec
-    26 00:F733: 11 05         	BCS		L_Update_CTW_FORW_End_Prog
-    27 00:F735: 15 DE F7      	JSR		R_CtwDec_Min
-    28 00:F738: 11 00         	BCS		L_Update_CTW_FORW_End_Prog
-    29                        	; JSR		L_CTW_Zero
-    30                        L_Update_CTW_FORW_End_Prog:
-    31 00:F73A: 73 AB         	LDA		R_Stw_Sec
-    32 00:F73C: 70 AC         	ORA		R_Stw_Min
-    33 00:F73E: 13 01         	BEQ		?Stop
-    34 00:F740: 09            	RTS
-    35                        ?Stop:
-    36 00:F741: 21 9A         	RMB1	Sys_Flag_B		;;暂停
-    37 00:F743: 2F 9A         	SMB7	Sys_Flag_B		;;倒计时结束
-    38 00:F745: 09            	RTS
-    39                        
-    40                        ; L_CTW_Zero:
-    41                        ; 	LDA		#$0
-    42                        ; 	STA		R_Stw_Sec
-    43                        ; 	STA		R_Stw_Min
-    44                        ; 	RMB1	Sys_Flag_B		;;暂停
-    45                        ; 	SMB7	Sys_Flag_B		;;倒计时结束
-    46                        ; 	RTS
-    47                        
-    48                        L_End_MAX_STW_Prog:
-    49 00:F746: 21 9A         	RMB1	Sys_Flag_B		;;正计时最大值，结束计时(暂停计时)
-    50 00:F748: 09            	rts
-    51                        L_End_Update_STW_Prog:
-    52 00:F749: 73 AB         	LDA		R_Stw_Sec
-    53 00:F74B: 70 AC         	ORA		R_Stw_Min
-    54 00:F74D: 12 01         	BNE		?CTW			;;min sec均为0时，为正计时
-    55 00:F74F: 09            	RTS
-    56                        ?CTW:
-    57 00:F750: 2A 9A         	SMB2	Sys_Flag_B		;;标记倒计时
-    58 00:F752: 09            	RTS
-    59                        
-    60                        ;;正计时
-    61                        L_Update_STW_FORW_Prog:
-    62 00:F753: 15 CA F7      	JSR		R_CtwInc_Sec
-    63 00:F756: 10 05         	BCC		L_Update_STW_FORW_End_Prog
-    64 00:F758: 15 CE F7      	JSR		R_CtwInc_Min
-    65 00:F75B: 10 00         	BCC		L_Update_STW_FORW_End_Prog
-    66                        L_Update_STW_FORW_End_Prog:
-    67                        	;对比正计时最大值
-    68 00:F75D: 73 AB         	LDA		R_Stw_Sec
-    69 00:F75F: 56 59         	CMP		#$59
-    70 00:F761: 10 0A         	BCC		?RTS
-    71 00:F763: 73 AC         	LDA		R_Stw_Min
-    72 00:F765: 56 99         	CMP		#$99
-    73 00:F767: 10 04         	BCC		?RTS
-    74                        
-    75 00:F769: 21 9A         	RMB1	Sys_Flag_B		;;暂停计时
-    76 00:F76B: 2B 9A         	SMB3	Sys_Flag_B		;;标记正计时达到99M59S
-    77                        ?RTS:
-    78 00:F76D: 09            	RTS
-    79                        
-    80                        ;====================================================
-    81                        ;====================================================
-    82                        ;----------------------------------------------------
-    83                        F_HrInc:
-    84 00:F76E: 5E 02         	LDX		#(R_Time_Hr-Time_str_Addr)
-    85                        L_Inc_0_To_23_Prog:
-    86                        L_Inc_To_24:
-    87 00:F770: 53 23         	LDA		#$23
-    88 00:F772: 17 14         	BRA		L_Inc_0_To_Any_Count_Prog
-    89                        
-    90                        F_HrDec:
-    91 00:F774: 5E 02         	LDX		#(R_Time_Hr-Time_str_Addr)
-    92 00:F776: 53 23         	LDA		#$23
-    93 00:F778: 17 30         	BRA		L_Dec_To_0_Prog
-    94                        
-    95                        ; F_AlHrInc:	;注意范围
-    96                        ; 	LDX		#(R_Al_Hr-Time_str_Addr)
-    97                        ; 	LDA		#$23
-    98                        ; 	; JMP		L_Inc_0_To_Any_Count_Prog
-    99                        ; 	BRA		L_Inc_0_To_23_Prog
-   100                        
-   101                        ;----------------------------------------------------
-   102                        F_MinInc:
-   103 00:F77A: 5E 00         	LDX		#(R_Time_Min-Time_str_Addr)
-   104 00:F77C: 17 08         	BRA		L_Inc_0_To_59_Prog
-   105                        
-   106                        F_MinDec:
-   107 00:F77E: 5E 00         	LDX		#(R_Time_Min-Time_str_Addr)
-   108 00:F780: 53 59         	LDA		#$59
-   109 00:F782: 17 26         	BRA		L_Dec_To_0_Prog
+    25 00:F734: 15 DE F7      	JSR		R_CtwDec_Sec
+    26 00:F737: 11 05         	BCS		L_Update_CTW_FORW_End_Prog
+    27 00:F739: 15 E2 F7      	JSR		R_CtwDec_Min
+    28 00:F73C: 11 00         	BCS		L_Update_CTW_FORW_End_Prog
+    29                        L_Update_CTW_FORW_End_Prog:
+    30 00:F73E: 73 AB         	LDA		R_Stw_Sec
+    31 00:F740: 70 AC         	ORA		R_Stw_Min
+    32 00:F742: 13 01         	BEQ		?Stop
+    33 00:F744: 09            	RTS
+    34                        ?Stop:
+    35 00:F745: 21 9A         	RMB1	Sys_Flag_B		;;暂停
+    36 00:F747: 2F 9A         	SMB7	Sys_Flag_B		;;倒计时结束
+    37 00:F749: 09            	RTS
+    38                        
+    39                        L_End_MAX_STW_Prog:
+    40 00:F74A: 21 9A         	RMB1	Sys_Flag_B		;;正计时最大值，结束计时(暂停计时)
+    41 00:F74C: 09            	rts
+    42                        L_End_Update_STW_Prog:
+    43 00:F74D: 73 AB         	LDA		R_Stw_Sec
+    44 00:F74F: 70 AC         	ORA		R_Stw_Min
+    45 00:F751: 12 01         	BNE		?CTW			;;min sec均为0时，为正计时
+    46 00:F753: 09            	RTS
+    47                        ?CTW:
+    48 00:F754: 2A 9A         	SMB2	Sys_Flag_B		;;标记倒计时
+    49 00:F756: 09            	RTS
+    50                        
+    51                        ;;正计时
+    52                        L_Update_STW_FORW_Prog:
+    53 00:F757: 15 CE F7      	JSR		R_CtwInc_Sec
+    54 00:F75A: 10 05         	BCC		L_Update_STW_FORW_End_Prog
+    55 00:F75C: 15 D2 F7      	JSR		R_CtwInc_Min
+    56 00:F75F: 10 00         	BCC		L_Update_STW_FORW_End_Prog
+    57                        L_Update_STW_FORW_End_Prog:
+    58                        	;对比正计时最大值
+    59 00:F761: 73 AB         	LDA		R_Stw_Sec
+    60 00:F763: 56 59         	CMP		#$59
+    61 00:F765: 10 0A         	BCC		?RTS
+    62 00:F767: 73 AC         	LDA		R_Stw_Min
+    63 00:F769: 56 99         	CMP		#$99
+    64 00:F76B: 10 04         	BCC		?RTS
+    65                        
+    66 00:F76D: 21 9A         	RMB1	Sys_Flag_B		;;暂停计时
+    67 00:F76F: 2B 9A         	SMB3	Sys_Flag_B		;;标记正计时达到99M59S
+    68                        ?RTS:
+    69 00:F771: 09            	RTS
+    70                        
+    71                        ;====================================================
+    72                        ;====================================================
+    73                        ;----------------------------------------------------
+    74                        F_HrInc:
+    75 00:F772: 5E 02         	LDX		#(R_Time_Hr-Time_str_Addr)
+    76                        L_Inc_0_To_23_Prog:
+    77                        L_Inc_To_24:
+    78 00:F774: 53 23         	LDA		#$23
+    79 00:F776: 17 14         	BRA		L_Inc_0_To_Any_Count_Prog
+    80                        
+    81                        F_HrDec:
+    82 00:F778: 5E 02         	LDX		#(R_Time_Hr-Time_str_Addr)
+    83 00:F77A: 53 23         	LDA		#$23
+    84 00:F77C: 17 30         	BRA		L_Dec_To_0_Prog
+    85                        
+    86                        ; F_AlHrInc:	;注意范围
+    87                        ; 	LDX		#(R_Al_Hr-Time_str_Addr)
+    88                        ; 	LDA		#$23
+    89                        ; 	; JMP		L_Inc_0_To_Any_Count_Prog
+    90                        ; 	BRA		L_Inc_0_To_23_Prog
+    91                        
+    92                        ;----------------------------------------------------
+    93                        F_MinInc:
+    94 00:F77E: 5E 00         	LDX		#(R_Time_Min-Time_str_Addr)
+    95 00:F780: 17 08         	BRA		L_Inc_0_To_59_Prog
+    96                        
+    97                        F_MinDec:
+    98 00:F782: 5E 00         	LDX		#(R_Time_Min-Time_str_Addr)
+    99 00:F784: 53 59         	LDA		#$59
+   100 00:F786: 17 26         	BRA		L_Dec_To_0_Prog
+   101                        
+   102                        ; F_MinSplDec:
+   103                        ; 	LDX		#(R_Al_Min_Spl-Time_str_Addr)
+   104                        ; 	LDA		#10
+   105                        ; 	BRA		L_Dec_To_0_Prog
+   106                        
+   107                        ; F_SecSplDec:
+   108                        ; 	LDX		#(R_Al_Sec_Spl-Time_str_Addr)
+   109                        ; 	BRA		L_Dec_To_60_Prog
    110                        
-   111                        ; F_MinSplDec:
-   112                        ; 	LDX		#(R_Al_Min_Spl-Time_str_Addr)
-   113                        ; 	LDA		#10
-   114                        ; 	BRA		L_Dec_To_0_Prog
-   115                        
-   116                        ; F_SecSplDec:
-   117                        ; 	LDX		#(R_Al_Sec_Spl-Time_str_Addr)
-   118                        ; 	BRA		L_Dec_To_60_Prog
-   119                        
-   120                        
-   121                        ; F_AlMinInc:
-   122                        ; 	LDX		#(R_Al_Min-Time_str_Addr)
-   123                        ; 	BRA		L_Inc_0_To_59_Prog
-   124                        ; F_AlInc:
-   125                        ; 	LDX		#(R_Al_Sec-Time_str_Addr)
-   126                        ; 	BRA		L_Inc_0_To_59_Prog
-   127                        
-   128                        F_SecInc:
-   129 00:F784: 5E 01         	LDX 	#(R_Time_Sec-Time_str_Addr)
-   130                        L_Inc_0_To_59_Prog:
-   131                        L_Inc_To_60:
-   132 00:F786: 53 59         	LDA		#$59
-   133                        L_Inc_0_To_Any_Count_Prog:
-   134 00:F788: 7F C3         	STA		P_Temp+1	;最大值
-   135 00:F78A: 53 00         	LDA		#$00
-   136                        L_Inc_Any_To_Any_Count_Prog:
-   137 00:F78C: 7F C2         	STA		P_Temp		;最小值
-   138 00:F78E: 63 27 18      	LDA		Time_Addr,X	;P_Temp+1
-   139 00:F791: 76 C3         	CMP		P_Temp+1	;Time_Addr,X
-   140 00:F793: 11 0C         	BCS		L_Inc_Over
-   141 00:F795: 04            	CLC
-   142 00:F796: 02            	SED
-   143 00:F797: 63 27 18      	LDA		Time_Addr,X
-   144 00:F79A: 54 01         	ADC		#1
-   145 00:F79C: 6F 27 18      	STA		Time_Addr,X
-   146 00:F79F: 06            	CLD
-   147 00:F7A0: 09            	RTS
-   148                        L_Inc_Over:
-   149 00:F7A1: 73 C2         	LDA		P_Temp
-   150 00:F7A3: 6F 27 18      	STA		Time_Addr,X
-   151 00:F7A6: 00            	SEC
-   152 00:F7A7: 09            	RTS
-   153                        ;=====================================================
-   154                        L_Dec_To_60_Prog:
-   155 00:F7A8: 53 59         	LDA		#$59
-   156                        L_Dec_To_0_Prog:
-   157 00:F7AA: 7F C2         	STA		P_Temp
-   158 00:F7AC: 53 00         	LDA		#0
-   159                        L_Dec_To_Anycount_Prog:
-   160 00:F7AE: 00            	SEC
-   161 00:F7AF: 65 27 18          SBC     Time_Addr,X
-   162 00:F7B2: 13 0F         	BEQ		L_Dec_Over_Prog
-   163 00:F7B4: 11 0D         	BCS		L_Dec_Over_Prog
-   164                        
-   165 00:F7B6: 00            	SEC
-   166 00:F7B7: 02            	SED
-   167 00:F7B8: 63 27 18      	LDA		Time_Addr,X
-   168 00:F7BB: 55 01         	SBC		#1
-   169 00:F7BD: 6F 27 18      	STA		Time_Addr,X
-   170 00:F7C0: 06            	CLD
-   171 00:F7C1: 00            	SEC
-   172 00:F7C2: 09            	RTS
-   173                        L_Dec_Over_Prog:
-   174 00:F7C3: 73 C2         	LDA		P_Temp
-   175 00:F7C5: 6F 27 18      	STA		Time_Addr,X
-   176 00:F7C8: 04            	CLC
-   177 00:F7C9: 09            	RTS
-   178                        ;=====================================================
-   179                        R_CtwInc_Sec:
-   180 00:F7CA: 5E 04         	LDX		#(R_Stw_Sec-Time_str_Addr)
+   111                        
+   112                        ; F_AlMinInc:
+   113                        ; 	LDX		#(R_Al_Min-Time_str_Addr)
+   114                        ; 	BRA		L_Inc_0_To_59_Prog
+   115                        ; F_AlInc:
+   116                        ; 	LDX		#(R_Al_Sec-Time_str_Addr)
+   117                        ; 	BRA		L_Inc_0_To_59_Prog
+   118                        
+   119                        F_SecInc:
+   120 00:F788: 5E 01         	LDX 	#(R_Time_Sec-Time_str_Addr)
+   121                        L_Inc_0_To_59_Prog:
+   122                        L_Inc_To_60:
+   123 00:F78A: 53 59         	LDA		#$59
+   124                        L_Inc_0_To_Any_Count_Prog:
+   125 00:F78C: 7F C3         	STA		P_Temp+1	;最大值
+   126 00:F78E: 53 00         	LDA		#$00
+   127                        L_Inc_Any_To_Any_Count_Prog:
+   128 00:F790: 7F C2         	STA		P_Temp		;最小值
+   129 00:F792: 63 27 18      	LDA		Time_Addr,X	;P_Temp+1
+   130 00:F795: 76 C3         	CMP		P_Temp+1	;Time_Addr,X
+   131 00:F797: 11 0C         	BCS		L_Inc_Over
+   132 00:F799: 04            	CLC
+   133 00:F79A: 02            	SED
+   134 00:F79B: 63 27 18      	LDA		Time_Addr,X
+   135 00:F79E: 54 01         	ADC		#1
+   136 00:F7A0: 6F 27 18      	STA		Time_Addr,X
+   137 00:F7A3: 06            	CLD
+   138 00:F7A4: 09            	RTS
+   139                        L_Inc_Over:
+   140 00:F7A5: 73 C2         	LDA		P_Temp
+   141 00:F7A7: 6F 27 18      	STA		Time_Addr,X
+   142 00:F7AA: 00            	SEC
+   143 00:F7AB: 09            	RTS
+   144                        ;=====================================================
+   145                        L_Dec_To_60_Prog:
+   146 00:F7AC: 53 59         	LDA		#$59
+   147                        L_Dec_To_0_Prog:
+   148 00:F7AE: 7F C2         	STA		P_Temp
+   149 00:F7B0: 53 00         	LDA		#0
+   150                        L_Dec_To_Anycount_Prog:
+   151 00:F7B2: 00            	SEC
+   152 00:F7B3: 65 27 18          SBC     Time_Addr,X
+   153 00:F7B6: 13 0F         	BEQ		L_Dec_Over_Prog
+   154 00:F7B8: 11 0D         	BCS		L_Dec_Over_Prog
+   155                        
+   156 00:F7BA: 00            	SEC
+   157 00:F7BB: 02            	SED
+   158 00:F7BC: 63 27 18      	LDA		Time_Addr,X
+   159 00:F7BF: 55 01         	SBC		#1
+   160 00:F7C1: 6F 27 18      	STA		Time_Addr,X
+   161 00:F7C4: 06            	CLD
+   162 00:F7C5: 00            	SEC
+   163 00:F7C6: 09            	RTS
+   164                        L_Dec_Over_Prog:
+   165 00:F7C7: 73 C2         	LDA		P_Temp
+   166 00:F7C9: 6F 27 18      	STA		Time_Addr,X
+   167 00:F7CC: 04            	CLC
+   168 00:F7CD: 09            	RTS
+   169                        ;=====================================================
+   170                        R_CtwInc_Sec:
+   171 00:F7CE: 5E 04         	LDX		#(R_Stw_Sec-Time_str_Addr)
+   172                        	; TXA
+   173                        	; CLC
+   174                        	; ADC		P_Temp+4
+   175                        	; TAX
+   176 00:F7D0: 17 B8         	BRA		L_Inc_To_60
+   177                        
+   178                        R_CtwInc_Min:
+   179 00:F7D2: 5E 05         	LDX		#(R_Stw_Min-Time_str_Addr)
+   180 00:F7D4: 53 99         	LDA		#$99
    181                        	; TXA
    182                        	; CLC
    183                        	; ADC		P_Temp+4
    184                        	; TAX
-   185 00:F7CC: 17 B8         	BRA		L_Inc_To_60
+   185 00:F7D6: 17 00         	BRA		L_Inc_0_To_99_Count_Prog
    186                        
-   187                        R_CtwInc_Min:
-   188 00:F7CE: 5E 05         	LDX		#(R_Stw_Min-Time_str_Addr)
-   189 00:F7D0: 53 99         	LDA		#$99
-   190                        	; TXA
-   191                        	; CLC
-   192                        	; ADC		P_Temp+4
-   193                        	; TAX
-   194 00:F7D2: 17 00         	BRA		L_Inc_0_To_99_Count_Prog
-   195                        
-   196                        L_Inc_0_To_99_Count_Prog:
-   197 00:F7D4: 7F C3         	STA		P_Temp+1	;最大值
-   198 00:F7D6: 53 00         	LDA		#$00
-   199 00:F7D8: 17 B2         	BRA		L_Inc_Any_To_Any_Count_Prog
-   200                        
-   201                        
-   202                        ; F_StwHrInc:
-   203                        ; 	LDX		#(R_Stw_Hr-Time_str_Addr)
-   204                        ; 	TXA
-   205                        ; 	CLC
-   206                        ; 	ADC		P_Temp+4
-   207                        ; 	TAX
-   208                        ; 	LDA		#$23
-   209                        ; 	BRA		L_Inc_0_To_Any_Count_Prog
-   210                        ;-------------------------------------------------
-   211                        
-   212                        R_CtwDec_Sec:
-   213 00:F7DA: 5E 04         	LDX		#(R_Stw_Sec-Time_str_Addr)
-   214                        	; TXA
-   215                        	; CLC
-   216                        	; ADC		P_Temp+4
-   217                        	; TAX
-   218 00:F7DC: 17 CA         	BRA		L_Dec_To_60_Prog
-   219                        
-   220                        R_CtwDec_Min:
-   221 00:F7DE: 5E 05         	LDX		#(R_Stw_Min-Time_str_Addr)
-   222                        	; TXA
-   223                        	; CLC
-   224                        	; ADC		P_Temp+4
-   225                        	; TAX
-   226 00:F7E0: 17 C6         	BRA		L_Dec_To_60_Prog
+   187                        L_Inc_0_To_99_Count_Prog:
+   188 00:F7D8: 7F C3         	STA		P_Temp+1	;最大值
+   189 00:F7DA: 53 00         	LDA		#$00
+   190 00:F7DC: 17 B2         	BRA		L_Inc_Any_To_Any_Count_Prog
+   191                        
+   192                        
+   193                        ; F_StwHrInc:
+   194                        ; 	LDX		#(R_Stw_Hr-Time_str_Addr)
+   195                        ; 	TXA
+   196                        ; 	CLC
+   197                        ; 	ADC		P_Temp+4
+   198                        ; 	TAX
+   199                        ; 	LDA		#$23
+   200                        ; 	BRA		L_Inc_0_To_Any_Count_Prog
+   201                        ;-------------------------------------------------
+   202                        
+   203                        R_CtwDec_Sec:
+   204 00:F7DE: 5E 04         	LDX		#(R_Stw_Sec-Time_str_Addr)
+   205                        	; TXA
+   206                        	; CLC
+   207                        	; ADC		P_Temp+4
+   208                        	; TAX
+   209 00:F7E0: 17 CA         	BRA		L_Dec_To_60_Prog
+   210                        
+   211                        R_CtwDec_Min:
+   212 00:F7E2: 5E 05         	LDX		#(R_Stw_Min-Time_str_Addr)
+   213                        	; TXA
+   214                        	; CLC
+   215                        	; ADC		P_Temp+4
+   216                        	; TAX
+   217 00:F7E4: 17 C6         	BRA		L_Dec_To_60_Prog
+   218                        
+   219                        ; F_StwHrDec:
+   220                        ; 	LDX		#(R_Stw_Hr-Time_str_Addr)
+   221                        ; 	TXA
+   222                        ; 	CLC
+   223                        ; 	ADC		P_Temp+4
+   224                        ; 	TAX
+   225                        ; 	LDA		#$99
+   226                        ; 	BRA		L_Dec_To_0_Prog
    227                        
-   228                        ; F_StwHrDec:
-   229                        ; 	LDX		#(R_Stw_Hr-Time_str_Addr)
-   230                        ; 	TXA
-   231                        ; 	CLC
-   232                        ; 	ADC		P_Temp+4
-   233                        ; 	TAX
-   234                        ; 	LDA		#$99
-   235                        ; 	BRA		L_Dec_To_0_Prog
-   236                        
-   237                        ;-------------------------------------------------
-   238                        
-   239                        ; F_KeyIncSec:
-   240                        ; 	JSR		F_SecInc
-   241                        ; 	JSR		L_Dis_Time ;L_Dis_TimeSec
-   242                        ; 	RTS
-   243                        
-   244                        ; F_KeyIncMin:
-   245                        ; 	JSR		F_MinInc
-   246                        ; 	JMP		L_Dis_Time ;L_Dis_TimeMin
-   247                        ; F_KeyIncHr:
-   248                        ; 	JSR		F_HrInc
-   249                        ; 	LDA		R_Time_Hr
-   250                        ; 	BNE		L_Exit_KeyIncHr
-   251                        ; 	LDA		Sys_Flag_B
-   252                        ; 	EOR		#BIT5
-   253                        ; 	STA		Sys_Flag_B	;12hr/24hr
-   254                        ; L_Exit_KeyIncHr:
-   255                        ; 	JMP		L_Dis_Time ;L_Dis_TimeHr
-   255                        
+   228                        ;-------------------------------------------------
+   229                        
+   230                        ; F_KeyIncSec:
+   231                        ; 	JSR		F_SecInc
+   232                        ; 	JSR		L_Dis_Time ;L_Dis_TimeSec
+   233                        ; 	RTS
+   234                        
+   235                        ; F_KeyIncMin:
+   236                        ; 	JSR		F_MinInc
+   237                        ; 	JMP		L_Dis_Time ;L_Dis_TimeMin
+   238                        ; F_KeyIncHr:
+   239                        ; 	JSR		F_HrInc
+   240                        ; 	LDA		R_Time_Hr
+   241                        ; 	BNE		L_Exit_KeyIncHr
+   242                        ; 	LDA		Sys_Flag_B
+   243                        ; 	EOR		#BIT5
+   244                        ; 	STA		Sys_Flag_B	;12hr/24hr
+   245                        ; L_Exit_KeyIncHr:
+   246                        ; 	JMP		L_Dis_Time ;L_Dis_TimeHr
+   246                        
    146                        .include    Time\Dis_time.asm
      1                        ;==========================================
      2                        L_Dis_Time_Mode:
@@ -3440,60 +3418,60 @@ Current file: main.asm
     11                        
     12                        
     13                        L_Dis_Time:
-    14 00:F7E2: 15 1A F6      	JSR		F_DisCol
+    14 00:F7E6: 15 1E F6      	JSR		F_DisCol
     15                        L_Dis_TimeHr:
-    16 00:F7E5: 73 A9         	LDA		R_Time_Hr
-    17 00:F7E7: 16 EA F7      	JMP		L_Dis_Hr_Common
+    16 00:F7E9: 73 A9         	LDA		R_Time_Hr
+    17 00:F7EB: 16 EE F7      	JMP		L_Dis_Hr_Common
     18                        
     19                        L_Dis_Hr_Common:
-    20 00:F7EA: 7F C6         	STA		P_Temp+4
-    21 00:F7EC: 73 9A         	LDA		Sys_Flag_B
-    22 00:F7EE: 51 20         	AND		#BIT5
-    23 00:F7F0: 13 2B         	BEQ		L_Dis_TimeHr_24
-    24 00:F7F2: 00            	SEC
-    25 00:F7F3: 02            	SED
-    26 00:F7F4: 73 C6         	LDA		P_Temp+4
-    27 00:F7F6: 55 12         	SBC		#$12
-    28 00:F7F8: 06            	CLD
-    29 00:F7F9: 10 0E         	BCC		L_Dis_Hour_12AM
-    30 00:F7FB: 7F C6         	STA		P_Temp+4
-    31 00:F7FD: 5E 1D         	LDX		#lcd_am
-    32 00:F7FF: 15 63 F1      	JSR		F_ClrpSymbol
-    33 00:F802: 5E 1E         	LDX		#lcd_pm
-    34 00:F804: 15 5C F1      	JSR		F_DispSymbol
-    35 00:F807: 17 0A         	BRA		L_TimeHr_0To12
+    20 00:F7EE: 7F C6         	STA		P_Temp+4
+    21 00:F7F0: 73 9A         	LDA		Sys_Flag_B
+    22 00:F7F2: 51 20         	AND		#BIT5
+    23 00:F7F4: 13 2B         	BEQ		L_Dis_TimeHr_24
+    24 00:F7F6: 00            	SEC
+    25 00:F7F7: 02            	SED
+    26 00:F7F8: 73 C6         	LDA		P_Temp+4
+    27 00:F7FA: 55 12         	SBC		#$12
+    28 00:F7FC: 06            	CLD
+    29 00:F7FD: 10 0E         	BCC		L_Dis_Hour_12AM
+    30 00:F7FF: 7F C6         	STA		P_Temp+4
+    31 00:F801: 5E 1D         	LDX		#lcd_am
+    32 00:F803: 15 63 F1      	JSR		F_ClrpSymbol
+    33 00:F806: 5E 1E         	LDX		#lcd_pm
+    34 00:F808: 15 5C F1      	JSR		F_DispSymbol
+    35 00:F80B: 17 0A         	BRA		L_TimeHr_0To12
     36                        L_Dis_Hour_12AM:
-    37 00:F809: 5E 1D         	LDX		#lcd_am
-    38 00:F80B: 15 5C F1      	JSR		F_DispSymbol
-    39 00:F80E: 5E 1E         	LDX		#lcd_pm
-    40 00:F810: 15 63 F1      	JSR		F_ClrpSymbol
+    37 00:F80D: 5E 1D         	LDX		#lcd_am
+    38 00:F80F: 15 5C F1      	JSR		F_DispSymbol
+    39 00:F812: 5E 1E         	LDX		#lcd_pm
+    40 00:F814: 15 63 F1      	JSR		F_ClrpSymbol
     41                        L_TimeHr_0To12:
-    42 00:F813: 73 C6         	LDA		P_Temp+4
-    43 00:F815: 12 10         	BNE		L_Dis_HourDate_Prog
-    44 00:F817: 53 12         	LDA		#$12
-    45 00:F819: 7F C6         	STA		P_Temp+4
-    46 00:F81B: 17 0A         	BRA		L_Dis_HourDate_Prog
+    42 00:F817: 73 C6         	LDA		P_Temp+4
+    43 00:F819: 12 10         	BNE		L_Dis_HourDate_Prog
+    44 00:F81B: 53 12         	LDA		#$12
+    45 00:F81D: 7F C6         	STA		P_Temp+4
+    46 00:F81F: 17 0A         	BRA		L_Dis_HourDate_Prog
     47                        L_Dis_TimeHr_24:
-    48 00:F81D: 5E 1D         	LDX		#lcd_am
-    49 00:F81F: 15 63 F1      	JSR		F_ClrpSymbol
-    50 00:F822: 5E 1E         	LDX		#lcd_pm
-    51 00:F824: 15 63 F1      	JSR		F_ClrpSymbol
+    48 00:F821: 5E 1D         	LDX		#lcd_am
+    49 00:F823: 15 63 F1      	JSR		F_ClrpSymbol
+    50 00:F826: 5E 1E         	LDX		#lcd_pm
+    51 00:F828: 15 63 F1      	JSR		F_ClrpSymbol
     52                        L_Dis_HourDate_Prog:
-    53 00:F827: 15 31 F8      	JSR		L_HighBitDealWith
-    54 00:F82A: 5E 00         	LDX		#lcd_d1
-    55 00:F82C: 73 C6         	LDA		P_Temp+4
-    56 00:F82E: 16 77 F6      	JMP		L_Dis_Digit12
+    53 00:F82B: 15 35 F8      	JSR		L_HighBitDealWith
+    54 00:F82E: 5E 00         	LDX		#lcd_d1
+    55 00:F830: 73 C6         	LDA		P_Temp+4
+    56 00:F832: 16 7B F6      	JMP		L_Dis_Digit12
     57                        
     58                        L_HighBitDealWith:
-    59 00:F831: 73 C6         	LDA		P_Temp+4
-    60 00:F833: 51 F0         	AND		#$F0
-    61 00:F835: 12 06         	BNE		L_Exit_HighBitDealWith
+    59 00:F835: 73 C6         	LDA		P_Temp+4
+    60 00:F837: 51 F0         	AND		#$F0
+    61 00:F839: 12 06         	BNE		L_Exit_HighBitDealWith
     62                        
-    63 00:F837: 73 C6         	LDA		P_Temp+4
-    64 00:F839: 50 A0         	ORA		#$A0
-    65 00:F83B: 7F C6         	STA		P_Temp+4
+    63 00:F83B: 73 C6         	LDA		P_Temp+4
+    64 00:F83D: 50 A0         	ORA		#$A0
+    65 00:F83F: 7F C6         	STA		P_Temp+4
     66                        L_Exit_HighBitDealWith:
-    67 00:F83D: 09            	RTS
+    67 00:F841: 09            	RTS
     68                        ; ;=====================================================
     69                        ;L_TimeHrDealwith:
     70                        ;	lda		R_Time_Hr
@@ -3593,70 +3571,70 @@ Current file: main.asm
    158                        ; ISR
    159                        ;--------------------------------------------------------
    160                        V_IRQ:
-   161 00:F83E: 0A                PHA
-   162 00:F83F: 1C                TXA
-   163 00:F840: 0A                PHA
-   164 00:F841: 73 0E             LDA     P_IER
-   165 00:F843: 71 0F             AND     P_IFR
-   166 00:F845: 7F 98             STA     R_Int_Backup
+   161 00:F842: 0A                PHA
+   162 00:F843: 1C                TXA
+   163 00:F844: 0A                PHA
+   164 00:F845: 73 0E             LDA     P_IER
+   165 00:F847: 71 0F             AND     P_IFR
+   166 00:F849: 7F 98             STA     R_Int_Backup
    167                        ;   AND     #$01
    168                        ;   BNE     L_Div_IRQ_Prog
    169                        ;   LDA     R_Int_Backup
    170                        ;   AND     #$02
    171                        ;   BNE     L_Timer0_IRQ_Prog
    172                        ;   LDA     R_Int_Backup
-   173 00:F847: 51 04             AND     #$04
-   174 00:F849: 12 19             BNE     L_Timer1_IRQ_Prog
-   175 00:F84B: 73 98             LDA     R_Int_Backup
-   176 00:F84D: 51 10             AND     #$10
-   177 00:F84F: 12 1E             BNE     L_PA_IRQ_Prog
-   178 00:F851: 73 98             LDA     R_Int_Backup
-   179 00:F853: 51 40             AND     #$40
-   180 00:F855: 12 21             BNE     L_LCD_IRQ_Prog
-   181 00:F857: 16 80 F8          JMP     L_End_IRQ_Prog
+   173 00:F84B: 51 04             AND     #$04
+   174 00:F84D: 12 19             BNE     L_Timer1_IRQ_Prog
+   175 00:F84F: 73 98             LDA     R_Int_Backup
+   176 00:F851: 51 10             AND     #$10
+   177 00:F853: 12 1E             BNE     L_PA_IRQ_Prog
+   178 00:F855: 73 98             LDA     R_Int_Backup
+   179 00:F857: 51 40             AND     #$40
+   180 00:F859: 12 21             BNE     L_LCD_IRQ_Prog
+   181 00:F85B: 16 84 F8          JMP     L_End_IRQ_Prog
    182                        L_Div_IRQ_Prog:
-   183 00:F85A: 20 0F             RMB0    P_IFR
-   184 00:F85C: 16 80 F8          JMP     L_End_IRQ_Prog
+   183 00:F85E: 20 0F             RMB0    P_IFR
+   184 00:F860: 16 84 F8          JMP     L_End_IRQ_Prog
    185                        
    186                        L_Timer0_IRQ_Prog:
-   187 00:F85F: 21 0F             RMB1    P_IFR
-   188 00:F861: 16 80 F8          JMP     L_End_IRQ_Prog
+   187 00:F863: 21 0F             RMB1    P_IFR
+   188 00:F865: 16 84 F8          JMP     L_End_IRQ_Prog
    189                        
    190                        L_Timer1_IRQ_Prog:
-   191 00:F864: 22 0F             RMB2    P_IFR
+   191 00:F868: 22 0F             RMB2    P_IFR
    192                        ;   SMB0    Sys_Flag_A      ;Half Second Flag
    193                        
-   194 00:F866: 73 99             LDA     Sys_Flag_A
-   195 00:F868: 50 01             ORA     #BIT0               ;2hz
-   196 00:F86A: 7F 99             STA     Sys_Flag_A
-   197 00:F86C: 16 80 F8          JMP     L_End_IRQ_Prog
+   194 00:F86A: 73 99             LDA     Sys_Flag_A
+   195 00:F86C: 50 01             ORA     #BIT0               ;2hz
+   196 00:F86E: 7F 99             STA     Sys_Flag_A
+   197 00:F870: 16 84 F8          JMP     L_End_IRQ_Prog
    198                        
    199                        L_PA_IRQ_Prog:
-   200 00:F86F: 24 0F             RMB4    P_IFR
+   200 00:F873: 24 0F             RMB4    P_IFR
    201                            DIS_PA_IRQ
-+  201 00:F871: 24 0E          RMB4 P_IER
++  201 00:F875: 24 0E          RMB4 P_IER
    202                            EN_LCD_IRQ
-+  202 00:F873: 2E 0E          SMB6 P_IER
-   203 00:F875: 16 80 F8          JMP     L_End_IRQ_Prog
++  202 00:F877: 2E 0E          SMB6 P_IER
+   203 00:F879: 16 84 F8          JMP     L_End_IRQ_Prog
    204                        
    205                        L_LCD_IRQ_Prog:
-   206 00:F878: 26 0F             RMB6    P_IFR
+   206 00:F87C: 26 0F             RMB6    P_IFR
    207                        ;   SMB2    Sys_Flag_A
-   208 00:F87A: 73 99             LDA     Sys_Flag_A
-   209 00:F87C: 50 04             ORA     #BIT2
-   210 00:F87E: 7F 99             STA     Sys_Flag_A      ;32HZ
+   208 00:F87E: 73 99             LDA     Sys_Flag_A
+   209 00:F880: 50 04             ORA     #BIT2
+   210 00:F882: 7F 99             STA     Sys_Flag_A      ;32HZ
    211                        L_End_IRQ_Prog:
-   212 00:F880: 3A 0F E1          BBS2    P_IFR,L_Timer1_IRQ_Prog
-   213 00:F883: 0C                PLA
-   214 00:F884: 1B                TAX
-   215 00:F885: 0C                PLA
-   216 00:F886: 08                RTI
+   212 00:F884: 3A 0F E1          BBS2    P_IFR,L_Timer1_IRQ_Prog
+   213 00:F887: 0C                PLA
+   214 00:F888: 1B                TAX
+   215 00:F889: 0C                PLA
+   216 00:F88A: 08                RTI
    217                        ;--------------------------------------------------------
    218                        ; Interrupt vector
    219                        ;--------------------------------------------------------
-   220 00:F887: 1A 1A 1A 1A       .BLKB   $FFD5-$,$1A
-   220 00:F887: 1A 1A 1A 1A   
-   220 00:F887: 1A 1A 1A 1A   
+   220 00:F88B: 1A 1A 1A 1A       .BLKB   $FFD5-$,$1A
+   220 00:F88B: 1A 1A 1A 1A   
+   220 00:F88B: 1A 1A 1A 1A   
    221                            .ORG    0FFD5H
    222 00:FFD5: 16 00 F0          JMP     V_RESET
    223 00:FFD8: FF FF FF FF       .BLKB   $FFFF-$,$FF
@@ -3669,7 +3647,7 @@ Current file: main.asm
    228                        
    229                            .ORG    0FFFCH
    230 00:FFFC: 00 F0             DW      V_RESET
-   231 00:FFFE: 3E F8             DW      V_IRQ
+   231 00:FFFE: 42 F8             DW      V_IRQ
    232                            .ENDS
    233                             END
 

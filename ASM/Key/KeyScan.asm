@@ -51,6 +51,9 @@ L_KeyLine1_:
 ;	JSR		Stop_Alarm_Beep		;有键按下即关闭闹钟
 
 	LDA		P_Temp+1
+	CMP		#D_Key57
+	BEQ		L_Key57_Enter
+
 	CMP		#D_Key2
 	BEQ		L_Key2_Enter
 	
@@ -60,15 +63,12 @@ L_KeyLine1_:
 	CMP		#D_Key7
 	BEQ		L_Key7_Enter
 
-	CMP		#D_Key57
-	BEQ		L_Key57_Enter
-
 	JMP		L_ManyKey
 ;============================================================
 L_Key57_Enter:
 	BBR0	Sys_Flag_B,L_Key57_Enter_RTS	;;判断是否在计时模式下
-	BBS4	Sys_Flag_A,L_Key57_Enter_RTS	;;标记57键是否为按下状态
-	SMB4	Sys_Flag_A
+	BBS3	Sys_Flag_A,L_Key57_Enter_RTS	;;标记57键是否为按下状态
+	SMB3	Sys_Flag_A
 	
 	LDA		#0
 	STA		R_Stw_Sec		;;同时按下则清零
@@ -83,7 +83,7 @@ L_Key2_Enter:
 	BBS4	Sys_Flag_A,?RTS		;;判断Sys_Flag_A的bit4=1？ 不为1，则往下执行；为1 说明按键已经按下，直接跳转
 	SMB4	Sys_Flag_A		;;标记Sys_Flag_A的bit4=1
 	SMB0	R_Key_Flag		;;R_Key_Flag的bit0=1
-
+	BBS0	Sys_Flag_B,L_Key2_Enter_RTS2
 ?RTS:
 	LDA		R_KeyHold_Time
 	CMP		#D_Key3S
@@ -92,26 +92,26 @@ L_Key2_Enter:
 	INC
 	STA		R_KeyHold_Time
 	RTS
-
 L_Key2_Enter_End:			;;满足3S
-	BBR0	R_Key_Flag,?RTS  ;;判断bit0=0?  =0：不是2key，跳转
+	BBR0	R_Key_Flag,L_Key2_Enter_RTS  ;;判断bit0=0?  =0：不是2key，跳转
 	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
 	LDA		#0					
-	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
-	LDA		#0					
+	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key					
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	LDA		R_Set_Flag			
-	BNE		?RTS				;;判断R_Set_Flag不为0 ？ 不为0：跳转	为0 ：R_Set_Flag加1,R_Set_Flag=1
+	BNE		L_Key2_Enter_RTS	;;判断R_Set_Flag不为0 ？ 不为0：跳转	为0 ：R_Set_Flag加1,R_Set_Flag=1
 	INC		R_Set_Flag
 	JSR		L_Display_Mode0Prog	;;R_Set_Flag=1
-?RTS:
+L_Key2_Enter_RTS:
+	RTS
+L_Key2_Enter_RTS2:
+	RMB4	Sys_Flag_A
 	RTS
 ;=================================================	
 L_Key5_Enter:
 	BBS6	Sys_Flag_A,?RTS
 	SMB6	Sys_Flag_A
 	SMB1	R_Key_Flag		;;bit1=1
-
 ?RTS:
 	LDA		R_KeyHold_Time
 	CMP		#D_Key3S
@@ -120,37 +120,30 @@ L_Key5_Enter:
 	INC
 	STA		R_KeyHold_Time
 	RTS
-?End:
-	RTS
-
 L_Key5_Enter_End:
-	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
 	LDA		#0
-	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
-	LDA		#0					
+	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key				
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	LDA		R_Fast_Time
 	CMP		#C_Fast_Time
 	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
 	LDA		#0
 	STA		R_Fast_Time			;;达到按键时长,R_Fast_Time>=C_Fast_Time,C=1不跳转,R_Fast_Time重置为0,一次快加结束
-	; BBS0	Sys_Flag_B,?STW_Fastadd
+	BBS0	Sys_Flag_B,?5Key_STW_Fastadd
 	JSR		L_FastAdd_Prog
 	RTS
-; ?STW_Fastadd:
-; 	BBS1	Sys_Flag_B,?RTS
-; 	LDA		#0
-; 	STA		R_Set_Flag
-; 	JSR		L_FastAdd_Prog
-; ?RTS:
-; 	RTS
-
+?5Key_STW_Fastadd:
+	BBS1	Sys_Flag_B,?RTS
+	LDA		#0
+	STA		R_Set_Flag
+	JSR		L_FastAdd_Prog
+?RTS:
+	RTS
 ;==================================================	
 L_Key7_Enter:
 	BBS7	Sys_Flag_A,?RTS
 	SMB7	Sys_Flag_A
 	SMB2	R_Key_Flag		;;bit2=1
-
 ?RTS:
 	LDA		R_KeyHold_Time
 	CMP		#D_Key3S
@@ -158,14 +151,11 @@ L_Key7_Enter:
 	LDA		R_KeyHold_Time
 	INC
 	STA		R_KeyHold_Time
-	RTS
-?End:
 	RTS	
 
 L_Key7_Enter_End:
 	LDA		#0
-	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key
-	LDA		#0					
+	STA		R_No_Key		;;若10S内有按键按下，重置R_No_Key				
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	RMB2	R_Key_Flag
 	LDA		R_Fast_Time
@@ -173,7 +163,16 @@ L_Key7_Enter_End:
 	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
 	LDA		#0
 	STA		R_Fast_Time	
+	BBS0	Sys_Flag_B,?7Key_STW_Fastadd
 	JSR		L_FastDec_Prog
+	RTS
+?7Key_STW_Fastadd:
+	BBS1	Sys_Flag_B,?RTS
+	SMB2	R_Key_Flag
+	LDA		#0
+	STA		R_Set_Flag
+	JSR		L_FastAdd_Prog
+?RTS:
 	RTS
 
 ;============================================================
@@ -199,13 +198,13 @@ L_Null_Key_Prog:
 	STA		R_KeyHold_Time
 
 	JSR		L_REALSE_2KEY
+	RMB4	Sys_Flag_A
 	JSR		L_REALSE_5KEY
+	RMB6	Sys_Flag_A
 	JSR		L_REALSE_7KEY
+	RMB7	Sys_Flag_A
 
-	RMB4 	Sys_Flag_A
-	RMB6 	Sys_Flag_A
-	RMB7 	Sys_Flag_A
-
+	RMB3	Sys_Flag_A
 	RMB0	Sys_Flag_C		;;清除快加/快减标志位
 
 	LDA		R_Key_Flag
@@ -419,8 +418,8 @@ L_Display_Mode0Prog:
 	PHA
 	RTS
 ?STW:
-	RMB1	R_Key_Flag
-	RMB2	R_Key_Flag
+	; RMB1	R_Key_Flag
+	; RMB2	R_Key_Flag
 	JMP		L_STWDisplay_Prog
 
 T_Display_Table:
@@ -593,6 +592,7 @@ T_FastAdd_Table:
 
 L_FastAdd_Set0:
 	BBR1	R_Key_Flag,L_FsatAdd_CTW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
+	RMB6	Sys_Flag_A
 	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
 	JSR		R_CtwInc_Min				;;"分"加
 	LDA		R_Stw_Min
@@ -600,6 +600,7 @@ L_FastAdd_Set0:
 	RTS
 L_FsatAdd_CTW7KEY_SecFlag:
 	BBR2	R_Key_Flag,?RTS  ;;判断bit1=0?  =0：不是7key，跳转
+	RMB7	Sys_Flag_A
 	RMB2	R_Key_Flag			;;bit1=1时，清除-->bit1=0
 	JSR		R_CtwInc_Sec				;;"秒"加
 	LDA		R_Stw_Sec
@@ -639,20 +640,6 @@ T_FastDec_Table:
 	DW		L_FastDec_Set3-1		;;R_Set_Flag=3
 
 L_FastDec_Set0:
-	BBR1	R_Key_Flag, L_FsatAdd_STW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
-	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-	JSR		R_CtwInc_Min				;;"分"加
-	LDA		R_Stw_Min
-	JSR		L_Dis_Digit12
-	RTS
-L_FsatAdd_STW7KEY_SecFlag:
-	BBR2	R_Key_Flag,?RTS  ;;判断bit1=0?  =0：不是7key，跳转
-	RMB2	R_Key_Flag			;;bit1=1时，清除-->bit1=0
-	JSR		R_CtwInc_Sec				;;"秒"加
-	LDA		R_Stw_Sec
-	JSR		L_Dis_Digit34
-	rts
-?RTS:
 	RTS
 
 L_FastDec_Set1:
