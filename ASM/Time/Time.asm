@@ -26,14 +26,12 @@ L_Update_CTW_FORW_Prog:
 	BCS		L_Update_CTW_FORW_End_Prog
 	JSR		R_CtwDec_Min
 	BCS		L_Update_CTW_FORW_End_Prog
-	JSR		L_CTW_Zero
 L_Update_CTW_FORW_End_Prog:
+	LDA		R_Stw_Sec
+	ORA		R_Stw_Min
+	BEQ		?Stop
 	RTS
-
-L_CTW_Zero:
-	LDA		#$0
-	STA		R_Stw_Sec
-	STA		R_Stw_Min
+?Stop:
 	RMB1	Sys_Flag_B		;;暂停
 	SMB7	Sys_Flag_B		;;倒计时结束
 	RTS
@@ -43,7 +41,7 @@ L_End_MAX_STW_Prog:
 	rts
 L_End_Update_STW_Prog:
 	LDA		R_Stw_Sec
-	AND		R_Stw_Min
+	ORA		R_Stw_Min
 	BNE		?CTW			;;min sec均为0时，为正计时
 	RTS
 ?CTW:

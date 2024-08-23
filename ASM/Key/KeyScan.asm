@@ -94,7 +94,7 @@ L_Key2_Enter:
 	RTS
 
 L_Key2_Enter_End:			;;满足3S
-	BBR0	R_Key_Flag, ?RTS  ;;判断bit0=0?  =0：不是2key，跳转
+	BBR0	R_Key_Flag,?RTS  ;;判断bit0=0?  =0：不是2key，跳转
 	RMB0	R_Key_Flag			;;bit0=1时，清除-->bit0=0
 	LDA		#0					
 	STA		R_No_Key			;;若10S内有按键按下，重置R_No_Key
@@ -134,11 +134,13 @@ L_Key5_Enter_End:
 	BCC		L_Inc_Fast_Time		;;R_Fast_Time<C_Fast_Time,C=0时跳转,R_Fast_Time继续累加
 	LDA		#0
 	STA		R_Fast_Time			;;达到按键时长,R_Fast_Time>=C_Fast_Time,C=1不跳转,R_Fast_Time重置为0,一次快加结束
-	; BBS0	Sys_Flag_B,?STW_CTW		;;判断时间(0)/计时(1)模式
+	; BBS0	Sys_Flag_B,?STW_Fastadd
 	JSR		L_FastAdd_Prog
 	RTS
-; ?STW_CTW:
-; 	BBS1	Sys_Flag_B,?RTS		;;判断计时开始(1)/暂停(0)
+; ?STW_Fastadd:
+; 	BBS1	Sys_Flag_B,?RTS
+; 	LDA		#0
+; 	STA		R_Set_Flag
 ; 	JSR		L_FastAdd_Prog
 ; ?RTS:
 ; 	RTS
@@ -214,7 +216,6 @@ L_Null_Key_Prog:
 	LDA		R_Voice_Unit
 	BNE		L_End_Null_Key_Prog
 
-;	JSR		L_Mode_Prog
 ;;L_Exit_Null_Key_Prog:	
 ;	ST_DIS
 	DIS_LCD_IRQ
@@ -300,7 +301,7 @@ L_REALSE_5KEY:
 	BBR1	R_Key_Flag,L_REALSE_5KEY_RTS	;;判断是否是PA5按下
 	LDA		#0
 	STA		R_No_Key
-	LDA		#0			
+	LDA		#0	
 	STA		R_STW_Key			;;若30S内有按键按下，重置R_STW_Key
 	LDA		R_Set_Flag
 	BEQ		?STW					;;Set=0？ =0：跳转去判断计时模式
@@ -591,7 +592,7 @@ T_FastAdd_Table:
 	DW		L_FastAdd_Set3-1		;;R_Set_Flag=3
 
 L_FastAdd_Set0:
-	BBR1	R_Key_Flag, L_FsatAdd_CTW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
+	BBR1	R_Key_Flag,L_FsatAdd_CTW7KEY_SecFlag  ;;判断bit1=0?  =0：不是5key，跳转
 	RMB1	R_Key_Flag			;;bit1=1时，清除-->bit1=0
 	JSR		R_CtwInc_Min				;;"分"加
 	LDA		R_Stw_Min
@@ -606,6 +607,7 @@ L_FsatAdd_CTW7KEY_SecFlag:
 	rts
 ?RTS:
 	RTS	
+
 L_FastAdd_Set1:
 	rts
 L_FastAdd_Set2:
