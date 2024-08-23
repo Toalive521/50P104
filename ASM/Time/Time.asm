@@ -14,9 +14,7 @@ L_End_Update_Time_Prog:
 F_Update_STW_Prog:
 	BBS3	Sys_Flag_B,L_End_MAX_STW_Prog		;判断是否到结束(正计时99M59S)
 	BBR1	Sys_Flag_B,L_End_Update_STW_Prog	;;判断计时是否暂停(暂停跳转)
-	JSR		L_End_Update_STW_Prog
 
-	; JSR		L_Zero_Start_STW
 	BBR2	Sys_Flag_B,L_Update_STW_FORW_Prog	;;0：正计时/1：倒计时
 	JSR		L_Update_CTW_FORW_Prog
 	RTS
@@ -71,20 +69,6 @@ L_Update_STW_FORW_End_Prog:
 	SMB3	Sys_Flag_B		;;标记正计时达到99M59S
 ?RTS:
 	RTS
-
-; L_Zero_Start_STW:
-; 	LDA		R_Stw_Sec
-; 	EOR		#0
-; 	BNE		?CTW_2
-; 	LDA		R_Stw_Min
-; 	EOR		#0
-; 	BNE		?CTW_2
-; 	RMB2	Sys_Flag_B		;;标记正计时
-; 	RTS
-
-; ?CTW_2:
-; 	SMB2	Sys_Flag_B		;;标记倒计时
-; 	RTS
 
 ;====================================================
 ;====================================================
