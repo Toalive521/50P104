@@ -45,7 +45,7 @@ L_End_Update_STW_Prog:
 	BNE		?CTW			;;min sec均为0时，为正计时
 	RTS
 ?CTW:
-	SMB2	Sys_Flag_B		;;标记倒计时
+	; SMB2	Sys_Flag_B		;;标记倒计时
 	RTS
 
 ;;正计时
