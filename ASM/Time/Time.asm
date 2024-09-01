@@ -32,6 +32,8 @@ L_Update_CTW_FORW_End_Prog:
 	BEQ		?Stop
 	RTS
 ?Stop:
+	LDA		#30H
+	STA		R_Beep_Time
 	RMB1	Sys_Flag_B		;;暂停
 	SMB7	Sys_Flag_B		;;倒计时结束
 	RTS

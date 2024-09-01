@@ -29,6 +29,7 @@ L_1Hz_Prog:
 	JSR		L_Nokey_Save		;;10S无操作保存退出设置
 	JSR		L_STWKey_Exit		;;计时模式30S无操作退出
 	JSR		L_Display_Mode0Prog
+	JSR		F_StwBeepControl
 
 L_1Hz_Prog_End:
 	RTS
@@ -72,6 +73,30 @@ L_Inc_STWKey_Time:
 	STA		R_STW_Key
 	RTS
 ;===============================================================
+F_StwBeepControl:	
+	; LDA		R_Stw_Flag
+	; ORA		R_Stw_Flag+1
+	; AND		#BIT7
+	; BEQ		F_StwBeepControl_End
+
+	lda		R_Beep_Time
+	BEQ     F_StwBeepControl_End
+	DEC     R_Beep_Time
+    BEQ     F_StwBeepControl_End
+
+	LDA		#9
+	STA		R_Voice_Unit
+	;ST_EN
+	EN_LCD_IRQ
+F_StwBeepControl_End:
+	RTS
+;========
+Stop_Stw_Beep:
+	LDA		#0
+	STA		R_Voice_Unit
+	STA		R_Beep_Time
+	RTS
+
 ; L_1Hz_Prog_Num:
 ; 	JSR		F_Update_Time_Prog
 	

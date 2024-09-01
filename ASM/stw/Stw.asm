@@ -88,7 +88,7 @@ F_StwBeepControl:
 	DEC     R_Beep_Time
     BEQ     F_StwBeepControl_End
 
-	LDA		#7
+	LDA		#9
 	STA		R_Voice_Unit
 	;ST_EN
 	EN_LCD_IRQ

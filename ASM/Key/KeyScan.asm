@@ -19,7 +19,7 @@ L_32Hz_Prog:
 	AND		#BIT2_
 	STA		Sys_Flag_A
 	CLI
-	; JSR		L_Beep_Control_Prog
+	JSR		L_Beep_Control_Prog
 	JSR		L_Scankey_Prog
 L_End_32Hz_Prog:
 	RTS
@@ -35,10 +35,18 @@ L_Scankey_Prog:
 	BNE		L_Havekey		
 	JMP		L_Null_Key_Prog
 L_Havekey:
+	LDA		R_Beep_Time
+	BNE		L_Stop_Beep
 	LDA		P_Temp+1
 	CMP		R_KeyValue
 	BEQ		L_KeyLine1
 	STA		R_KeyValue
+	RTS
+L_Stop_Beep:
+	LDA		#0
+	STA		R_Beep_Time
+	STA		R_Voice_Unit
+	JSR		L_CloseBeep
 	RTS
 
 L_KeyLine1:
@@ -668,60 +676,60 @@ Stz_Fast_Hold_Key:
 ; 	; JMP		L_Display_Prog
 	
 
-; L_Beep_Control_Prog:			;控制声音频率
-; 	LDA		Sys_Flag_B	
-; 	AND		#BIT2				;静音状态不发出声音
-; 	BNE		L_StzVoice
+L_Beep_Control_Prog:			;控制声音频率
+	; LDA		Sys_Flag_B	
+	; AND		#BIT2				;静音状态不发出声音
+	; BNE		L_StzVoice
 	
-; 	LDA     Sys_Flag_B  
-;     AND     #BIT3
-;     BEQ     L_Set16HzBIT
+	; LDA     Sys_Flag_B  
+    ; AND     #BIT3
+    ; BEQ     L_Set16HzBIT
 
-; 	LDA		Sys_Flag_B
-; 	AND		#BIT3_
-; 	STA		Sys_Flag_B
+	; LDA		Sys_Flag_B
+	; AND		#BIT3_
+	; STA		Sys_Flag_B
 
 	
 
-; 	LDA		R_Voice_Unit
-; 	BEQ		L_End_OpenBeep
-; 	DEC		R_Voice_Unit
-; 	BNE		L_ContinueJudge	
-; 	;JSR		L_LightOff
-; 	BRA		L_CloseBeep	
-; L_ContinueJudge:	
-; 	LDA		R_Voice_Unit
-; 	AND		#BIT0
-; 	BEQ		L_JudgeOpenBeep	;L_OpenBeep	
-; 	BRA		L_CloseBeep
-; ;	JSR		L_LightOn
-; L_StzVoice:
-; 	LDA		#0
-; 	STA		R_Voice_Unit
-; L_CloseBeep:
-; 	PB2_PB2_NMOS
-; 	PB3_PB3_NMOS
-; 	LDA	 #$FF
-; 	STA	 P_PB
-; 	PWM_OFF
-; 	RTS
+	LDA		R_Voice_Unit
+	BEQ		L_End_OpenBeep
+	DEC		R_Voice_Unit
+	BNE		L_ContinueJudge	
+	;JSR		L_LightOff
+	BRA		L_CloseBeep	
+L_ContinueJudge:	
+	LDA		R_Voice_Unit
+	AND		#BIT0
+	BEQ		L_JudgeOpenBeep	;L_OpenBeep	
+	BRA		L_CloseBeep
+;	JSR		L_LightOn
+L_StzVoice:
+	LDA		#0
+	STA		R_Voice_Unit
+L_CloseBeep:
+	PB2_PB2_NMOS
+	PB3_PB3_NMOS
+	LDA	 #$FF
+	STA	 P_PB
+	PWM_OFF
+	RTS
 
-; L_JudgeOpenBeep:	
-; ;	JSR		L_LightOff
-; L_OpenBeep:
-; 	PB2_PWM
-;     LDA	 #$FF
-; 	STA	 P_PB
-; 	PB3_PWM
-; 	PWM_ON
+L_JudgeOpenBeep:	
+;	JSR		L_LightOff
+L_OpenBeep:
+	PB2_PWM
+    LDA	 #$FF
+	STA	 P_PB
+	PB3_PWM
+	PWM_ON
 
 ; ?3Key:
 ;     TONE_4KHZ_3_4_Duty
 ; 	;TONE_2KHZ_3_4_Duty
 ; 	;PWM_ON			
 ; 	RTS
-; L_End_OpenBeep:	
-; 	RTS
+L_End_OpenBeep:	
+	RTS
 
 ; L_Set16HzBIT:
 ; 	LDA		Sys_Flag_B
