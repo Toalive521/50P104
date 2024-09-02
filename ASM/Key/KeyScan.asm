@@ -43,6 +43,7 @@ L_Havekey:
 	STA		R_KeyValue
 	RTS
 L_Stop_Beep:
+	SMB0	Sys_Flag_D
 	LDA		#0
 	STA		R_Beep_Time
 	STA		R_Voice_Unit
@@ -214,6 +215,8 @@ L_Null_Key_Prog:
 
 	RMB3	Sys_Flag_A
 	RMB0	Sys_Flag_C		;;清除快加/快减标志位
+
+	RMB0	Sys_Flag_D
 
 	LDA		R_Key_Flag
 	AND		#%01111111
@@ -700,7 +703,7 @@ L_Beep_Control_Prog:			;控制声音频率
 L_ContinueJudge:	
 	LDA		R_Voice_Unit
 	AND		#BIT0
-	BEQ		L_JudgeOpenBeep	;L_OpenBeep	
+	BEQ		L_JudgeOpenBeep	;L_OpenBeep
 	BRA		L_CloseBeep
 ;	JSR		L_LightOn
 L_StzVoice:

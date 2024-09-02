@@ -34,10 +34,10 @@ V_RESET:
     NOP
     NOP
     NOP
-    SEI
+    SEI                     ;;全局中断屏蔽
     LDX     #STACK_BOT  
     TXS
-    LDA     #$07    
+    LDA     #$07    ;;时钟配置
     STA     P_SYSCLK    ;Fcpu=560K, Fext=32768,Strong ,Fosc/1
     ClrAllRam               
     JSR     L_InitSPR_Prog

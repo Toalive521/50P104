@@ -40,25 +40,26 @@ L_FillLcd_1:
 L_Dis_8Bit_DigitDot_Prog:
 ;	STA		P_Temp
 ;	LDA		Table_Digit_Add   r_Offset,X
+
 	STX		P_Temp+1
 	TAX
 	LDA		Table_Digit_DataDot,X
 	LDX		P_Temp+1
 F_DispPro:	
 	STA		P_Temp
-	STX		P_Temp+1	;
+	STX		P_Temp+1
 	LDA		#7
 	STA		P_Temp+3	;显示段数
 L_Judge_Dis_8Bit_DigitDot:
 	LDX		P_Temp+1
-	LDA		lcd_bit,X
+	LDA		lcd_bit,X		;;Seg
 	STA		P_Temp+2
-	LDA		lcd_byte,X
+	LDA		lcd_byte,X		;;Com
 	TAX
-	ROR		P_Temp
+	ROR		P_Temp			;;右移
 	BCC		L_CLR
 	LDA		LCD_RamAddr,X
-	ORA		P_Temp+2
+	ORA		P_Temp+2		;;
 	STA		LCD_RamAddr,X
 	BRA		L_Inc_Dis_Index_Prog
 L_CLR:	
@@ -111,7 +112,7 @@ F_DispSymbol_Com:
 	ORA		P_Temp+2
 	RTS
 ;============================================================
-;==================================== ===========
+;============================================================
 L_ROR_4Bit_Prog:
 L_ROR4Bit_Prog:
 L_LSR4Bit_Prog:
@@ -122,7 +123,7 @@ F_MSBToLSB:
 	ROR		
 	AND		#$0F
 	RTS
-;================================================
+;============================================================
 ;********************************************	
 Table_Digit_DataDot:	;显示内容对应显示的段码
 	.BYTE 	3fh	;0
